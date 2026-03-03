@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @MappedSuperclass
-public class BaseEntityOnlyCreated extends AbstractEntity {
+public abstract class BaseEntityOnlyCreated extends AbstractEntity {
 	private LocalDateTime createdAt;
 	private UUID createdBy;
 }
