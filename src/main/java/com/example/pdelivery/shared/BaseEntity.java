@@ -1,6 +1,7 @@
 package com.example.pdelivery.shared;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -27,4 +28,12 @@ public abstract class BaseEntity extends AbstractEntity {
 	private UUID updatedBy;
 	private LocalDateTime deletedAt;
 	private UUID deletedBy;
+
+	public void softDelete(UUID deletedByUserId) {
+		if (this.deletedAt != null) {
+			return;
+		}
+		this.deletedAt = LocalDateTime.now();
+		this.deletedBy = Objects.requireNonNull(deletedByUserId, "deletedByUserId must not be null");
+	}
 }
