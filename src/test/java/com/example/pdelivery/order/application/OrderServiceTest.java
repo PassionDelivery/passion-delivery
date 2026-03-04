@@ -18,6 +18,7 @@ import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
+import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 
 @ExtendWith(MockitoExtension.class) // Spring을 다 띄우지 않고 Mockito만 사용해서 빠릅니다.
 class OrderServiceTest {
@@ -28,6 +29,8 @@ class OrderServiceTest {
 	private OrderCartRequirer orderCartRequirer;
 	@Mock
 	private OrderAddressRequirer orderAddressRequirer;
+	@Mock
+	private OrderPaymentRequirer orderPaymentRequirer;
 
 	@InjectMocks
 	private OrderServiceImpl orderService; // Mock들을 이 서비스에 주입
@@ -43,10 +46,10 @@ class OrderServiceTest {
 
 		// Stubbing
 		when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
-		when(orderCartRequirer.getCartLines(cartId)).thenReturn(List.of(
-			new CartData(UUID.randomUUID(), "chicken", 1, 20000),
-			new CartData(UUID.randomUUID(), "pizza", 2, 17000)
-		));
+		when(orderCartRequirer.getCartLines(cartId)).thenReturn(
+			List.of(new CartData(UUID.randomUUID(), "chicken", 1, 20000),
+				new CartData(UUID.randomUUID(), "pizza", 2, 17000)));
+		when(orderPaymentRequirer.processPayment(any(), eq(54000))).thenReturn(true);
 
 		// 실행
 		Order result = orderService.createOrder(req);

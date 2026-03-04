@@ -35,6 +35,7 @@ public class Order extends BaseEntity {
 
 	private String reason;
 
+	@Getter
 	private Integer totalPrice;
 
 	//MSA 확장 고려하여 논리적 연관관계 맵핑

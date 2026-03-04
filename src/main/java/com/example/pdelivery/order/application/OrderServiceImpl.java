@@ -11,6 +11,7 @@ import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
+import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderRepository orderRepository;
 	private final OrderCartRequirer orderCartRequirer;
 	private final OrderAddressRequirer orderAddressRequirer;
+	private final OrderPaymentRequirer orderPaymentRequirer;
 
 	//추후 삭제 예정
 	private UUID customerId = UUID.randomUUID();
@@ -41,7 +43,9 @@ public class OrderServiceImpl implements OrderService {
 
 		Order order = Order.create(req.storeId(), address, customerId, orderLineVOs);
 
-		orderRepository.save(order);
+		if (orderPaymentRequirer.processPayment(order.getId(), order.getTotalPrice())) {
+			orderRepository.save(order);
+		}
 
 		return order;
 	}
