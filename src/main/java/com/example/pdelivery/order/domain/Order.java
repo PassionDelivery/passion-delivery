@@ -14,7 +14,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @Table(name = "p_order")
 @Entity
 public class Order extends BaseEntity {
@@ -30,11 +34,11 @@ public class Order extends BaseEntity {
 	private OrderType orderType;
 
 	private String reason;
-	
+
 	private Integer totalPrice;
 
 	//MSA 확장 고려하여 논리적 연관관계 맵핑
-	private String customerId;
+	private UUID customerId;
 
 	private UUID storeId;
 
@@ -42,13 +46,57 @@ public class Order extends BaseEntity {
 	@JoinColumn(name = "order_id")
 	private List<OrderLine> orderLines = new ArrayList<>(); // order 서버는 동일할 것 예상
 
-	public Order(String address) {
+	@Builder
+	private Order(UUID storeId, String address, UUID customerId) {
+		this.storeId = storeId;
 		this.address = address;
+		this.customerId = customerId;
 		this.status = OrderStatus.ACCEPTED;
 		this.orderType = OrderType.ONLINE;
 	}
 
-	public void addOrderLines(OrderLine orderLine) {
-		orderLines.add(orderLine);
+	private void addOrderLine(OrderLineVO orderLineVO) {
+		OrderLine orderLine = OrderLine.builder()
+			.menuId(orderLineVO.menuId())
+			.menuName(orderLineVO.menuName())
+			.quantity(orderLineVO.quantity())
+			.price(orderLineVO.price())
+			.build();
+		this.orderLines.add(orderLine);
 	}
+
+	private void calculateTotalPrice() {
+		this.totalPrice = this.orderLines.stream()
+			.mapToInt(line -> line.calculateSubTotalPrice())
+			.sum();
+	}
+
+	public static Order create(UUID storeId, String address, UUID customerId, List<OrderLineVO> items) {
+		Order order = Order.builder()
+			.storeId(storeId)
+			.address(address)
+			.customerId(customerId)
+			.build();
+		for (OrderLineVO item : items) {
+			order.addOrderLine(item);
+		}
+
+		order.calculateTotalPrice();
+
+		return order;
+	}
+
+	@Getter // test 위해서만
+	public static class OrderView {
+		private final String address;
+		private final Integer totalPrice;
+		private final List<OrderLine> orderLines;
+
+		public OrderView(Order order) {
+			this.address = order.address;
+			this.totalPrice = order.totalPrice;
+			this.orderLines = order.orderLines;
+		}
+	}
+
 }
