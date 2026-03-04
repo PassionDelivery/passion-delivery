@@ -1,19 +1,37 @@
 server:
-  port:
+  port: 8080
 
 spring:
   application:
     name: pdelivery
   datasource:
-    username:
-    password:
-    url:
+    url: "${DB_URL}"
+    driver-class-name: org.postgresql.Driver
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
   jpa:
     hibernate:
       ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
-        use_sql_comments: true
+        show_sql: false
+        format_sql: false
+        use_sql_comments: false
         default_batch_fetch_size: 100
+
+springdoc:
+  api-docs:
+    enabled: false
+
+app:
+  jwt:
+    secret: "${JWT_SECRET}"
+    expiration-ms: 3600000
+  master:
+    username: "${MASTER_USERNAME}"
+    password: "${MASTER_PASSWORD}"
+    nickname: "${MASTER_NICKNAME}"
+    email: "${MASTER_EMAIL}"
+  cors:
+    allowed-origins: "${CORS_ALLOWED_ORIGINS}"
