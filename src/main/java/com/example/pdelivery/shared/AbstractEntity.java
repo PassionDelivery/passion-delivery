@@ -10,14 +10,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
 
 @MappedSuperclass
 public abstract class AbstractEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Getter(onMethod_ = {@Nullable})
 	private UUID id;
+
+	@Nullable
+	public UUID getId() {
+		return id;
+	}
 
 	@Override
 	public final boolean equals(Object o) {
