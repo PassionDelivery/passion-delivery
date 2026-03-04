@@ -36,4 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
+### Environment variables (contains credentials — never commit) ###
+.env
+
 src/main/resources/*.yml
