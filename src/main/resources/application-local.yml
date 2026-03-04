@@ -17,3 +17,15 @@ spring:
         format_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+
+app:
+  jwt:
+    secret: "${JWT_SECRET:passion-delivery-jwt-secret-key-must-be-at-least-32-characters}"
+    expiration-ms: 3600000
+  master:
+    username: "${MASTER_USERNAME:master}"
+    password: "${MASTER_PASSWORD:Master1234!}"
+    nickname: "${MASTER_NICKNAME:마스터}"
+    email: "${MASTER_EMAIL:master@pdelivery.com}"
+  cors:
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:http://localhost:3000}"
