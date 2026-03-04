@@ -38,5 +38,3 @@ out/
 
 ### Environment variables (contains credentials — never commit) ###
 .env
-
-src/main/resources/*.yml
