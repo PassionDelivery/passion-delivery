@@ -27,4 +27,9 @@ public abstract class BaseEntity extends AbstractEntity {
 	private UUID updatedBy;
 	private LocalDateTime deletedAt;
 	private UUID deletedBy;
+
+	public void softDelete(UUID deletedByUserId) {
+		this.deletedAt = LocalDateTime.now();
+		this.deletedBy = deletedByUserId;
+	}
 }
