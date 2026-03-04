@@ -14,8 +14,8 @@ class ReviewTest {
 		var review3 = new Review(5, "content");
 
 		assertThat(review1).isNotNull();
-		assertThat(review1.rating()).isEqualTo(1);
-		assertThat(review1.content()).isEqualTo("content");
+		assertThat(review1.getRating()).isEqualTo(1);
+		assertThat(review1.getContent()).isEqualTo("content");
 
 		assertThat(review2).isNotNull();
 		assertThat(review3).isNotNull();
