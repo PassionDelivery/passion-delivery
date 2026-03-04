@@ -3,6 +3,7 @@ package com.example.pdelivery.shared.security;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +23,19 @@ public class JwtUtil {
 	@Value("${app.jwt.expiration-ms}")
 	private long expirationMs;
 
+	private SecretKey signingKey;
+
+	@PostConstruct
+	void init() {
+		byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+		if (keyBytes.length < 32) {
+			throw new IllegalStateException("app.jwt.secret must be at least 32 bytes (HS256 minimum).");
+		}
+		this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+	}
+
 	private SecretKey getSigningKey() {
-		return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+		return signingKey;
 	}
 
 	public String generateToken(String username, String role) {

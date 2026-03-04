@@ -28,7 +28,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 	public ResponseEntity<ProblemDetail> handleResponseStatusException(
 			ResponseStatusException ex, HttpServletRequest request) {
 		ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-			HttpStatus.valueOf(ex.getStatusCode().value()), ex.getReason());
+			ex.getStatusCode(), ex.getReason());
 		problem.setInstance(URI.create(request.getRequestURI()));
 		return ResponseEntity.status(ex.getStatusCode()).body(problem);
 	}

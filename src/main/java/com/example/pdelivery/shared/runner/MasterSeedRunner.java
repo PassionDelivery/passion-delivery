@@ -5,6 +5,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.repository.UserRepository;
@@ -34,7 +35,10 @@ public class MasterSeedRunner implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) {
-		if (!userRepository.existsByUsername(masterUsername)) {
+		if (userRepository.existsByUsername(masterUsername)) {
+			return;
+		}
+		try {
 			UserEntity master = UserEntity.createMaster(
 				masterUsername,
 				passwordEncoder.encode(masterPassword),
@@ -43,6 +47,8 @@ public class MasterSeedRunner implements ApplicationRunner {
 			);
 			userRepository.save(master);
 			log.info("MASTER seed account created: {}", masterUsername);
+		} catch (DataIntegrityViolationException ex) {
+			log.info("MASTER seed account already exists: {}", masterUsername);
 		}
 	}
 }
