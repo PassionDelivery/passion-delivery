@@ -7,7 +7,7 @@ import jakarta.persistence.Embeddable;
 public record Review(@Column(name = "rating", nullable = false) Integer rating,
 					 @Column(name = "content", nullable = false, length = 200) String content) {
 	public Review {
-		if (rating <= 1 || rating >= 5) {
+		if (rating < 1 || rating > 5) {
 			throw new IllegalArgumentException("평점은 1 ~ 5점 사이여야 합니다.");
 		}
 		if (content == null || content.isBlank() || content.length() > 200) {
