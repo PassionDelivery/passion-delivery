@@ -9,11 +9,16 @@ class ReviewTest {
 
 	@Test
 	void review() {
-		var review = new Review(3, "content");
+		var review1 = new Review(1, "content");
+		var review2 = new Review(3, "content");
+		var review3 = new Review(5, "content");
 
-		assertThat(review).isNotNull();
-		assertThat(review.rating()).isEqualTo(3);
-		assertThat(review.content()).isEqualTo("content");
+		assertThat(review1).isNotNull();
+		assertThat(review1.rating()).isEqualTo(1);
+		assertThat(review1.content()).isEqualTo("content");
+
+		assertThat(review2).isNotNull();
+		assertThat(review3).isNotNull();
 	}
 
 	@Test
@@ -29,6 +34,5 @@ class ReviewTest {
 		}).isInstanceOf(IllegalArgumentException.class);
 
 		assertThat(message2.actual().getMessage()).isEqualTo("리뷰 내용은 공백이 아니고 또는 200자 이내여야 합니다.");
-
 	}
 }
