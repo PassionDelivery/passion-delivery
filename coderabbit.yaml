@@ -1,6 +1,7 @@
 # 출처:https://yesjuhee.tistory.com/18
 # 설명
 # 다른 사람이 작성해둔 yaml 파일입니다. 제(정후) 취향대로 설정을 한 후, 혹시모를 변경을 위해 기존 세팅은 삭제 대신 주석으로 두었습니다.
+#https://www.coderabbit.ai/blog/how-to-integrate-ai-code-review-into-your-devops-pipeline 을 참고하여 설정을 추가할 수 있습니다.
 
 # ---------------------------------------------------------------- #
 # AI 기본 설정 (언어 및 페르소나)
@@ -21,8 +22,9 @@ language: ko-KR
 # 코드 리뷰 기능 세부 설정
 # ---------------------------------------------------------------- #
 reviews:
+  enable_prompt_for_ai_agents: true
   # 리뷰의 전반적인 스타일을 설정합니다. 'chill'은 비교적 덜 엄격하고 부드러운 톤을 의미합니다.
-  profile: chill
+  profile: assertive
   # CodeRabbit의 코멘트를 모두 `resolve`하면, 자동으로 Approve를 하는 기능입니다.
   # PR은 2명의 리뷰어의 Approve 후 가능하다는 팀 컨벤션이 있기 때문에 false로 설정했습니다.
   request_changes_workflow: false
