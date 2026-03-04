@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
-public class OrderPaymentRequirerImpl {
+public class OrderPaymentRequirerImpl implements OrderPaymentRequirer {
 	//private final PaymentOrderProvider paymentOrderProvider;
 	public Boolean processPayment(UUID orderId, Integer amount) {
 		//return paymentOrderProvider의 결제 성공/실패 로직
