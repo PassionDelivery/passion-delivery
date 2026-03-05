@@ -14,5 +14,9 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
 
 	boolean existsByUsername(String username);
 
+	boolean existsByNickname(String nickname);
+
+	boolean existsByEmail(String email);
+
 	Optional<UserEntity> findByUsername(String username);
 }

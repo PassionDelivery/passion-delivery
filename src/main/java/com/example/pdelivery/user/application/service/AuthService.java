@@ -30,12 +30,25 @@ public class AuthService {
 		if (userRepository.existsByUsername(dto.getUsername())) {
 			throw new AuthException(AuthErrorCode.DUPLICATE_USERNAME);
 		}
+		if (userRepository.existsByNickname(dto.getNickname())) {
+			throw new AuthException(AuthErrorCode.DUPLICATE_NICKNAME);
+		}
+		if (userRepository.existsByEmail(dto.getEmail())) {
+			throw new AuthException(AuthErrorCode.DUPLICATE_EMAIL);
+		}
 		String encodedPassword = passwordEncoder.encode(dto.getPassword());
 		UserEntity user = UserEntity.create(dto.getUsername(), encodedPassword, dto.getNickname(), dto.getEmail(),
 			dto.getRole());
 		try {
 			return SignupResponseDto.from(userRepository.save(user));
 		} catch (DataIntegrityViolationException e) {
+			String msg = e.getMostSpecificCause().getMessage();
+			if (msg != null && msg.toLowerCase().contains("nickname")) {
+				throw new AuthException(AuthErrorCode.DUPLICATE_NICKNAME, e);
+			}
+			if (msg != null && msg.toLowerCase().contains("email")) {
+				throw new AuthException(AuthErrorCode.DUPLICATE_EMAIL, e);
+			}
 			throw new AuthException(AuthErrorCode.DUPLICATE_USERNAME, e);
 		}
 	}

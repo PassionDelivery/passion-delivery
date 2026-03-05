@@ -7,7 +7,9 @@ import com.example.pdelivery.shared.error.ErrorCode;
 public enum AuthErrorCode implements ErrorCode {
 
 	INVALID_ROLE("AUTH_001", HttpStatus.BAD_REQUEST, "MANAGER 또는 MASTER 역할로는 가입할 수 없습니다"),
-	DUPLICATE_USERNAME("AUTH_002", HttpStatus.CONFLICT, "이미 존재하는 username입니다");
+	DUPLICATE_USERNAME("AUTH_002", HttpStatus.CONFLICT, "이미 존재하는 username입니다"),
+	DUPLICATE_NICKNAME("AUTH_003", HttpStatus.CONFLICT, "이미 존재하는 nickname입니다"),
+	DUPLICATE_EMAIL("AUTH_004", HttpStatus.CONFLICT, "이미 존재하는 email입니다");
 
 	private final String code;
 	private final HttpStatus status;
