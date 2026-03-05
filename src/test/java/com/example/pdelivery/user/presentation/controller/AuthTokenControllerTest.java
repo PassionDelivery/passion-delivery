@@ -90,7 +90,7 @@ class AuthTokenControllerTest {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		String hash = encoder.encode("Password1!");
 
-		when(userRepository.findByUsername("testuser"))
+		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
 				.thenReturn(Optional.of(UserEntity.create("testuser", hash, "nick", "a@b.com", UserRole.CUSTOMER)));
 
 		mockMvc.perform(post("/api/auth/tokens")
@@ -102,7 +102,7 @@ class AuthTokenControllerTest {
 
 	@Test
 	void login_userNotFound() throws Exception {
-		when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+		when(userRepository.findByUsernameAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
 
 		mockMvc.perform(post("/api/auth/tokens")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -117,7 +117,7 @@ class AuthTokenControllerTest {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		String hashForDifferentPassword = encoder.encode("OtherPassword9@");
 
-		when(userRepository.findByUsername("testuser"))
+		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
 				.thenReturn(Optional.of(
 						UserEntity.create("testuser", hashForDifferentPassword, "nick", "a@b.com", UserRole.CUSTOMER)));
 
