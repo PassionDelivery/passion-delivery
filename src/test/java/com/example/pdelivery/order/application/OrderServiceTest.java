@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.order.error.OrderErrorCode;
+import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
@@ -40,43 +44,81 @@ class OrderServiceTest {
 	@InjectMocks
 	private OrderServiceImpl orderService; // Mock들을 이 서비스에 주입
 
-	@Test
-	@DisplayName("주문 생성 성공 테스트")
-	void createOrder_Success() {
-		// 가짜 데이터
-		UUID storeId = UUID.randomUUID();
-		UUID cartId = UUID.randomUUID();
-		UUID addressId = UUID.randomUUID();
+	// 공통 가짜 데이터 필드
+	private UUID storeId;
+	private UUID cartId;
+	private UUID addressId;
+	private UUID chickenId;
+	private UUID pizzaId;
+	private List<UUID> menuIds;
+	private OrderRequest.OrderCreateRequest req;
+	private CartData mockCartData;
+	private List<MenuData> menuData = new ArrayList<>();
 
-		UUID chickenId = UUID.randomUUID();
-		UUID pizzaId = UUID.randomUUID();
-		List<UUID> menuIds = List.of(chickenId, pizzaId);
+	@BeforeEach
+	void setUp() {
+		storeId = UUID.randomUUID();
+		cartId = UUID.randomUUID();
+		addressId = UUID.randomUUID();
 
-		CartData mockCartData = new CartData(storeId, menuIds);
+		req = new OrderRequest.OrderCreateRequest(cartId, addressId);
 
-		List<MenuData> menuData = new ArrayList<>();
+		chickenId = UUID.randomUUID();
+		pizzaId = UUID.randomUUID();
+		menuIds = List.of(chickenId, pizzaId);
+
+		mockCartData = new CartData(storeId, menuIds);
+
 		menuData.add(new MenuData(chickenId, "chiken", 20000, 1));
 		menuData.add(new MenuData(pizzaId, "pizza", 17000, 2));
 
-		OrderRequest.OrderCreateRequest req = new OrderRequest.OrderCreateRequest(cartId, addressId);
+	}
 
-		// Stubbing
-		when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
-		when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
-		when(orderPaymentRequirer.processPayment(any(), eq(54000))).thenReturn(true);
-		when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
+	@Nested
+	@DisplayName("주문 생성 테스트")
+	class CreateOrder {
 
-		// 실행
-		Order result = orderService.createOrder(req);
+		@Test
+		@DisplayName("주문 생성 성공 테스트")
+		void createOrder_Success() {
+			// Stubbing
+			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
+			when(orderPaymentRequirer.processPayment(any(), eq(54000))).thenReturn(true);
+			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
-		// Assert
-		Order.OrderView orderView = new Order.OrderView(result);
+			Order result = orderService.createOrder(req);
 
-		assertThat(result).isNotNull();
-		assertThat(orderView.getAddress()).isEqualTo("서울시 강남구");
-		assertThat(orderView.getTotalPrice()).isEqualTo(54000);
+			// Assert
+			Order.OrderView orderView = new Order.OrderView(result);
 
-		// 호출 여부 확인 -> "실제로 리포지토리에 저장이 요청되었는가?"
-		verify(orderRepository, times(1)).save(any(Order.class));
+			assertThat(result).isNotNull();
+			assertThat(orderView.getAddress()).isEqualTo("서울시 강남구");
+			assertThat(orderView.getTotalPrice()).isEqualTo(54000);
+
+			// 호출 여부 확인 -> "실제로 리포지토리에 저장이 요청되었는가?"
+			verify(orderRepository, times(1)).save(any(Order.class));
+		}
+
+		@Test
+		@DisplayName("결제 실패 테스트")
+		void createOrder_Payment() {
+			//Stubbing
+			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
+			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
+			when(orderPaymentRequirer.processPayment(any(), anyInt()))
+				.thenThrow(new OrderException(OrderErrorCode.PAYMENT_FAILED));
+
+			assertThatThrownBy(() -> orderService.createOrder(req))
+				.isInstanceOf(OrderException.class)
+				.hasMessageContaining("결제 실패")
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.PAYMENT_FAILED);
+
+			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
+			verify(orderRepository, never()).save(any());
+
+		}
 	}
 }
