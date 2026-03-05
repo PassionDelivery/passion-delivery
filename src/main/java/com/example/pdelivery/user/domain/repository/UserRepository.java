@@ -21,4 +21,6 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
 	Optional<UserEntity> findByUsername(String username);
 
 	Optional<UserEntity> findByUsernameAndDeletedAtIsNull(String username);
+
+	boolean existsByUsernameAndDeletedAtIsNull(String username);
 }
