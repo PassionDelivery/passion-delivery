@@ -20,13 +20,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.pdelivery.shared.security.JwtAccessDeniedHandler;
@@ -38,11 +35,8 @@ import com.example.pdelivery.user.domain.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(AuthController.class)
-@Import({AuthControllerTest.TestConfig.class, SecurityConfig.class, AuthService.class})
-@TestPropertySource(properties = {
-		"app.cors.allowed-origins=http://localhost:3000",
-		"spring.main.allow-bean-definition-overriding=true"
-})
+@Import({SecurityConfig.class, AuthService.class})
+@TestPropertySource(properties = "app.cors.allowed-origins=http://localhost:3000")
 class AuthControllerTest {
 
 	@Autowired
@@ -52,26 +46,18 @@ class AuthControllerTest {
 	ObjectMapper objectMapper;
 
 	// DB boundary mock — real AuthService uses this
-	@MockBean
+	@MockitoBean
 	UserRepository userRepository;
 
 	// SecurityConfig dependencies
-	@MockBean
+	@MockitoBean
 	JwtAuthFilter jwtAuthFilter;
 
-	@MockBean
+	@MockitoBean
 	JwtAuthenticationEntryPoint authEntryPoint;
 
-	@MockBean
+	@MockitoBean
 	JwtAccessDeniedHandler accessDeniedHandler;
-
-	// Provides NoOpPasswordEncoder as the PasswordEncoder bean (overrides SecurityConfig's BCrypt bean)
-	static class TestConfig {
-		@Bean
-		PasswordEncoder passwordEncoder() {
-			return NoOpPasswordEncoder.getInstance();
-		}
-	}
 
 	@BeforeEach
 	void setUpFilterPassThrough() throws ServletException, IOException {
