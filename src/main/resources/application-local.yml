@@ -5,10 +5,10 @@ spring:
   application:
     name: pdelivery
   datasource:
-    url: jdbc:postgresql://db:5432/pdelivery
+    url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
-    username: pdelivery
-    password: pdelivery
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
