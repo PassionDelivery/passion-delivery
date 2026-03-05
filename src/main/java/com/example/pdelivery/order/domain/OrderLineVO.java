@@ -2,6 +2,9 @@ package com.example.pdelivery.order.domain;
 
 import java.util.UUID;
 
+import com.example.pdelivery.order.error.OrderErrorCode;
+import com.example.pdelivery.order.error.OrderException;
+
 public record OrderLineVO(
 	UUID menuId,
 	String menuName,
@@ -10,10 +13,10 @@ public record OrderLineVO(
 ) {
 	public OrderLineVO {
 		if (quantity < 1) {
-			throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+			throw new OrderException(OrderErrorCode.INVALID_QUANTITY);
 		}
 		if (price < 0) {
-			throw new IllegalArgumentException("가격은 0원 이상이어야 합니다.");
+			throw new OrderException(OrderErrorCode.INVALID_PRICE);
 		}
 	}
 }
