@@ -49,8 +49,14 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 			HttpStatusCode status,
 			WebRequest request) {
 
-		String detail = ex.getBindingResult().getFieldErrors().stream()
+		String fieldErrors = ex.getBindingResult().getFieldErrors().stream()
 			.map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+			.collect(Collectors.joining(", "));
+		String globalErrors = ex.getBindingResult().getGlobalErrors().stream()
+			.map(ge -> ge.getObjectName() + ": " + ge.getDefaultMessage())
+			.collect(Collectors.joining(", "));
+		String detail = java.util.stream.Stream.of(fieldErrors, globalErrors)
+			.filter(s -> !s.isEmpty())
 			.collect(Collectors.joining(", "));
 
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
