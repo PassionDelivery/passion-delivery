@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class OrderAddressRequirerImpl implements OrderAddressRequirer {
 	// private final AddressProvider addressProvider;
-	private final String address = "address";
+	private String address = "address";
 
 	@Override
 	public String getAddress(UUID deliveryAddressId) {

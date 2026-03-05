@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderMenuRequirerImpl implements OrderMenuRequirer {
 	// private final MenuProvider menuProvider;
 	// menuProvider로 가져오는 로직으로 대체될 예정
-	private final List<MenuData> menuData = new ArrayList<>();
+	private List<MenuData> menuData = new ArrayList<>();
 
 	public List<MenuData> getMenus(List<UUID> MenuIds) {
 		return menuData;

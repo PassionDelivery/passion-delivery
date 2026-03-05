@@ -67,8 +67,8 @@ class OrderServiceTest {
 
 		chickenId = UUID.randomUUID();
 		pizzaId = UUID.randomUUID();
-		items = List.of(new CartItems(chickenId, 1), new CartItems(pizzaId, 2));
-		menuIds = List.of(chickenId, pizzaId);
+		items = new ArrayList<>(List.of(new CartItems(chickenId, 1), new CartItems(pizzaId, 2)));
+		menuIds = new ArrayList<>(List.of(chickenId, pizzaId));
 
 		mockCartData = new CartData(storeId, items);
 
@@ -99,12 +99,8 @@ class OrderServiceTest {
 			assertThat(orderView.getAddress()).isEqualTo("서울시 강남구");
 			assertThat(orderView.getTotalPrice()).isEqualTo(54000);
 
-			assertThat(orderView.getOrderLines())
-				.extracting("menuId", "quantity", "price")
-				.containsExactlyInAnyOrder(
-					tuple(chickenId, 1, 20000),
-					tuple(pizzaId, 2, 17000)
-				);
+			assertThat(orderView.getOrderLines()).extracting("menuId", "quantity", "price")
+				.containsExactlyInAnyOrder(tuple(chickenId, 1, 20000), tuple(pizzaId, 2, 17000));
 
 			// 호출 여부 확인 -> "실제로 리포지토리에 저장이 요청되었는가?"
 			verify(orderRepository, times(1)).save(any(Order.class));
@@ -117,18 +113,84 @@ class OrderServiceTest {
 			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
-			when(orderPaymentRequirer.processPayment(any(), anyInt()))
-				.thenThrow(new OrderException(OrderErrorCode.PAYMENT_FAILED));
+			when(orderPaymentRequirer.processPayment(any(), anyInt())).thenThrow(
+				new OrderException(OrderErrorCode.PAYMENT_FAILED));
 
-			assertThatThrownBy(() -> orderService.createOrder(req))
-				.isInstanceOf(OrderException.class)
+			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
 				.hasMessageContaining("결제 실패")
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.PAYMENT_FAILED);
 
 			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
 			verify(orderRepository, never()).save(any());
+		}
 
+		@Test
+		@DisplayName("빈 cart 실패 테스트")
+		void createOrder_Cart() {
+			//Stubbing
+			CartData emptyCartData = new CartData(storeId, new ArrayList<>());
+			List<UUID> emptyMenuIds = new ArrayList<>();
+			List<MenuData> emptyMenuData = new ArrayList<>();
+
+			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			when(orderCartRequirer.getCartLines(cartId)).thenThrow(new OrderException(OrderErrorCode.CART_EMPTY));
+
+			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.CART_EMPTY);
+
+			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
+			verify(orderRepository, never()).save(any());
+
+		}
+
+		@Test
+		@DisplayName("빈 주소 실패 테스트")
+		void createOrder_Address() {
+			//null or 빈 문자열 왔다고 가정
+			when(orderAddressRequirer.getAddress(addressId)).thenThrow(
+				new OrderException(OrderErrorCode.ADDRESS_INVALID));
+
+			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.ADDRESS_INVALID);
+
+			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
+			verify(orderRepository, never()).save(any());
+
+		}
+
+		@Test
+		@DisplayName("수량이 1개 미만 실패")
+		void createOrder_InvalidQuantity() {
+			UUID kimbap = UUID.randomUUID();
+			mockCartData.cartItems().add(new CartItems(kimbap, 0));
+			menuIds.add(kimbap);
+			menuData.add(new MenuData(kimbap, "kimbap", 4000));
+
+			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
+			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
+
+			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+				.hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.INVALID_QUANTITY);
+		}
+
+		@Test
+		@DisplayName("가격이 0원 미만 실패")
+		void createOrder_InvalidPrice() {
+			UUID kimbap = UUID.randomUUID();
+			mockCartData.cartItems().add(new CartItems(kimbap, 1));
+			menuIds.add(kimbap);
+			menuData.add(new MenuData(kimbap, "kimbap", -1));
+
+			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
+			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
+
+			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+				.hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.INVALID_PRICE);
 		}
 	}
 }
