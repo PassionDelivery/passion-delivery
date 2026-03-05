@@ -3,8 +3,7 @@ package com.example.pdelivery.user.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,15 +96,9 @@ class LoginServiceTest {
 		UserEntity user = UserEntity.create("testuser", passwordEncoder.encode("Password1!"), "nick", "a@b.com", UserRole.CUSTOMER);
 		userRepository.save(user);
 
-		// soft-delete the user via reflection on BaseEntity.deletedAt
-		try {
-			Field deletedAtField = user.getClass().getSuperclass().getDeclaredField("deletedAt");
-			deletedAtField.setAccessible(true);
-			deletedAtField.set(user, LocalDateTime.now());
-			userRepository.save(user);
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to set deletedAt via reflection", e);
-		}
+		// soft-delete the user via the public domain method
+		user.softDelete(UUID.randomUUID());
+		userRepository.save(user);
 
 		LoginRequestDto dto = new LoginRequestDto("testuser", "Password1!");
 
