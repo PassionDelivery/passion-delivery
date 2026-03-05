@@ -1,8 +1,7 @@
 package com.example.pdelivery.review.domain;
 
-import java.util.UUID;
-
 import org.springframework.data.repository.Repository;
 
-public interface ReviewRepository extends Repository<ReviewEntity, UUID> {
+public interface ReviewRepository extends Repository<ReviewEntity, Long> {
+	ReviewEntity save(ReviewEntity review);
 }
