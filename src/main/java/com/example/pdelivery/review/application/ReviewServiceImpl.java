@@ -3,13 +3,14 @@ package com.example.pdelivery.review.application;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.pdelivery.review.domain.ReviewEntity;
 import com.example.pdelivery.review.domain.ReviewRepository;
-import com.example.pdelivery.review.infrastructure.ReviewValidator;
 
 import lombok.RequiredArgsConstructor;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class ReviewServiceImpl implements ReviewService {

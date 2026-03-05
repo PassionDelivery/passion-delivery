@@ -1,4 +1,4 @@
-package com.example.pdelivery.review.infrastructure;
+package com.example.pdelivery.review.application;
 
 import static com.example.pdelivery.review.ReviewErrorCode.*;
 
@@ -8,7 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.example.pdelivery.order.domain.OrderStatus;
 import com.example.pdelivery.review.ReviewException;
-import com.example.pdelivery.review.application.CreateReviewRequest;
+import com.example.pdelivery.review.infrastructure.OrderData;
+import com.example.pdelivery.review.infrastructure.ReviewOrderRequirer;
+import com.example.pdelivery.review.infrastructure.ReviewStoreRequirer;
+import com.example.pdelivery.review.infrastructure.ReviewUserRequirer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,10 +31,8 @@ public class ReviewValidator {
 		}
 
 		OrderData orderInfo = reviewOrderRequirer.getOrderInfo(reviewRequest.orderId());
-		if (orderInfo == null) {
-			throw new ReviewException(REVIEW_ORDER_NOT_FOUND);
-		}
-		if (orderInfo.orderStatus() != OrderStatus.COMPLETED) {
+
+		if (orderInfo != null && orderInfo.orderStatus() != OrderStatus.COMPLETED) {
 			throw new ReviewException(REVIEW_ORDER_INVALID_STATUS);
 		}
 	}
