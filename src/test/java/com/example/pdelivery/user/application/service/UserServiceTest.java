@@ -9,9 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.pdelivery.shared.AuditorAwareImpl;
+import com.example.pdelivery.shared.JpaAuditConfig;
 import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.user.domain.repository.UserRepository;
@@ -20,6 +23,7 @@ import com.example.pdelivery.user.error.UserException;
 import com.example.pdelivery.user.presentation.dto.UpdateUserRequestDto;
 
 @DataJpaTest
+@Import({JpaAuditConfig.class, AuditorAwareImpl.class})
 class UserServiceTest {
 
 	@Autowired
