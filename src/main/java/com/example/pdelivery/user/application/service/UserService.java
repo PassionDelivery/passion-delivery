@@ -36,7 +36,7 @@ public class UserService {
 			throw new UserException(UserErrorCode.USER_FORBIDDEN);
 		}
 		if (dto.getNickname() == null && dto.getEmail() == null && dto.getPassword() == null) {
-			throw new UserException(UserErrorCode.USER_FORBIDDEN);
+			throw new UserException(UserErrorCode.NO_UPDATE_FIELD);
 		}
 		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
