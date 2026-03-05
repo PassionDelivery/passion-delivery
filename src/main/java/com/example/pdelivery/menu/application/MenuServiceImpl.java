@@ -44,18 +44,13 @@ public class MenuServiceImpl implements MenuService {
 			log.warn("AI 설명 생성이 요청되었지만 아직 구현되지 않았습니다. storeId={}", storeId);
 		}
 
-		Menu menu;
+		MenuEntity menuEntity;
 		try {
-			menu = new Menu(
-				request.name(),
-				request.price(),
-				request.description()
-			);
+			menuEntity = MenuEntity.create(storeId, request.name(), request.price(), request.description());
 		} catch (IllegalArgumentException e) {
 			throw toMenuException(e);
 		}
 
-		MenuEntity menuEntity = new MenuEntity(storeId, menu);
 		MenuEntity saved = menuRepository.save(menuEntity);
 
 		return MenuResponse.from(saved);

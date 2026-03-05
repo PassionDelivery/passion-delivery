@@ -8,9 +8,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Entity
 @Table(name = "p_menu")
 public class MenuEntity extends BaseEntity {
@@ -21,12 +24,18 @@ public class MenuEntity extends BaseEntity {
 	@Embedded
 	private Menu menu;
 
-	protected MenuEntity() {
-	}
-
-	public MenuEntity(UUID storeId, Menu menu) {
+	@Builder
+	private MenuEntity(UUID storeId, Menu menu) {
 		this.storeId = storeId;
 		this.menu = menu;
+	}
+
+	public static MenuEntity create(UUID storeId, String name, Integer price, String description) {
+		Menu menu = new Menu(name, price, description);
+		return MenuEntity.builder()
+			.storeId(storeId)
+			.menu(menu)
+			.build();
 	}
 
 	public void updateMenu(Menu menu) {

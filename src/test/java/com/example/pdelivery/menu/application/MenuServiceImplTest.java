@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 
-import com.example.pdelivery.menu.domain.Menu;
 import com.example.pdelivery.menu.domain.MenuEntity;
 import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
@@ -57,7 +56,7 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴를 정상적으로 생성한다")
 		void success() {
 			MenuCreateRequest request = new MenuCreateRequest("치킨", 20000, "바삭한 치킨", null, null);
-			MenuEntity menuEntity = new MenuEntity(storeId, new Menu("치킨", 20000, "바삭한 치킨"));
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
 
 			given(menuStoreRequirer.existsById(storeId)).willReturn(true);
 			given(menuRepository.save(any(MenuEntity.class))).willReturn(menuEntity);
@@ -80,7 +79,7 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴를 정상적으로 조회한다")
 		void success() {
 			UUID menuId = UUID.randomUUID();
-			MenuEntity menuEntity = new MenuEntity(storeId, new Menu("치킨", 20000, "바삭한 치킨"));
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
 
 			given(menuRepository.findById(menuId)).willReturn(Optional.of(menuEntity));
 
@@ -113,8 +112,8 @@ class MenuServiceImplTest {
 		@DisplayName("키워드 없이 메뉴 목록을 조회한다")
 		void successWithoutKeyword() {
 			Pageable pageable = PageRequest.of(0, 10);
-			MenuEntity menu1 = new MenuEntity(storeId, new Menu("치킨", 20000, null));
-			MenuEntity menu2 = new MenuEntity(storeId, new Menu("피자", 25000, null));
+			MenuEntity menu1 = MenuEntity.create(storeId, "치킨", 20000, null);
+			MenuEntity menu2 = MenuEntity.create(storeId, "피자", 25000, null);
 
 			given(menuRepository.findAllByStoreId(storeId, pageable))
 				.willReturn(new SliceImpl<>(List.of(menu1, menu2), pageable, false));
@@ -129,7 +128,7 @@ class MenuServiceImplTest {
 		@DisplayName("키워드로 메뉴를 검색한다")
 		void successWithKeyword() {
 			Pageable pageable = PageRequest.of(0, 10);
-			MenuEntity menu1 = new MenuEntity(storeId, new Menu("양념치킨", 22000, null));
+			MenuEntity menu1 = MenuEntity.create(storeId, "양념치킨", 22000, null);
 
 			given(menuRepository.searchByStoreIdAndName(storeId, "치킨", pageable))
 				.willReturn(new SliceImpl<>(List.of(menu1), pageable, false));
@@ -149,7 +148,7 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴를 정상적으로 수정한다")
 		void success() {
 			UUID menuId = UUID.randomUUID();
-			MenuEntity menuEntity = new MenuEntity(storeId, new Menu("치킨", 20000, "바삭한 치킨"));
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
 			given(menuRepository.findByIdForUpdate(menuId)).willReturn(Optional.of(menuEntity));
@@ -188,7 +187,7 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			UUID userId = UUID.randomUUID();
 			String username = "test_user";
-			MenuEntity menuEntity = new MenuEntity(storeId, new Menu("치킨", 20000, null));
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null);
 			UserEntity user = mock(UserEntity.class);
 			given(user.getId()).willReturn(userId);
 
