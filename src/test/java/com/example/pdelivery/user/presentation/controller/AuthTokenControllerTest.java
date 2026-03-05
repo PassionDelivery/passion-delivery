@@ -84,7 +84,6 @@ class AuthTokenControllerTest {
 
 	@Test
 	void login_success() throws Exception {
-		// BCrypt-encode the expected password so real BCryptPasswordEncoder matches it
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		String hash = encoder.encode("Password1!");
 

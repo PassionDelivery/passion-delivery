@@ -47,13 +47,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		}
 
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			// AUTH-05: DB 접근 최소화 — boolean 쿼리로 존재 및 soft-delete 여부만 확인
 			if (!userRepository.existsByUsernameAndDeletedAtIsNull(username)) {
 				filterChain.doFilter(request, response);
 				return;
 			}
 
-			// AUTH-04: role은 JWT claims에서 직접 읽기 — DB round-trip 없음
 			String role = jwtUtil.extractRole(token);
 			List<SimpleGrantedAuthority> authorities =
 				List.of(new SimpleGrantedAuthority("ROLE_" + role));

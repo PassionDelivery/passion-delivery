@@ -24,7 +24,6 @@ public class LoginService {
 	private final JwtUtil jwtUtil;
 
 	public LoginResponseDto login(LoginRequestDto dto) {
-		// Use soft-delete-aware query — deleted users cannot login (AUTH-02 extension)
 		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(dto.getUsername())
 			.orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_CREDENTIALS));
 
@@ -32,7 +31,6 @@ public class LoginService {
 			throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
 		}
 
-		// AUTH-03: JWT contains username (subject) and role (claim)
 		String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
 		return new LoginResponseDto(token);
 	}
