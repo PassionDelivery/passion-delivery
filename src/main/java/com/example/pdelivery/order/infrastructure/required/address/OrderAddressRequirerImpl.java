@@ -12,12 +12,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class OrderAddressRequirerImpl implements OrderAddressRequirer {
-	// private final AddressOrderProvider addressOrderProvider;
+	// private final AddressProvider addressProvider;
 	private final String address = "address";
 
 	@Override
 	public String getAddress(UUID deliveryAddressId) {
-		// String address = addressOrderProvider.getAddress(deliveryAddressId);
+		// String address = addressProvider.getAddress(deliveryAddressId);
 		if (address == null || address.isBlank()) {
 			throw new OrderException(OrderErrorCode.ADDRESS_INVALID);
 		}

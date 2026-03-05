@@ -11,6 +11,8 @@ import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
+import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
+import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 
 import jakarta.transaction.Transactional;
@@ -23,6 +25,7 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderCartRequirer orderCartRequirer;
 	private final OrderAddressRequirer orderAddressRequirer;
 	private final OrderPaymentRequirer orderPaymentRequirer;
+	private final OrderMenuRequirer orderMenuRequirer;
 
 	//추후 삭제 예정
 	private UUID customerId = UUID.randomUUID();
@@ -31,17 +34,15 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Order createOrder(OrderRequest.OrderCreateRequest req) {
 		String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
-		List<CartData> cartLines = orderCartRequirer.getCartLines(req.cartId());
+		CartData cartLines = orderCartRequirer.getCartLines(req.cartId());
+		List<MenuData> menuData = orderMenuRequirer.getMenus(cartLines.menuIds());
 
-		List<OrderLineVO> orderLineVOs = cartLines.stream()
-			.map(cartData -> new OrderLineVO(
-				cartData.menuId(),
-				cartData.menuName(),
-				cartData.quantity(),
-				cartData.price()
-			)).toList();
+		List<OrderLineVO> orderLineVOs = menuData.stream()
+			.map(menu -> new OrderLineVO(menu.menuId(), menu.menuName(), menu.quantity(), menu.price()))
+			.toList();
 
-		Order order = Order.create(req.storeId(), address, customerId, orderLineVOs);
+		UUID storeId = cartLines.storeId();
+		Order order = Order.create(storeId, address, customerId, orderLineVOs);
 
 		if (orderPaymentRequirer.processPayment(order.getId(), order.getTotalPrice())) {
 			orderRepository.save(order);
