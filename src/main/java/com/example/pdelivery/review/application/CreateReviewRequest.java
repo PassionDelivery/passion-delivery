@@ -6,12 +6,7 @@ import java.util.UUID;
 
 import com.example.pdelivery.review.ReviewException;
 
-public record CreateReviewRequest(
-	UUID storeId,
-	UUID orderId,
-	Integer rating,
-	String content
-) {
+public record CreateReviewRequest(UUID storeId, UUID orderId, Integer rating, String content) {
 	public CreateReviewRequest {
 		if (storeId == null) {
 			throw new ReviewException(REVIEW_VALIDATOR_STORE_ID);
