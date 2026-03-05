@@ -6,9 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +24,10 @@ import com.example.pdelivery.user.error.AuthException;
 import com.example.pdelivery.user.presentation.dto.LoginRequestDto;
 import com.example.pdelivery.user.presentation.dto.LoginResponseDto;
 
-import java.nio.charset.StandardCharsets;
-import javax.crypto.SecretKey;
-
 @DataJpaTest
 @Import(JwtUtil.class)
 @TestPropertySource(properties = {
-		"app.jwt.secret=test-secret-key-that-is-at-least-32-characters-long-for-hs256",
+		"app.jwt.secret=${JWT_JWT_SECRET:placeholder-test-secret-key-at-least-32-chars}",
 		"app.jwt.expiration-ms=3600000"
 })
 class LoginServiceTest {
@@ -47,8 +41,6 @@ class LoginServiceTest {
 	PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	LoginService loginService;
-
-	private static final String TEST_SECRET = "test-secret-key-that-is-at-least-32-characters-long-for-hs256";
 
 	@BeforeEach
 	void setUp() {
@@ -69,16 +61,7 @@ class LoginServiceTest {
 		// then
 		assertThat(result.accessToken()).isNotNull();
 		assertThat(jwtUtil.extractUsername(result.accessToken())).isEqualTo("testuser");
-
-		// decode claims directly to verify role
-		SecretKey signingKey = Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8));
-		String role = Jwts.parser()
-				.verifyWith(signingKey)
-				.build()
-				.parseSignedClaims(result.accessToken())
-				.getPayload()
-				.get("role", String.class);
-		assertThat(role).isEqualTo("CUSTOMER");
+		assertThat(jwtUtil.extractRole(result.accessToken())).isEqualTo("CUSTOMER");
 	}
 
 	@Test

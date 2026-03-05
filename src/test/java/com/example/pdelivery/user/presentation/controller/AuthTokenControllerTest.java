@@ -42,7 +42,7 @@ import jakarta.servlet.ServletResponse;
 @Import({SecurityConfig.class, LoginService.class, JwtUtil.class})
 @TestPropertySource(properties = {
 	"app.cors.allowed-origins=http://localhost:3000",
-	"app.jwt.secret=test-secret-key-that-is-at-least-32-characters-long-for-hs256",
+	"app.jwt.secret=${JWT_JWT_SECRET:placeholder-test-secret-key-at-least-32-chars}",
 	"app.jwt.expiration-ms=3600000"
 })
 class AuthTokenControllerTest {
