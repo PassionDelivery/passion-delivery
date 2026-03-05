@@ -1,5 +1,6 @@
 package com.example.pdelivery.order.application;
 
+import static com.example.pdelivery.order.infrastructure.required.cart.CartData.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -50,6 +51,7 @@ class OrderServiceTest {
 	private UUID addressId;
 	private UUID chickenId;
 	private UUID pizzaId;
+	private List<CartItems> items;
 	private List<UUID> menuIds;
 	private OrderRequest.OrderCreateRequest req;
 	private CartData mockCartData;
@@ -65,12 +67,13 @@ class OrderServiceTest {
 
 		chickenId = UUID.randomUUID();
 		pizzaId = UUID.randomUUID();
+		items = List.of(new CartItems(chickenId, 1), new CartItems(pizzaId, 2));
 		menuIds = List.of(chickenId, pizzaId);
 
-		mockCartData = new CartData(storeId, menuIds);
+		mockCartData = new CartData(storeId, items);
 
-		menuData.add(new MenuData(chickenId, "chiken", 20000, 1));
-		menuData.add(new MenuData(pizzaId, "pizza", 17000, 2));
+		menuData.add(new MenuData(chickenId, "chiken", 20000));
+		menuData.add(new MenuData(pizzaId, "pizza", 17000));
 
 	}
 
@@ -95,6 +98,13 @@ class OrderServiceTest {
 			assertThat(result).isNotNull();
 			assertThat(orderView.getAddress()).isEqualTo("서울시 강남구");
 			assertThat(orderView.getTotalPrice()).isEqualTo(54000);
+
+			assertThat(orderView.getOrderLines())
+				.extracting("menuId", "quantity", "price")
+				.containsExactlyInAnyOrder(
+					tuple(chickenId, 1, 20000),
+					tuple(pizzaId, 2, 17000)
+				);
 
 			// 호출 여부 확인 -> "실제로 리포지토리에 저장이 요청되었는가?"
 			verify(orderRepository, times(1)).save(any(Order.class));

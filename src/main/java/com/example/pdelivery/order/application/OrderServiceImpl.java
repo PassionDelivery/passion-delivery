@@ -1,6 +1,8 @@
 package com.example.pdelivery.order.application;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -35,10 +37,21 @@ public class OrderServiceImpl implements OrderService {
 	public Order createOrder(OrderRequest.OrderCreateRequest req) {
 		String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
 		CartData cartLines = orderCartRequirer.getCartLines(req.cartId());
-		List<MenuData> menuData = orderMenuRequirer.getMenus(cartLines.menuIds());
+		List<UUID> menuIds = cartLines.cartItems().stream()
+			.map(CartData.CartItems::menuId)
+			.toList();
+		List<MenuData> menuData = orderMenuRequirer.getMenus(menuIds);
 
-		List<OrderLineVO> orderLineVOs = menuData.stream()
-			.map(menu -> new OrderLineVO(menu.menuId(), menu.menuName(), menu.quantity(), menu.price()))
+		Map<UUID, MenuData> menuMap = new HashMap<>();
+		for (MenuData menu : menuData) {
+			menuMap.put(menu.menuId(), menu);
+		}
+
+		List<OrderLineVO> orderLineVOs = cartLines.cartItems().stream()
+			.map(cartItem -> {
+				MenuData menu = menuMap.get(cartItem.menuId());
+				return new OrderLineVO(cartItem.menuId(), menu.menuName(), cartItem.quantity(), menu.price());
+			})
 			.toList();
 
 		UUID storeId = cartLines.storeId();
