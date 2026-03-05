@@ -12,15 +12,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class OrderCartRequirerImpl implements OrderCartRequirer {
-	// private final CartOrderProvider cartOrderProvider;
+	// private final CartProvider cartProvider;
 	private final CartData cartData;
 
 	public CartData getCartLines(UUID cartId) {
 
-		// List<CartData> cartData = cartOrderProvider.getCartLines(cartId);
-
 		//데이터가 없거나 빈 경우
-		if (cartData.cartItems().isEmpty()) {
+		if (cartData.storeId() == null) {
+			throw new OrderException(OrderErrorCode.REQUIRED_PARAMETER_MISSING, "storeId is missing");
+		}
+		if (cartData.menuIds().isEmpty()) {
 			throw new OrderException(OrderErrorCode.CART_EMPTY);
 		}
 		return cartData;

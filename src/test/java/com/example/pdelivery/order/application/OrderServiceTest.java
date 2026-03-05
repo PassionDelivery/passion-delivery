@@ -3,6 +3,7 @@ package com.example.pdelivery.order.application;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,8 @@ import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
+import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
+import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 
 @ExtendWith(MockitoExtension.class) // Spring을 다 띄우지 않고 Mockito만 사용해서 빠릅니다.
@@ -31,6 +34,8 @@ class OrderServiceTest {
 	private OrderAddressRequirer orderAddressRequirer;
 	@Mock
 	private OrderPaymentRequirer orderPaymentRequirer;
+	@Mock
+	private OrderMenuRequirer orderMenuRequirer;
 
 	@InjectMocks
 	private OrderServiceImpl orderService; // Mock들을 이 서비스에 주입
@@ -42,14 +47,24 @@ class OrderServiceTest {
 		UUID storeId = UUID.randomUUID();
 		UUID cartId = UUID.randomUUID();
 		UUID addressId = UUID.randomUUID();
-		OrderRequest.OrderCreateRequest req = new OrderRequest.OrderCreateRequest(cartId, addressId, storeId);
+
+		UUID chickenId = UUID.randomUUID();
+		UUID pizzaId = UUID.randomUUID();
+		List<UUID> menuIds = List.of(chickenId, pizzaId);
+
+		CartData mockCartData = new CartData(storeId, menuIds);
+
+		List<MenuData> menuData = new ArrayList<>();
+		menuData.add(new MenuData(chickenId, "chiken", 20000, 1));
+		menuData.add(new MenuData(pizzaId, "pizza", 17000, 2));
+
+		OrderRequest.OrderCreateRequest req = new OrderRequest.OrderCreateRequest(cartId, addressId);
 
 		// Stubbing
 		when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
-		when(orderCartRequirer.getCartLines(cartId)).thenReturn(
-			List.of(new CartData(UUID.randomUUID(), "chicken", 1, 20000),
-				new CartData(UUID.randomUUID(), "pizza", 2, 17000)));
+		when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 		when(orderPaymentRequirer.processPayment(any(), eq(54000))).thenReturn(true);
+		when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
 		// 실행
 		Order result = orderService.createOrder(req);
