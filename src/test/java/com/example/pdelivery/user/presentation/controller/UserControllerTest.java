@@ -8,10 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -139,10 +141,11 @@ class UserControllerTest {
 	@Test
 	@WithMockUser(username = "testuser", roles = "CUSTOMER")
 	void deleteUser_success() throws Exception {
-		// given
+		// given — entity needs a UUID id so softDelete(user.getId()) does not NPE
+		UserEntity user = UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER);
+		ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
 		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-			.thenReturn(Optional.of(
-				UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
+			.thenReturn(Optional.of(user));
 
 		// when & then
 		mockMvc.perform(delete("/api/users/testuser"))
