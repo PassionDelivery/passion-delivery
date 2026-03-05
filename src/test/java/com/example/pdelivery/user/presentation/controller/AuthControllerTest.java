@@ -1,20 +1,13 @@
 package com.example.pdelivery.user.presentation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +27,11 @@ import com.example.pdelivery.user.application.service.AuthService;
 import com.example.pdelivery.user.domain.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class, AuthService.class})
 @TestPropertySource(properties = "app.cors.allowed-origins=http://localhost:3000")
@@ -45,11 +43,9 @@ class AuthControllerTest {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	// DB boundary mock — real AuthService uses this
 	@MockitoBean
 	UserRepository userRepository;
 
-	// SecurityConfig dependencies
 	@MockitoBean
 	JwtAuthFilter jwtAuthFilter;
 
@@ -83,15 +79,14 @@ class AuthControllerTest {
 
 	@Test
 	void signup_success() throws Exception {
-		// stub: username not taken, save returns the entity
 		when(userRepository.existsByUsername(any())).thenReturn(false);
 		when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
 		mockMvc.perform(post("/api/users")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(validRequest())))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.data.username").value("testuser"));
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(validRequest())))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.data.username").value("testuser"));
 	}
 
 	@Test
@@ -100,11 +95,11 @@ class AuthControllerTest {
 		invalid.put("username", "");
 
 		mockMvc.perform(post("/api/users")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(invalid)))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-				.andExpect(jsonPath("$.timestamp").exists());
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(invalid)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+			.andExpect(jsonPath("$.timestamp").exists());
 	}
 
 	@Test
@@ -112,10 +107,10 @@ class AuthControllerTest {
 		when(userRepository.existsByUsername(any())).thenReturn(true);
 
 		mockMvc.perform(post("/api/users")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(validRequest())))
-				.andExpect(status().isConflict())
-				.andExpect(jsonPath("$.code").value("AUTH_002"));
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(validRequest())))
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.code").value("AUTH_002"));
 	}
 
 	@Test
@@ -124,9 +119,9 @@ class AuthControllerTest {
 		managerRequest.put("role", "MANAGER");
 
 		mockMvc.perform(post("/api/users")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(managerRequest)))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("AUTH_001"));
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(managerRequest)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("AUTH_001"));
 	}
 }
