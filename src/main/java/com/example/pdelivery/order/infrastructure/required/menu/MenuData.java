@@ -5,8 +5,7 @@ import java.util.UUID;
 public record MenuData(
 	UUID menuId,
 	String menuName,
-	Integer price,
-	Integer quantity
+	Integer price
 ) {
 
 }

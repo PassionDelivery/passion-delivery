@@ -21,7 +21,7 @@ public class OrderCartRequirerImpl implements OrderCartRequirer {
 		if (cartData.storeId() == null) {
 			throw new OrderException(OrderErrorCode.REQUIRED_PARAMETER_MISSING, "storeId is missing");
 		}
-		if (cartData.menuIds().isEmpty()) {
+		if (cartData.cartItems().isEmpty()) {
 			throw new OrderException(OrderErrorCode.CART_EMPTY);
 		}
 		return cartData;
