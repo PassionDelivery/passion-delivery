@@ -1,0 +1,140 @@
+package com.example.pdelivery.user.application.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.example.pdelivery.user.domain.entity.UserEntity;
+import com.example.pdelivery.user.domain.entity.UserRole;
+import com.example.pdelivery.user.domain.repository.UserRepository;
+import com.example.pdelivery.user.error.UserErrorCode;
+import com.example.pdelivery.user.error.UserException;
+import com.example.pdelivery.user.presentation.dto.UpdateUserRequestDto;
+
+@DataJpaTest
+class UserServiceTest {
+
+	@Autowired
+	UserRepository userRepository;
+
+	PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+	UserService userService;
+
+	@BeforeEach
+	void setUp() {
+		userService = new UserService(userRepository, passwordEncoder);
+	}
+
+	// Helper — creates and persists a test user
+	private UserEntity savedUser(String username) {
+		return userRepository.save(
+			UserEntity.create(username, passwordEncoder.encode("Password1!"), "nick_" + username,
+				username + "@test.com", UserRole.CUSTOMER)
+		);
+	}
+
+	@Test
+	void getUser_success() {
+		// given
+		savedUser("testuser");
+
+		// when
+		var result = userService.getUser("testuser", "testuser");
+
+		// then
+		assertThat(result.username()).isEqualTo("testuser");
+		assertThat(result.createdAt()).isNotNull();
+	}
+
+	@Test
+	void getUser_forbidden() {
+		// 403 check happens before DB lookup — no user setup needed
+		assertThatThrownBy(() -> userService.getUser("targetuser", "currentuser"))
+			.isInstanceOf(UserException.class)
+			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
+	}
+
+	@Test
+	void getUser_notFound() {
+		// nobody is not saved
+		assertThatThrownBy(() -> userService.getUser("nobody", "nobody"))
+			.isInstanceOf(UserException.class)
+			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND));
+	}
+
+	@Test
+	void updateUser_success() {
+		// given
+		savedUser("testuser");
+
+		// when
+		var result = userService.updateUser("testuser", "testuser",
+			new UpdateUserRequestDto("newNick", null, null));
+
+		// then
+		assertThat(result.nickname()).isEqualTo("newNick");
+	}
+
+	@Test
+	void updateUser_forbidden() {
+		// 403 check before DB — no setup needed
+		assertThatThrownBy(() ->
+			userService.updateUser("target", "other", new UpdateUserRequestDto("x", null, null)))
+			.isInstanceOf(UserException.class)
+			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
+	}
+
+	@Test
+	void updateUser_duplicateNickname() {
+		// given: user2 has nickname "nick_user2"
+		savedUser("user1");
+		savedUser("user2");
+
+		// when: user1 tries to take user2's nickname
+		assertThatThrownBy(() ->
+			userService.updateUser("user1", "user1", new UpdateUserRequestDto("nick_user2", null, null)))
+			.isInstanceOf(UserException.class)
+			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.DUPLICATE_NICKNAME));
+	}
+
+	@Test
+	void updateUser_allFieldsNull() {
+		// given
+		savedUser("testuser");
+
+		// when: all fields null — must be rejected at service layer
+		assertThatThrownBy(() ->
+			userService.updateUser("testuser", "testuser", new UpdateUserRequestDto(null, null, null)))
+			.isInstanceOf(UserException.class);
+	}
+
+	@Test
+	void deleteUser_success() {
+		// given
+		savedUser("testuser");
+
+		// when
+		userService.deleteUser("testuser", "testuser");
+
+		// then: soft-deleted user is not returned by findByUsernameAndDeletedAtIsNull
+		Optional<UserEntity> found = userRepository.findByUsernameAndDeletedAtIsNull("testuser");
+		assertThat(found).isEmpty();
+	}
+
+	@Test
+	void deleteUser_forbidden() {
+		// 403 check before DB — no setup needed
+		assertThatThrownBy(() -> userService.deleteUser("target", "other"))
+			.isInstanceOf(UserException.class)
+			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
+	}
+}
