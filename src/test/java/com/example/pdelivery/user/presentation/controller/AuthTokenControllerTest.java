@@ -108,7 +108,7 @@ class AuthTokenControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(loginRequest("unknown", "Password1!"))))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("AUTH_003"));
+				.andExpect(jsonPath("$.code").value("AUTH_010"));
 	}
 
 	@Test
@@ -125,6 +125,6 @@ class AuthTokenControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(loginRequest("testuser", "Password1!"))))
 				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("AUTH_003"));
+				.andExpect(jsonPath("$.code").value("AUTH_010"));
 	}
 }

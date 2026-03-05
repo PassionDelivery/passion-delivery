@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 
@@ -44,7 +44,7 @@ class LoginServiceTest {
 	@Autowired
 	JwtUtil jwtUtil;
 
-	PasswordEncoder passwordEncoder = NoOpPasswordEncoder.getInstance();
+	PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	LoginService loginService;
 
@@ -58,7 +58,7 @@ class LoginServiceTest {
 	@Test
 	void login_success() {
 		// given
-		UserEntity user = UserEntity.create("testuser", "Password1!", "nick", "a@b.com", UserRole.CUSTOMER);
+		UserEntity user = UserEntity.create("testuser", passwordEncoder.encode("Password1!"), "nick", "a@b.com", UserRole.CUSTOMER);
 		userRepository.save(user);
 
 		LoginRequestDto dto = new LoginRequestDto("testuser", "Password1!");
@@ -96,7 +96,7 @@ class LoginServiceTest {
 	@Test
 	void login_wrongPassword() {
 		// given
-		UserEntity user = UserEntity.create("testuser", "Password1!", "nick", "a@b.com", UserRole.CUSTOMER);
+		UserEntity user = UserEntity.create("testuser", passwordEncoder.encode("Password1!"), "nick", "a@b.com", UserRole.CUSTOMER);
 		userRepository.save(user);
 
 		LoginRequestDto dto = new LoginRequestDto("testuser", "WrongPassword!");
@@ -111,7 +111,7 @@ class LoginServiceTest {
 	@Test
 	void login_deletedUser() {
 		// given
-		UserEntity user = UserEntity.create("testuser", "Password1!", "nick", "a@b.com", UserRole.CUSTOMER);
+		UserEntity user = UserEntity.create("testuser", passwordEncoder.encode("Password1!"), "nick", "a@b.com", UserRole.CUSTOMER);
 		userRepository.save(user);
 
 		// soft-delete the user via reflection on BaseEntity.deletedAt
