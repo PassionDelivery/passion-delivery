@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class OrderCartRequirerImpl implements OrderCartRequirer {
 	// private final CartProvider cartProvider;
-	private final CartData cartData;
+	private CartData cartData;
 
 	public CartData getCartLines(UUID cartId) {
 
