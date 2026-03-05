@@ -1,7 +1,6 @@
 package com.example.pdelivery.user.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Optional;
 
@@ -61,18 +60,16 @@ class UserServiceTest {
 
 	@Test
 	void getUser_forbidden() {
-		// 403 check happens before DB lookup — no user setup needed
 		assertThatThrownBy(() -> userService.getUser("targetuser", "currentuser"))
 			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
+			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
 	}
 
 	@Test
 	void getUser_notFound() {
-		// nobody is not saved
 		assertThatThrownBy(() -> userService.getUser("nobody", "nobody"))
 			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND));
+			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND));
 	}
 
 	@Test
@@ -90,11 +87,10 @@ class UserServiceTest {
 
 	@Test
 	void updateUser_forbidden() {
-		// 403 check before DB — no setup needed
 		assertThatThrownBy(() ->
 			userService.updateUser("target", "other", new UpdateUserRequestDto("x", null, null)))
 			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
+			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
 	}
 
 	@Test
@@ -107,7 +103,7 @@ class UserServiceTest {
 		assertThatThrownBy(() ->
 			userService.updateUser("user1", "user1", new UpdateUserRequestDto("nick_user2", null, null)))
 			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.DUPLICATE_NICKNAME));
+			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.DUPLICATE_NICKNAME));
 	}
 
 	@Test
@@ -136,9 +132,8 @@ class UserServiceTest {
 
 	@Test
 	void deleteUser_forbidden() {
-		// 403 check before DB — no setup needed
 		assertThatThrownBy(() -> userService.deleteUser("target", "other"))
 			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException) e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
+			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
 	}
 }

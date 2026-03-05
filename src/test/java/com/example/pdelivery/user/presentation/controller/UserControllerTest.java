@@ -2,7 +2,6 @@ package com.example.pdelivery.user.presentation.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -13,7 +12,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -21,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.pdelivery.shared.security.JwtAccessDeniedHandler;
@@ -65,7 +64,7 @@ class UserControllerTest {
 	JwtAccessDeniedHandler accessDeniedHandler;
 
 	@MockitoBean
-	PasswordEncoder passwordEncoder;  // overrides SecurityConfig BCrypt bean
+	PasswordEncoder passwordEncoder;
 
 	@BeforeEach
 	void setUpFilterPassThrough() throws ServletException, IOException {
@@ -92,7 +91,6 @@ class UserControllerTest {
 	@Test
 	@WithMockUser(username = "otheruser", roles = "CUSTOMER")
 	void getUser_forbidden() throws Exception {
-		// 403 thrown before DB lookup in UserService — no stub needed
 		mockMvc.perform(get("/api/users/testuser"))
 			.andExpect(status().isForbidden())
 			.andExpect(jsonPath("$.code").value("USER_002"));
@@ -155,7 +153,6 @@ class UserControllerTest {
 	@Test
 	@WithMockUser(username = "otheruser", roles = "CUSTOMER")
 	void deleteUser_forbidden() throws Exception {
-		// 403 thrown before DB lookup — no stub needed
 		mockMvc.perform(delete("/api/users/testuser"))
 			.andExpect(status().isForbidden())
 			.andExpect(jsonPath("$.code").value("USER_002"));
