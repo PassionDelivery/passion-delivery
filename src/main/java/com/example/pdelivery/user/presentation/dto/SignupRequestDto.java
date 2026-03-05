@@ -17,8 +17,8 @@ public class SignupRequestDto {
 	private String username;
 
 	@NotBlank
-	@Pattern(
-		regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,15}$",
+	`@Pattern`(
+		regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?])[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]{8,15}$",
 		message = "password는 8~15자, 대소문자·숫자·특수문자를 모두 포함해야 합니다."
 	)
 	private String password;
