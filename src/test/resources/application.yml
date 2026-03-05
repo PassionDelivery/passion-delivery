@@ -23,3 +23,5 @@ app:
     password: TestMaster1!
     nickname: 테스트마스터
     email: testmaster@test.com
+  cors:
+    allowed-origins: "http://localhost:3000"

@@ -5,12 +5,14 @@ spring:
   application:
     name: pdelivery
   datasource:
-    username:
-    password:
-    url:
+    url: jdbc:postgresql://db:5432/pdelivery
+    driver-class-name: org.postgresql.Driver
+    username: pdelivery
+    password: pdelivery
   jpa:
     hibernate:
       ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         show_sql: true
