@@ -31,6 +31,10 @@ public class AuthService {
 		}
 		String encodedPassword = passwordEncoder.encode(dto.getPassword());
 		UserEntity user = UserEntity.create(dto.getUsername(), encodedPassword, dto.getNickname(), dto.getEmail(), dto.getRole());
-		return SignupResponseDto.from(userRepository.save(user));
+		try {
+			return SignupResponseDto.from(userRepository.save(user));
+		} catch (DataIntegrityViolationException e) {
+			throw new AuthException(AuthErrorCode.DUPLICATE_USERNAME, e);
+		}
 	}
 }
