@@ -1,21 +1,14 @@
 package com.example.pdelivery.user.presentation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,12 +32,17 @@ import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.user.domain.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+
 @WebMvcTest(AuthTokenController.class)
 @Import({SecurityConfig.class, LoginService.class, JwtUtil.class})
 @TestPropertySource(properties = {
-		"app.cors.allowed-origins=http://localhost:3000",
-		"app.jwt.secret=test-secret-key-that-is-at-least-32-characters-long-for-hs256",
-		"app.jwt.expiration-ms=3600000"
+	"app.cors.allowed-origins=http://localhost:3000",
+	"app.jwt.secret=test-secret-key-that-is-at-least-32-characters-long-for-hs256",
+	"app.jwt.expiration-ms=3600000"
 })
 class AuthTokenControllerTest {
 
@@ -91,13 +89,13 @@ class AuthTokenControllerTest {
 		String hash = encoder.encode("Password1!");
 
 		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-				.thenReturn(Optional.of(UserEntity.create("testuser", hash, "nick", "a@b.com", UserRole.CUSTOMER)));
+			.thenReturn(Optional.of(UserEntity.create("testuser", hash, "nick", "a@b.com", UserRole.CUSTOMER)));
 
 		mockMvc.perform(post("/api/auth/tokens")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(loginRequest("testuser", "Password1!"))))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.accessToken").isNotEmpty());
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginRequest("testuser", "Password1!"))))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.accessToken").isNotEmpty());
 	}
 
 	@Test
@@ -105,10 +103,10 @@ class AuthTokenControllerTest {
 		when(userRepository.findByUsernameAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
 
 		mockMvc.perform(post("/api/auth/tokens")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(loginRequest("unknown", "Password1!"))))
-				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("AUTH_010"));
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginRequest("unknown", "Password1!"))))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value("AUTH_100"));
 	}
 
 	@Test
@@ -118,13 +116,13 @@ class AuthTokenControllerTest {
 		String hashForDifferentPassword = encoder.encode("OtherPassword9@");
 
 		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-				.thenReturn(Optional.of(
-						UserEntity.create("testuser", hashForDifferentPassword, "nick", "a@b.com", UserRole.CUSTOMER)));
+			.thenReturn(Optional.of(
+				UserEntity.create("testuser", hashForDifferentPassword, "nick", "a@b.com", UserRole.CUSTOMER)));
 
 		mockMvc.perform(post("/api/auth/tokens")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(loginRequest("testuser", "Password1!"))))
-				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("AUTH_010"));
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginRequest("testuser", "Password1!"))))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value("AUTH_100"));
 	}
 }
