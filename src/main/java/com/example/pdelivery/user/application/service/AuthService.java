@@ -1,5 +1,6 @@
 package com.example.pdelivery.user.application.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,8 @@ public class AuthService {
 			throw new AuthException(AuthErrorCode.DUPLICATE_USERNAME);
 		}
 		String encodedPassword = passwordEncoder.encode(dto.getPassword());
-		UserEntity user = UserEntity.create(dto.getUsername(), encodedPassword, dto.getNickname(), dto.getEmail(), dto.getRole());
+		UserEntity user = UserEntity.create(dto.getUsername(), encodedPassword, dto.getNickname(), dto.getEmail(),
+			dto.getRole());
 		try {
 			return SignupResponseDto.from(userRepository.save(user));
 		} catch (DataIntegrityViolationException e) {
