@@ -30,6 +30,7 @@ import com.example.pdelivery.user.application.service.LoginService;
 import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.user.domain.repository.UserRepository;
+import com.example.pdelivery.user.error.AuthErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
@@ -105,7 +106,7 @@ class AuthTokenControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(loginRequest("unknown", "Password1!"))))
 			.andExpect(status().isUnauthorized())
-			.andExpect(jsonPath("$.code").value("AUTH_100"));
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.INVALID_CREDENTIALS.code()));
 	}
 
 	@Test
@@ -122,6 +123,6 @@ class AuthTokenControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(loginRequest("testuser", "Password1!"))))
 			.andExpect(status().isUnauthorized())
-			.andExpect(jsonPath("$.code").value("AUTH_100"));
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.INVALID_CREDENTIALS.code()));
 	}
 }
