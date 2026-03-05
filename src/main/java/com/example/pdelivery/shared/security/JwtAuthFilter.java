@@ -3,8 +3,6 @@ package com.example.pdelivery.shared.security;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-
-	private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
 
 	private final JwtUtil jwtUtil;
 	private final UserRepository userRepository;
@@ -61,7 +57,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			try {
 				roleStr = jwtUtil.extractRole(token);
 			} catch (Exception e) {
-				log.warn("JWT role extraction failed: {}", e.getMessage());
 				filterChain.doFilter(request, response);
 				return;
 			}
@@ -70,7 +65,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			try {
 				userRole = UserRole.valueOf(roleStr);
 			} catch (IllegalArgumentException | NullPointerException e) {
-				log.warn("JWT contains invalid role value: {}", roleStr);
 				filterChain.doFilter(request, response);
 				return;
 			}
