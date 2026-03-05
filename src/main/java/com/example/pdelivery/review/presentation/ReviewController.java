@@ -4,7 +4,9 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.pdelivery.review.application.CreateReviewRequest;
@@ -13,11 +15,13 @@ import com.example.pdelivery.shared.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
 
+@RequestMapping("/api/reviews")
 @RequiredArgsConstructor
 @RestController
 public class ReviewController {
 	private final ReviewService reviewService;
 
+	@PostMapping
 	public ResponseEntity<ApiResponse<UUID>> createReview(@RequestBody CreateReviewRequest reviewRequest) {
 		//todo 인증객체로 수정 필요
 		var customerId = UUID.randomUUID();
@@ -25,4 +29,5 @@ public class ReviewController {
 
 		return ApiResponse.of(review.getId(), HttpStatus.CREATED);
 	}
+
 }
