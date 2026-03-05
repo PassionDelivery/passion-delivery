@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.presentation.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.example.pdelivery.menu.domain.MenuEntity;
@@ -10,7 +11,8 @@ public record MenuResponse(
 	String name,
 	Integer price,
 	String description,
-	Boolean isHidden
+	Boolean isHidden,
+	LocalDateTime createdAt
 ) {
 
 	public static MenuResponse from(MenuEntity entity) {
@@ -21,7 +23,8 @@ public record MenuResponse(
 			entity.getMenu().getName(),
 			entity.getMenu().getPrice(),
 			entity.getMenu().getDescription(),
-			entity.getMenu().getIsHidden()
+			entity.getMenu().getIsHidden(),
+			entity.getCreatedAt()
 		);
 	}
 }

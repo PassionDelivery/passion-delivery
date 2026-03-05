@@ -28,4 +28,12 @@ public class MenuEntity extends BaseEntity {
 		this.storeId = storeId;
 		this.menu = menu;
 	}
+
+	public void updateMenu(Menu menu) {
+		this.menu = menu;
+	}
+
+	public boolean isDeleted() {
+		return this.getDeletedAt() != null;
+	}
 }

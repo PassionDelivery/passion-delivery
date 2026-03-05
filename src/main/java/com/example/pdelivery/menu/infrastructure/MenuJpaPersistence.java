@@ -3,6 +3,8 @@ package com.example.pdelivery.menu.infrastructure;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 import com.example.pdelivery.menu.domain.MenuEntity;
@@ -34,5 +36,15 @@ public class MenuJpaPersistence implements MenuRepository {
 	@Override
 	public boolean existsById(UUID menuId) {
 		return menuJpaRepository.existsById(menuId);
+	}
+
+	@Override
+	public Slice<MenuEntity> findAllByStoreId(UUID storeId, Pageable pageable) {
+		return menuJpaRepository.findAllByStoreId(storeId, pageable);
+	}
+
+	@Override
+	public Slice<MenuEntity> searchByStoreIdAndName(UUID storeId, String keyword, Pageable pageable) {
+		return menuJpaRepository.searchByStoreIdAndName(storeId, keyword, pageable);
 	}
 }
