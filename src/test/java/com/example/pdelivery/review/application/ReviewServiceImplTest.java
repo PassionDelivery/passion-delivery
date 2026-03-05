@@ -4,16 +4,19 @@ import static org.mockito.BDDMockito.*;
 
 import java.util.UUID;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.pdelivery.review.domain.ReviewRepository;
-import com.example.pdelivery.review.infrastructure.ReviewValidator;
 
+@Transactional
 @ExtendWith(MockitoExtension.class)
+@DisplayName("리뷰 서비스 테스트")
 class ReviewServiceImplTest {
 	@InjectMocks
 	ReviewServiceImpl reviewService;
@@ -25,6 +28,7 @@ class ReviewServiceImplTest {
 	ReviewValidator reviewValidator;
 
 	@Test
+	@DisplayName("리뷰 등록하기")
 	void createReview() {
 		var customerId = UUID.randomUUID();
 		var storeId = UUID.randomUUID();

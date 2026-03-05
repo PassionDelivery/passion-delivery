@@ -6,10 +6,12 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.example.pdelivery.review.ReviewException;
 
+@DisplayName("리뷰 등록 DTO 테스트")
 class CreateReviewRequestTest {
 
 	@Test

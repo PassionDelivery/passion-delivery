@@ -3,10 +3,12 @@ package com.example.pdelivery.review.domain;
 import static com.example.pdelivery.review.ReviewErrorCode.*;
 import static org.assertj.core.api.Assertions.*;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.example.pdelivery.review.ReviewException;
 
+@DisplayName("리뷰 값 객체 테스트")
 class ReviewTest {
 
 	@Test
