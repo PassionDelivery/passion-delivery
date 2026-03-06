@@ -19,5 +19,5 @@ public interface MenuService {
 
 	MenuResponse updateMenu(UUID storeId, UUID menuId, MenuUpdateRequest request);
 
-	void deleteMenu(UUID storeId, UUID menuId, String username);
+	void deleteMenu(UUID storeId, UUID menuId, UUID userId);
 }

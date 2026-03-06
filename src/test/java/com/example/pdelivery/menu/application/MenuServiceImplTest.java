@@ -29,17 +29,12 @@ import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
 import com.example.pdelivery.menu.infrastructure.required.store.StoreData;
-import com.example.pdelivery.user.domain.entity.UserEntity;
-import com.example.pdelivery.user.domain.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MenuServiceImplTest {
 
 	@Mock
 	private MenuRepository menuRepository;
-
-	@Mock
-	private UserRepository userRepository;
 
 	@Mock
 	private MenuStoreRequirer menuStoreRequirer;
@@ -152,6 +147,7 @@ class MenuServiceImplTest {
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
 			given(menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)).willReturn(Optional.of(menuEntity));
 
 			MenuResponse response = menuService.updateMenu(storeId, menuId, request);
@@ -167,6 +163,7 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
 			given(menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.updateMenu(storeId, menuId, request))
@@ -187,15 +184,12 @@ class MenuServiceImplTest {
 		void success() {
 			UUID menuId = UUID.randomUUID();
 			UUID userId = UUID.randomUUID();
-			String username = "test_user";
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null, null);
-			UserEntity user = mock(UserEntity.class);
-			given(user.getId()).willReturn(userId);
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
-			given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
 
-			menuService.deleteMenu(storeId, menuId, username);
+			menuService.deleteMenu(storeId, menuId, userId);
 
 			assertThat(menuEntity.isDeleted()).isTrue();
 		}
@@ -204,11 +198,12 @@ class MenuServiceImplTest {
 		@DisplayName("존재하지 않는 메뉴를 삭제하면 예외가 발생한다")
 		void failNotFound() {
 			UUID menuId = UUID.randomUUID();
-			String username = "test_user";
+			UUID userId = UUID.randomUUID();
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.empty());
 
-			assertThatThrownBy(() -> menuService.deleteMenu(storeId, menuId, username))
+			assertThatThrownBy(() -> menuService.deleteMenu(storeId, menuId, userId))
 				.isInstanceOf(MenuException.class)
 				.satisfies(e -> {
 					MenuException me = (MenuException) e;

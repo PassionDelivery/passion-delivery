@@ -2,6 +2,7 @@ package com.example.pdelivery.menu.application;
 
 import java.util.UUID;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,13 @@ import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
-
-import lombok.extern.slf4j.Slf4j;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
-import com.example.pdelivery.user.domain.entity.UserEntity;
-import com.example.pdelivery.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -31,11 +29,11 @@ import lombok.RequiredArgsConstructor;
 public class MenuServiceImpl implements MenuService {
 
 	private final MenuRepository menuRepository;
-	private final UserRepository userRepository;
 	private final MenuStoreRequirer menuStoreRequirer;
 
 	@Override
 	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
+		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);
 
 		if (Boolean.TRUE.equals(request.useAiDescription())) {
@@ -74,7 +72,10 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 	@Override
-	public MenuResponse updateMenu(UUID storeId, UUID menuId, MenuUpdateRequest request) {
+	public MenuResponse updateMenu(UUID storeId, UUID menuId, @NonNull MenuUpdateRequest request) {
+		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
+		menuStoreRequirer.getStore(storeId);
+
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
@@ -91,13 +92,13 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 	@Override
-	public void deleteMenu(UUID storeId, UUID menuId, String username) {
+	public void deleteMenu(UUID storeId, UUID menuId, UUID userId) {
+		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
+		menuStoreRequirer.getStore(storeId);
+
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
-		UserEntity user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new MenuException(MenuErrorCode.USER_NOT_FOUND));
-
-		menuEntity.softDelete(user.getId());
+		menuEntity.softDelete(userId);
 	}
 }
