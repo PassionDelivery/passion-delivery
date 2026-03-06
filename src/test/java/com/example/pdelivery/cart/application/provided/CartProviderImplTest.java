@@ -25,14 +25,16 @@ class CartProviderImplTest {
 	void getCartInfo() {
 		UUID userId = UUID.randomUUID();
 		UUID storeId = UUID.randomUUID();
+		Integer no1 = 1;
 		UUID menuId1 = UUID.randomUUID();
 		Integer quantity1 = 1;
+		Integer no2 = 1;
 		UUID menuId2 = UUID.randomUUID();
 		Integer quantity2 = 2;
 
 		List<CartLineEntity> cartLineEntities = List.of(
-			new CartLineEntity(menuId1, quantity1),
-			new CartLineEntity(menuId2, quantity2)
+			new CartLineEntity(no1, menuId1, quantity1),
+			new CartLineEntity(no2, menuId2, quantity2)
 		);
 
 		CartEntity cart = new CartEntity();
@@ -43,7 +45,7 @@ class CartProviderImplTest {
 
 		UUID cartId = cartRepository.save(cart).getId();
 
-		CartEntity savedCart = cartRepository.findById(cartId);
+		CartEntity savedCart = cartRepository.findById(cartId).orElseThrow();
 
 		assertThat(savedCart.getId()).isEqualTo(cartId);
 		assertThat(savedCart.getUserId()).isEqualTo(userId);

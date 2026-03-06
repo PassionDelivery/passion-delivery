@@ -11,7 +11,6 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -25,6 +24,5 @@ public class CartEntity extends AbstractEntity {
 	private UUID storeId;
 	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "p_cart_line", joinColumns = @JoinColumn(name = "cart_id"))
-	@OrderColumn(name = "no")
 	private List<CartLineEntity> cartLineEntities;
 }
