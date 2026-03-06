@@ -1,12 +1,17 @@
 package com.example.pdelivery.shared;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.pdelivery.shared.error.ErrorCode;
@@ -35,6 +40,31 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 		problemDetail.setProperty("exception", exception.getClass().getSimpleName());
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
+	}
+
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException ex,
+			HttpHeaders headers,
+			HttpStatusCode status,
+			WebRequest request) {
+
+		String fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+			.map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+			.collect(Collectors.joining(", "));
+		String globalErrors = ex.getBindingResult().getGlobalErrors().stream()
+			.map(ge -> ge.getObjectName() + ": " + ge.getDefaultMessage())
+			.collect(Collectors.joining(", "));
+		String detail = java.util.stream.Stream.of(fieldErrors, globalErrors)
+			.filter(s -> !s.isEmpty())
+			.collect(Collectors.joining(", "));
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+		problemDetail.setTitle("입력값이 올바르지 않습니다.");
+		problemDetail.setProperty("code", "VALIDATION_ERROR");
+		problemDetail.setProperty("timestamp", Instant.now());
+
+		return ResponseEntity.badRequest().body(problemDetail);
 	}
 
 	private static ProblemDetail getProblemDetail(ErrorCode errorCode, Exception exception) {
