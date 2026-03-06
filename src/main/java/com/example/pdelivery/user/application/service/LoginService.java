@@ -37,7 +37,7 @@ public class LoginService {
 			throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
 		}
 
-		String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+		String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getId());
 		return new LoginResponseDto(token);
 	}
 }

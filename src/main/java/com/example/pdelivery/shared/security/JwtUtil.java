@@ -2,6 +2,7 @@ package com.example.pdelivery.shared.security;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
@@ -38,10 +39,14 @@ public class JwtUtil {
 		return signingKey;
 	}
 
-	public String generateToken(String username, String role) {
+	public String generateToken(String username, String role, UUID userId) {
+		if (userId == null) {
+			throw new IllegalArgumentException("userId must not be null");
+		}
 		return Jwts.builder()
 			.subject(username)
 			.claim("role", role)
+			.claim("userId", userId.toString())
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + expirationMs))
 			.signWith(getSigningKey())
@@ -54,6 +59,10 @@ public class JwtUtil {
 
 	public String extractRole(String token) {
 		return extractAllClaims(token).get("role", String.class);
+	}
+
+	public UUID extractUserId(String token) {
+		return UUID.fromString(extractAllClaims(token).get("userId", String.class));
 	}
 
 	public boolean isTokenValid(String token) {

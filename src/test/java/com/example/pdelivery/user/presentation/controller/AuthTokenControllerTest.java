@@ -88,8 +88,13 @@ class AuthTokenControllerTest {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		String hash = encoder.encode("Password1!");
 
+		UserEntity user = UserEntity.create("testuser", hash, "nick", "a@b.com", UserRole.CUSTOMER);
+		java.lang.reflect.Field idField = com.example.pdelivery.shared.AbstractEntity.class.getDeclaredField("id");
+		idField.setAccessible(true);
+		idField.set(user, java.util.UUID.randomUUID());
+
 		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-			.thenReturn(Optional.of(UserEntity.create("testuser", hash, "nick", "a@b.com", UserRole.CUSTOMER)));
+			.thenReturn(Optional.of(user));
 
 		mockMvc.perform(post("/api/auth/tokens")
 				.contentType(MediaType.APPLICATION_JSON)
