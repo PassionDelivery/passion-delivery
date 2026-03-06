@@ -87,9 +87,10 @@ public class Order extends BaseEntity {
 		return order;
 	}
 
+	//OrderInfo는 application 단, 레이어 경계 다시 생각 필요성 있음
 	public OrderInfo toOrderInfo() {
 		return new OrderInfo(
-			this.getId(), // BaseEntity에 getId()가 있다고 가정
+			this.getId(),
 			this.storeId,
 			this.customerId,
 			this.address,

@@ -83,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
 		//5분 이내만 취소 가능
 		if (checkCancelTimeout(order.getCreatedAt()))
 			throw new OrderException(CANCEL_TIMEOUT);
-		
+
 		//TO DO: 결제 취소 요청
 
 		order.updateStatus(OrderStatus.CANCELLED);
@@ -94,6 +94,6 @@ public class OrderServiceImpl implements OrderService {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime timeoutLimit = orderCreatedAt.plusMinutes(5);
 
-		return now.isBefore(timeoutLimit);
+		return now.isAfter(timeoutLimit);
 	}
 }
