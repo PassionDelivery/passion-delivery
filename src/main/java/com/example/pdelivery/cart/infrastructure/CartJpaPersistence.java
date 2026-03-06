@@ -1,5 +1,6 @@
 package com.example.pdelivery.cart.infrastructure;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ public class CartJpaPersistence implements CartRepository {
 	}
 
 	@Override
-	public CartEntity findById(UUID cartId) {
-		return cartJpaRepository.findById(cartId).get();
+	public Optional<CartEntity> findById(UUID cartId) {
+		return cartJpaRepository.findById(cartId);
 	}
 }
