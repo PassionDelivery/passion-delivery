@@ -69,11 +69,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				return;
 			}
 
+			java.util.UUID userId;
+			try {
+				userId = jwtUtil.extractUserId(token);
+			} catch (Exception e) {
+				filterChain.doFilter(request, response);
+				return;
+			}
+
 			List<SimpleGrantedAuthority> authorities =
 				List.of(new SimpleGrantedAuthority("ROLE_" + userRole.name()));
 
+			AuthUser authUser = new AuthUser(userId, username);
 			UsernamePasswordAuthenticationToken authToken =
-				new UsernamePasswordAuthenticationToken(username, null, authorities);
+				new UsernamePasswordAuthenticationToken(authUser, null, authorities);
 			authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			SecurityContextHolder.getContext().setAuthentication(authToken);
 		}
