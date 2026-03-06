@@ -52,6 +52,10 @@ public class JwtUtil {
 		return extractAllClaims(token).getSubject();
 	}
 
+	public String extractRole(String token) {
+		return extractAllClaims(token).get("role", String.class);
+	}
+
 	public boolean isTokenValid(String token) {
 		try {
 			return !isTokenExpired(token);

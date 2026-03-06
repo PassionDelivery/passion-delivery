@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.pdelivery.user.domain.entity.UserRole;
@@ -23,7 +23,7 @@ class AuthServiceTest {
 	@Autowired
 	UserRepository userRepository;
 
-	PasswordEncoder passwordEncoder = NoOpPasswordEncoder.getInstance();
+	PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	AuthService authService;
 
