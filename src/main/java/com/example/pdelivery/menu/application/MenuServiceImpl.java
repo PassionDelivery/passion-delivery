@@ -2,6 +2,7 @@ package com.example.pdelivery.menu.application;
 
 import java.util.UUID;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -13,14 +14,13 @@ import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
-
-import lombok.extern.slf4j.Slf4j;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -33,6 +33,7 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
+		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);
 
 		if (Boolean.TRUE.equals(request.useAiDescription())) {
@@ -71,7 +72,8 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 	@Override
-	public MenuResponse updateMenu(UUID storeId, UUID menuId, MenuUpdateRequest request) {
+	public MenuResponse updateMenu(UUID storeId, UUID menuId, @NonNull MenuUpdateRequest request) {
+		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);
 
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)
@@ -91,6 +93,7 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public void deleteMenu(UUID storeId, UUID menuId, UUID userId) {
+		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);
 
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
