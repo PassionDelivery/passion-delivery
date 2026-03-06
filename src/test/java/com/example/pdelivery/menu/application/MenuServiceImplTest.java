@@ -28,6 +28,7 @@ import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
+import com.example.pdelivery.menu.infrastructure.required.store.StoreData;
 import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.repository.UserRepository;
 
@@ -58,7 +59,7 @@ class MenuServiceImplTest {
 			MenuCreateRequest request = new MenuCreateRequest("치킨", 20000, "바삭한 치킨", null, null);
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
 
-			given(menuStoreRequirer.existsById(storeId)).willReturn(true);
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
 			given(menuRepository.save(any(MenuEntity.class))).willReturn(menuEntity);
 
 			MenuResponse response = menuService.createMenu(storeId, request);

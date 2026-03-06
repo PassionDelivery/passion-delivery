@@ -36,9 +36,7 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
-		if (!menuStoreRequirer.existsById(storeId)) {
-			throw new MenuException(MenuErrorCode.STORE_NOT_FOUND);
-		}
+		menuStoreRequirer.getStore(storeId);
 
 		if (Boolean.TRUE.equals(request.useAiDescription())) {
 			log.warn("AI 설명 생성이 요청되었지만 아직 구현되지 않았습니다. storeId={}", storeId);
