@@ -12,10 +12,10 @@ public record OrderLineVO(
 	Integer price
 ) {
 	public OrderLineVO {
-		if (quantity < 1) {
+		if (quantity == null || quantity < 1) {
 			throw new OrderException(OrderErrorCode.INVALID_QUANTITY);
 		}
-		if (price < 0) {
+		if (price == null || price < 0) {
 			throw new OrderException(OrderErrorCode.INVALID_PRICE);
 		}
 	}
