@@ -19,6 +19,7 @@ public enum OrderErrorCode implements ErrorCode {
 
 	// 조회
 	ORDER_NOT_FOUND("ORDER_101", HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
+	ORDER_MENU_NOT_FOUND("ORDER_102", HttpStatus.NOT_FOUND, "주문한 메뉴를 찾을 수 없습니다."),
 
 	// TO DO: provider 오류
 	PROVIDER_ERROR("ORDER_501", HttpStatus.BAD_GATEWAY, "외부 서비스 호출 중 오류가 발생했습니다."),

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.order.error.OrderErrorCode;
+import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
@@ -37,9 +39,7 @@ public class OrderServiceImpl implements OrderService {
 	public Order createOrder(OrderRequest.OrderCreateRequest req) {
 		String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
 		CartData cartLines = orderCartRequirer.getCartLines(req.cartId());
-		List<UUID> menuIds = cartLines.cartItems().stream()
-			.map(CartData.CartItems::menuId)
-			.toList();
+		List<UUID> menuIds = cartLines.cartItems().stream().map(CartData.CartItems::menuId).toList();
 		List<MenuData> menuData = orderMenuRequirer.getMenus(menuIds);
 
 		Map<UUID, MenuData> menuMap = new HashMap<>();
@@ -47,12 +47,13 @@ public class OrderServiceImpl implements OrderService {
 			menuMap.put(menu.menuId(), menu);
 		}
 
-		List<OrderLineVO> orderLineVOs = cartLines.cartItems().stream()
-			.map(cartItem -> {
-				MenuData menu = menuMap.get(cartItem.menuId());
-				return new OrderLineVO(cartItem.menuId(), menu.menuName(), cartItem.quantity(), menu.price());
-			})
-			.toList();
+		List<OrderLineVO> orderLineVOs = cartLines.cartItems().stream().map(cartItem -> {
+			MenuData menu = menuMap.get(cartItem.menuId());
+			if (menu == null) {
+				throw new OrderException(OrderErrorCode.ORDER_MENU_NOT_FOUND);
+			}
+			return new OrderLineVO(cartItem.menuId(), menu.menuName(), cartItem.quantity(), menu.price());
+		}).toList();
 
 		UUID storeId = cartLines.storeId();
 		Order order = Order.create(storeId, address, customerId, orderLineVOs);
