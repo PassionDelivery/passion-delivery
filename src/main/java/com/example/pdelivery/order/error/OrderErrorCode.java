@@ -15,7 +15,7 @@ public enum OrderErrorCode implements ErrorCode {
 
 	PAYMENT_FAILED("ORDER_005", HttpStatus.BAD_REQUEST, "결제 실패했습니다."),
 
-	REQUIRED_PARAMETER_MISSING("ORDER_OO6", HttpStatus.BAD_REQUEST, "request가 NULL입니다."),
+	REQUIRED_PARAMETER_MISSING("ORDER_006", HttpStatus.BAD_REQUEST, "request가 NULL입니다."),
 
 	// 조회
 	ORDER_NOT_FOUND("ORDER_101", HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
