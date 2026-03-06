@@ -13,14 +13,14 @@ import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
+import com.example.pdelivery.menu.infrastructure.required.user.MenuUserRequirer;
+import com.example.pdelivery.menu.infrastructure.required.user.UserData;
 
 import lombok.extern.slf4j.Slf4j;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
-import com.example.pdelivery.user.domain.entity.UserEntity;
-import com.example.pdelivery.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,8 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class MenuServiceImpl implements MenuService {
 
 	private final MenuRepository menuRepository;
-	private final UserRepository userRepository;
 	private final MenuStoreRequirer menuStoreRequirer;
+	private final MenuUserRequirer menuUserRequirer;
 
 	@Override
 	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
@@ -95,9 +95,8 @@ public class MenuServiceImpl implements MenuService {
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
-		UserEntity user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new MenuException(MenuErrorCode.USER_NOT_FOUND));
+		UserData user = menuUserRequirer.getUserByUsername(username);
 
-		menuEntity.softDelete(user.getId());
+		menuEntity.softDelete(user.userId());
 	}
 }
