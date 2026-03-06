@@ -13,8 +13,6 @@ import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
-import com.example.pdelivery.menu.infrastructure.required.user.MenuUserRequirer;
-import com.example.pdelivery.menu.infrastructure.required.user.UserData;
 
 import lombok.extern.slf4j.Slf4j;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
@@ -32,7 +30,6 @@ public class MenuServiceImpl implements MenuService {
 
 	private final MenuRepository menuRepository;
 	private final MenuStoreRequirer menuStoreRequirer;
-	private final MenuUserRequirer menuUserRequirer;
 
 	@Override
 	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
@@ -91,12 +88,10 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 	@Override
-	public void deleteMenu(UUID storeId, UUID menuId, String username) {
+	public void deleteMenu(UUID storeId, UUID menuId, UUID userId) {
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
-		UserData user = menuUserRequirer.getUserByUsername(username);
-
-		menuEntity.softDelete(user.userId());
+		menuEntity.softDelete(userId);
 	}
 }

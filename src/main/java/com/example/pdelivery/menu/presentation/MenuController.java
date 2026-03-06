@@ -7,8 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.example.pdelivery.shared.security.AuthUser;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -83,9 +84,9 @@ public class MenuController {
 	public ResponseEntity<Void> deleteMenu(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
-		@AuthenticationPrincipal UserDetails userDetails
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		menuService.deleteMenu(storeId, menuId, userDetails.getUsername());
+		menuService.deleteMenu(storeId, menuId, authUser.userId());
 		return ResponseEntity.noContent().build();
 	}
 }

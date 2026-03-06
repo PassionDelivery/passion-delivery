@@ -14,7 +14,6 @@ public enum MenuErrorCode implements ErrorCode {
 	// 조회
 	STORE_NOT_FOUND("MENU_004", HttpStatus.NOT_FOUND, "가게를 찾을 수 없습니다."),
 	MENU_NOT_FOUND("MENU_101", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
-	USER_NOT_FOUND("MENU_102", HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 	MENU_STORE_MISMATCH("MENU_103", HttpStatus.NOT_FOUND, "해당 가게의 메뉴가 아닙니다."),
 
 	// 상태

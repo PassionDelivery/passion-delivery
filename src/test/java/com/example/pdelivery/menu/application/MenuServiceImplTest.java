@@ -29,8 +29,6 @@ import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
 import com.example.pdelivery.menu.infrastructure.required.store.StoreData;
-import com.example.pdelivery.menu.infrastructure.required.user.MenuUserRequirer;
-import com.example.pdelivery.menu.infrastructure.required.user.UserData;
 
 @ExtendWith(MockitoExtension.class)
 class MenuServiceImplTest {
@@ -40,9 +38,6 @@ class MenuServiceImplTest {
 
 	@Mock
 	private MenuStoreRequirer menuStoreRequirer;
-
-	@Mock
-	private MenuUserRequirer menuUserRequirer;
 
 	@InjectMocks
 	private MenuServiceImpl menuService;
@@ -187,13 +182,11 @@ class MenuServiceImplTest {
 		void success() {
 			UUID menuId = UUID.randomUUID();
 			UUID userId = UUID.randomUUID();
-			String username = "test_user";
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null, null);
 
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
-			given(menuUserRequirer.getUserByUsername(username)).willReturn(new UserData(userId));
 
-			menuService.deleteMenu(storeId, menuId, username);
+			menuService.deleteMenu(storeId, menuId, userId);
 
 			assertThat(menuEntity.isDeleted()).isTrue();
 		}
@@ -202,11 +195,11 @@ class MenuServiceImplTest {
 		@DisplayName("존재하지 않는 메뉴를 삭제하면 예외가 발생한다")
 		void failNotFound() {
 			UUID menuId = UUID.randomUUID();
-			String username = "test_user";
+			UUID userId = UUID.randomUUID();
 
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.empty());
 
-			assertThatThrownBy(() -> menuService.deleteMenu(storeId, menuId, username))
+			assertThatThrownBy(() -> menuService.deleteMenu(storeId, menuId, userId))
 				.isInstanceOf(MenuException.class)
 				.satisfies(e -> {
 					MenuException me = (MenuException) e;
