@@ -13,13 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.example.pdelivery.order.domain.OrderStatus;
 import com.example.pdelivery.review.ReviewErrorCode;
 import com.example.pdelivery.review.ReviewException;
 import com.example.pdelivery.review.infrastructure.OrderData;
 import com.example.pdelivery.review.infrastructure.ReviewOrderRequirer;
 import com.example.pdelivery.review.infrastructure.ReviewStoreRequirer;
 import com.example.pdelivery.review.infrastructure.ReviewUserRequirer;
+import com.example.pdelivery.shared.enums.OrderStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("리뷰 등록 시 검증 테스트")

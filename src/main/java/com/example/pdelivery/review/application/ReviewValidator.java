@@ -6,12 +6,12 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.example.pdelivery.order.domain.OrderStatus;
 import com.example.pdelivery.review.ReviewException;
 import com.example.pdelivery.review.infrastructure.OrderData;
 import com.example.pdelivery.review.infrastructure.ReviewOrderRequirer;
 import com.example.pdelivery.review.infrastructure.ReviewStoreRequirer;
 import com.example.pdelivery.review.infrastructure.ReviewUserRequirer;
+import com.example.pdelivery.shared.enums.OrderStatus;
 
 import lombok.RequiredArgsConstructor;
 

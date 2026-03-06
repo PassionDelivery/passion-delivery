@@ -5,9 +5,9 @@ import static com.example.pdelivery.review.ReviewErrorCode.*;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.example.pdelivery.order.domain.OrderStatus;
 import com.example.pdelivery.review.ReviewException;
 import com.example.pdelivery.shared.Requirer;
+import com.example.pdelivery.shared.enums.OrderStatus;
 
 @Requirer
 public class ReviewOrderRequirerImpl implements ReviewOrderRequirer {
