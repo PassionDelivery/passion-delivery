@@ -1,5 +1,7 @@
 package com.example.pdelivery.shared;
 
+import static org.springframework.util.Assert.*;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,9 +32,8 @@ public abstract class BaseEntity extends AbstractEntity {
 	private UUID deletedBy;
 
 	public void softDelete(UUID deletedByUserId) {
-		if (this.deletedAt != null) {
-			return;
-		}
+		state(deletedAt == null, "이미 삭제된 항목입니다.");
+
 		this.deletedAt = LocalDateTime.now();
 		this.deletedBy = Objects.requireNonNull(deletedByUserId, "deletedByUserId must not be null");
 	}

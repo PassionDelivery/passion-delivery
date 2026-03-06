@@ -1,5 +1,9 @@
 package com.example.pdelivery.review.application;
 
-public interface ReviewService {
+import java.util.UUID;
 
+import com.example.pdelivery.review.domain.ReviewEntity;
+
+public interface ReviewService {
+	ReviewEntity createReview(UUID customerId, CreateReviewRequest reviewRequest);
 }
