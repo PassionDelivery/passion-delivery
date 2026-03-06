@@ -1,5 +1,9 @@
 package com.example.pdelivery.order.application;
 
+import static com.example.pdelivery.order.application.OrderRequest.*;
+import static com.example.pdelivery.order.error.OrderErrorCode.*;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +22,7 @@ import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequire
 import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
+import com.example.pdelivery.shared.enums.OrderStatus;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional
 	@Override
-	public Order createOrder(OrderRequest.OrderCreateRequest req) {
+	public Order createOrder(OrderCreateRequest req) {
 		String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
 		CartData cartLines = orderCartRequirer.getCartLines(req.cartId());
 		List<UUID> menuIds = cartLines.cartItems().stream().map(CartData.CartItems::menuId).toList();
@@ -63,5 +68,32 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		return order;
+	}
+
+	@Transactional
+	@Override
+	public void cancelOrder(UUID orderId, OrderCancelRequest req) {
+		//TO DO: OrderId의 Order customerId랑 userId랑 같은지 확인
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+
+		if (order.checkCancellatioin())
+			throw new OrderException(OrderErrorCode.ALREADY_CANCELED);
+		//5분 이내만 취소 가능
+		if (checkCancelTimeout(order.getCreatedAt()))
+			throw new OrderException(CANCEL_TIMEOUT);
+		
+		//TO DO: 결제 취소 요청
+
+		order.updateStatus(OrderStatus.CANCELLED);
+		order.updateReason(req.reason());
+	}
+
+	private boolean checkCancelTimeout(LocalDateTime orderCreatedAt) {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime timeoutLimit = orderCreatedAt.plusMinutes(5);
+
+		return now.isBefore(timeoutLimit);
 	}
 }

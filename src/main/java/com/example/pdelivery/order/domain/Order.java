@@ -102,6 +102,18 @@ public class Order extends BaseEntity {
 		);
 	}
 
+	public void updateReason(String reason) {
+		this.reason = reason;
+	}
+
+	public void updateStatus(OrderStatus status) {
+		this.status = status;
+	}
+
+	public boolean checkCancellatioin() {
+		return this.status.equals(OrderStatus.CANCELLED);
+	}
+
 	@Getter // test 위해서만
 	public static class OrderView {
 		private final String address;

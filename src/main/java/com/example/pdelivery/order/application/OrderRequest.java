@@ -20,4 +20,12 @@ public class OrderRequest {
 			}
 		}
 	}
+
+	public record OrderCancelRequest(String reason) {
+		public OrderCancelRequest {
+			if (reason == null || reason.isBlank()) {
+				throw new OrderException(INVALID_REASON);
+			}
+		}
+	}
 }
