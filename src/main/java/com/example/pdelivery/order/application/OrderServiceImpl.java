@@ -78,11 +78,18 @@ public class OrderServiceImpl implements OrderService {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
-		if (order.checkCancellatioin())
+		//중복 취소
+		if (order.checkCancellatioin()) {
 			throw new OrderException(OrderErrorCode.ALREADY_CANCELED);
+		}
+		//PENDING 상태에서만 취소 가능
+		if (!order.checkPending()) {
+			throw new OrderException(INVALID_CANCEL_STATUS);
+		}
 		//5분 이내만 취소 가능
-		if (checkCancelTimeout(order.getCreatedAt()))
+		if (checkCancelTimeout(order.getCreatedAt())) {
 			throw new OrderException(CANCEL_TIMEOUT);
+		}
 
 		//TO DO: 결제 취소 요청
 

@@ -114,5 +114,19 @@ public class OrderServiceIntegrationTest {
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.ALREADY_CANCELED);
 		}
+
+		@Test
+		@DisplayName("주문 취소 실패 - 이미 수락 상태")
+		public void cancelOrder_AlreadyAccepted() {
+			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+
+			ReflectionTestUtils.setField(order1, "status", ACCEPTED);
+			orderRepository.save(order1);
+
+			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
+				.isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.INVALID_CANCEL_STATUS);
+		}
 	}
 }

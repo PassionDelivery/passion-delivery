@@ -15,15 +15,16 @@ public enum OrderErrorCode implements ErrorCode {
 	PAYMENT_FAILED("ORDER_005", HttpStatus.BAD_REQUEST, "결제 실패했습니다."),
 
 	REQUIRED_PARAMETER_MISSING("ORDER_006", HttpStatus.BAD_REQUEST, "request가 NULL입니다."),
-	INVALID_REASON("ORDER_007", HttpStatus.BAD_REQUEST, "취소 사유를 입력해주세요."),
+	INVALID_REASON("ORDER_007", HttpStatus.BAD_REQUEST, "사유를 입력해주세요."),
 
 	// 조회
 	ORDER_NOT_FOUND("ORDER_101", HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
 	ORDER_MENU_NOT_FOUND("ORDER_102", HttpStatus.NOT_FOUND, "주문한 메뉴를 찾을 수 없습니다."),
 
-	ALREADY_CANCELED("ORDER_102", HttpStatus.CONFLICT, "이미 취소된 주문입니다."),
-
 	CANCEL_TIMEOUT("ORDER_201", HttpStatus.FORBIDDEN, "주문한지 5분이 지나 취소할 수 없습니다."),
+
+	ALREADY_CANCELED("ORDER_301", HttpStatus.CONFLICT, "이미 취소된 주문입니다."),
+	INVALID_CANCEL_STATUS("ORDER_302", HttpStatus.CONFLICT, "취소 불가능한 상태입니다."),
 
 	// TO DO: provider 오류
 	PROVIDER_ERROR("ORDER_501", HttpStatus.BAD_GATEWAY, "외부 서비스 호출 중 오류가 발생했습니다."),
