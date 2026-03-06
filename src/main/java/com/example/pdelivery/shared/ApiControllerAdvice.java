@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.example.pdelivery.shared.error.ErrorCode;
 import com.example.pdelivery.shared.error.PDeliveryException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,17 +39,16 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 		problemDetail.setTitle("Internal Server Error");
 		problemDetail.setDetail("내부 오류가 발생했습니다.");
 		problemDetail.setProperty("timestamp", Instant.now());
-		problemDetail.setProperty("exception", exception.getClass().getSimpleName());
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
 	}
 
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(
-			MethodArgumentNotValidException ex,
-			HttpHeaders headers,
-			HttpStatusCode status,
-			WebRequest request) {
+		MethodArgumentNotValidException ex,
+		HttpHeaders headers,
+		HttpStatusCode status,
+		WebRequest request) {
 
 		String fieldErrors = ex.getBindingResult().getFieldErrors().stream()
 			.map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
@@ -65,6 +66,17 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 		problemDetail.setProperty("timestamp", Instant.now());
 
 		return ResponseEntity.badRequest().body(problemDetail);
+	}
+
+	@ExceptionHandler(AuthorizationDeniedException.class)
+	public ResponseEntity<ProblemDetail> handleAuthorizationDeniedException(AuthorizationDeniedException exception,
+		HttpServletRequest request) {
+		log.warn("Authorization denied: {}", request.getRequestURI());
+		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+		problemDetail.setTitle("접급 권한이 없습니다.");
+		problemDetail.setProperty("timestamp", Instant.now());
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problemDetail);
 	}
 
 	private static ProblemDetail getProblemDetail(ErrorCode errorCode, Exception exception) {
