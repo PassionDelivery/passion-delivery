@@ -110,10 +110,11 @@ public class PaymentControllerTest {
 			when(paymentService.createPayment(eq(customerId), any(CreatePaymentRequest.class))).thenReturn(response);
 
 			mockMvc.perform(post("/api/payments")
-				.with(csrf())
-				.with(authentication(customerAuth(customerId, "customer@test.com")))
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)));
+					.with(csrf())
+					.with(authentication(customerAuth(customerId, "customer@test.com")))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isCreated());
 		}
 
 		@Test
