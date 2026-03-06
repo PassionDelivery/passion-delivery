@@ -41,11 +41,11 @@ public class UserService {
 		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		if (dto.getNickname() != null
-			&& userRepository.existsByNicknameAndUsernameNot(dto.getNickname(), username)) {
+			&& userRepository.existsByNicknameAndUsernameNotAndDeletedAtIsNull(dto.getNickname(), username)) {
 			throw new UserException(UserErrorCode.DUPLICATE_NICKNAME);
 		}
 		if (dto.getEmail() != null
-			&& userRepository.existsByEmailAndUsernameNot(dto.getEmail(), username)) {
+			&& userRepository.existsByEmailAndUsernameNotAndDeletedAtIsNull(dto.getEmail(), username)) {
 			throw new UserException(UserErrorCode.DUPLICATE_EMAIL);
 		}
 		String encodedPassword = dto.getPassword() != null
