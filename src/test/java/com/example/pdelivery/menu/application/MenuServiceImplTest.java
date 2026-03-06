@@ -29,8 +29,8 @@ import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
 import com.example.pdelivery.menu.infrastructure.required.store.StoreData;
-import com.example.pdelivery.user.domain.entity.UserEntity;
-import com.example.pdelivery.user.domain.repository.UserRepository;
+import com.example.pdelivery.menu.infrastructure.required.user.MenuUserRequirer;
+import com.example.pdelivery.menu.infrastructure.required.user.UserData;
 
 @ExtendWith(MockitoExtension.class)
 class MenuServiceImplTest {
@@ -39,10 +39,10 @@ class MenuServiceImplTest {
 	private MenuRepository menuRepository;
 
 	@Mock
-	private UserRepository userRepository;
+	private MenuStoreRequirer menuStoreRequirer;
 
 	@Mock
-	private MenuStoreRequirer menuStoreRequirer;
+	private MenuUserRequirer menuUserRequirer;
 
 	@InjectMocks
 	private MenuServiceImpl menuService;
@@ -189,11 +189,9 @@ class MenuServiceImplTest {
 			UUID userId = UUID.randomUUID();
 			String username = "test_user";
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null, null);
-			UserEntity user = mock(UserEntity.class);
-			given(user.getId()).willReturn(userId);
 
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
-			given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
+			given(menuUserRequirer.getUserByUsername(username)).willReturn(new UserData(userId));
 
 			menuService.deleteMenu(storeId, menuId, username);
 
