@@ -36,5 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### Local docs (schema, notes — not for repo) ###
+docs/
+
 ### Environment variables (contains credentials — never commit) ###
 .env
