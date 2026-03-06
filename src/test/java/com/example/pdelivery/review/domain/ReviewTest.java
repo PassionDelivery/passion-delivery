@@ -1,10 +1,14 @@
 package com.example.pdelivery.review.domain;
 
+import static com.example.pdelivery.review.ReviewErrorCode.*;
 import static org.assertj.core.api.Assertions.*;
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.example.pdelivery.review.ReviewException;
+
+@DisplayName("리뷰 값 객체 테스트")
 class ReviewTest {
 
 	@Test
@@ -23,16 +27,14 @@ class ReviewTest {
 
 	@Test
 	void reviewFail() {
-		var message1 = Assertions.assertThatThrownBy(() -> {
-			new Review(10, "content");
-		}).isInstanceOf(IllegalArgumentException.class);
+		var message1 = assertThatThrownBy(() -> new Review(10, "content"))
+			.isInstanceOf(ReviewException.class).actual().getMessage();
 
-		assertThat(message1.actual().getMessage()).isEqualTo("평점은 1 ~ 5점 사이여야 합니다.");
+		assertThat(message1).isEqualTo(REVIEW_RATING_BOUNDED_ERROR.message());
 
-		var message2 = Assertions.assertThatThrownBy(() -> {
-			new Review(3, "c".repeat(201));
-		}).isInstanceOf(IllegalArgumentException.class);
+		var message2 = assertThatThrownBy(() -> new Review(3, "c".repeat(201)))
+			.isInstanceOf(ReviewException.class).actual().getMessage();
 
-		assertThat(message2.actual().getMessage()).isEqualTo("리뷰 내용은 공백이 아니고 또는 200자 이내여야 합니다.");
+		assertThat(message2).isEqualTo(REVIEW_CONTENT_SIZE_ERROR.message());
 	}
 }
