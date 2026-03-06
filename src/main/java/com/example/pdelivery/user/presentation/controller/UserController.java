@@ -1,7 +1,7 @@
 package com.example.pdelivery.user.presentation.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,31 +26,28 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping("/{username}")
+	@PreAuthorize("hasRole('MANAGER') or authentication.name == #username")
 	public ResponseEntity<ApiResponse<UserResponseDto>> getUser(
-		@PathVariable String username,
-		Authentication authentication
+		@PathVariable String username
 	) {
-		String currentUsername = authentication.getName();
-		return ApiResponse.ok(userService.getUser(username, currentUsername));
+		return ApiResponse.ok(userService.getUser(username));
 	}
 
 	@PatchMapping("/{username}")
+	@PreAuthorize("hasRole('MANAGER') or authentication.name == #username")
 	public ResponseEntity<ApiResponse<UserResponseDto>> updateUser(
 		@PathVariable String username,
-		@Valid @RequestBody UpdateUserRequestDto dto,
-		Authentication authentication
+		@Valid @RequestBody UpdateUserRequestDto dto
 	) {
-		String currentUsername = authentication.getName();
-		return ApiResponse.ok(userService.updateUser(username, currentUsername, dto));
+		return ApiResponse.ok(userService.updateUser(username, dto));
 	}
 
 	@DeleteMapping("/{username}")
+	@PreAuthorize("hasRole('MANAGER') or authentication.name == #username")
 	public ResponseEntity<Void> deleteUser(
-		@PathVariable String username,
-		Authentication authentication
+		@PathVariable String username
 	) {
-		String currentUsername = authentication.getName();
-		userService.deleteUser(username, currentUsername);
+		userService.deleteUser(username);
 		return ResponseEntity.noContent().build();
 	}
 

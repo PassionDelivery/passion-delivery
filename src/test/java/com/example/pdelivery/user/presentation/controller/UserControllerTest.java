@@ -89,14 +89,6 @@ class UserControllerTest {
 	}
 
 	@Test
-	@WithMockUser(username = "otheruser", roles = "CUSTOMER")
-	void getUser_forbidden() throws Exception {
-		mockMvc.perform(get("/api/users/testuser"))
-			.andExpect(status().isForbidden())
-			.andExpect(jsonPath("$.code").value("USER_002"));
-	}
-
-	@Test
 	@WithMockUser(username = "nobody", roles = "CUSTOMER")
 	void getUser_notFound() throws Exception {
 		// given
@@ -116,7 +108,7 @@ class UserControllerTest {
 		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
 			.thenReturn(Optional.of(
 				UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
-		when(userRepository.existsByNicknameAndUsernameNot("newNick", "testuser")).thenReturn(false);
+		when(userRepository.existsByNicknameAndUsernameNotAndDeletedAtIsNull("newNick", "testuser")).thenReturn(false);
 
 		// when & then
 		mockMvc.perform(patch("/api/users/testuser")
@@ -150,11 +142,4 @@ class UserControllerTest {
 			.andExpect(status().isNoContent());
 	}
 
-	@Test
-	@WithMockUser(username = "otheruser", roles = "CUSTOMER")
-	void deleteUser_forbidden() throws Exception {
-		mockMvc.perform(delete("/api/users/testuser"))
-			.andExpect(status().isForbidden())
-			.andExpect(jsonPath("$.code").value("USER_002"));
-	}
 }

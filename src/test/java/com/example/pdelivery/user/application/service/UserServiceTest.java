@@ -51,7 +51,7 @@ class UserServiceTest {
 		savedUser("testuser");
 
 		// when
-		var result = userService.getUser("testuser", "testuser");
+		var result = userService.getUser("testuser");
 
 		// then
 		assertThat(result.username()).isEqualTo("testuser");
@@ -59,15 +59,8 @@ class UserServiceTest {
 	}
 
 	@Test
-	void getUser_forbidden() {
-		assertThatThrownBy(() -> userService.getUser("targetuser", "currentuser"))
-			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
-	}
-
-	@Test
 	void getUser_notFound() {
-		assertThatThrownBy(() -> userService.getUser("nobody", "nobody"))
+		assertThatThrownBy(() -> userService.getUser("nobody"))
 			.isInstanceOf(UserException.class)
 			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND));
 	}
@@ -78,19 +71,11 @@ class UserServiceTest {
 		savedUser("testuser");
 
 		// when
-		var result = userService.updateUser("testuser", "testuser",
+		var result = userService.updateUser("testuser",
 			new UpdateUserRequestDto("newNick", null, null));
 
 		// then
 		assertThat(result.nickname()).isEqualTo("newNick");
-	}
-
-	@Test
-	void updateUser_forbidden() {
-		assertThatThrownBy(() ->
-			userService.updateUser("target", "other", new UpdateUserRequestDto("x", null, null)))
-			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
 	}
 
 	@Test
@@ -101,7 +86,7 @@ class UserServiceTest {
 
 		// when: user1 tries to take user2's nickname
 		assertThatThrownBy(() ->
-			userService.updateUser("user1", "user1", new UpdateUserRequestDto("nick_user2", null, null)))
+			userService.updateUser("user1", new UpdateUserRequestDto("nick_user2", null, null)))
 			.isInstanceOf(UserException.class)
 			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.DUPLICATE_NICKNAME));
 	}
@@ -113,7 +98,7 @@ class UserServiceTest {
 
 		// when: all fields null — must be rejected at service layer
 		assertThatThrownBy(() ->
-			userService.updateUser("testuser", "testuser", new UpdateUserRequestDto(null, null, null)))
+			userService.updateUser("testuser", new UpdateUserRequestDto(null, null, null)))
 			.isInstanceOf(UserException.class);
 	}
 
@@ -123,17 +108,11 @@ class UserServiceTest {
 		savedUser("testuser");
 
 		// when
-		userService.deleteUser("testuser", "testuser");
+		userService.deleteUser("testuser");
 
 		// then: soft-deleted user is not returned by findByUsernameAndDeletedAtIsNull
 		Optional<UserEntity> found = userRepository.findByUsernameAndDeletedAtIsNull("testuser");
 		assertThat(found).isEmpty();
 	}
 
-	@Test
-	void deleteUser_forbidden() {
-		assertThatThrownBy(() -> userService.deleteUser("target", "other"))
-			.isInstanceOf(UserException.class)
-			.satisfies(e -> assertThat(((UserException)e).getErrorCode()).isEqualTo(UserErrorCode.USER_FORBIDDEN));
-	}
 }

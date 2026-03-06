@@ -21,20 +21,14 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserResponseDto getUser(String username, String currentUsername) {
-		if (!username.equals(currentUsername)) {
-			throw new UserException(UserErrorCode.USER_FORBIDDEN);
-		}
+	public UserResponseDto getUser(String username) {
 		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		return UserResponseDto.from(user);
 	}
 
 	@Transactional
-	public UserResponseDto updateUser(String username, String currentUsername, UpdateUserRequestDto dto) {
-		if (!username.equals(currentUsername)) {
-			throw new UserException(UserErrorCode.USER_FORBIDDEN);
-		}
+	public UserResponseDto updateUser(String username, UpdateUserRequestDto dto) {
 		if (dto.getNickname() == null && dto.getEmail() == null && dto.getPassword() == null) {
 			throw new UserException(UserErrorCode.NO_UPDATE_FIELD);
 		}
@@ -56,10 +50,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deleteUser(String username, String currentUsername) {
-		if (!username.equals(currentUsername)) {
-			throw new UserException(UserErrorCode.USER_FORBIDDEN);
-		}
+	public void deleteUser(String username) {
 		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		user.softDelete(user.getId());
