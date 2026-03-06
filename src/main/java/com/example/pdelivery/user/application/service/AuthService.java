@@ -27,6 +27,7 @@ public class AuthService {
 		if (dto.getRole() == UserRole.MANAGER || dto.getRole() == UserRole.MASTER) {
 			throw new AuthException(AuthErrorCode.INVALID_ROLE);
 		}
+
 		if (userRepository.existsByUsername(dto.getUsername())) {
 			throw new AuthException(AuthErrorCode.DUPLICATE_USERNAME);
 		}

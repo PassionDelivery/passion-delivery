@@ -5,17 +5,16 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.example.pdelivery.cart.application.provided.CartOrderProvider;
+import com.example.pdelivery.cart.application.provided.CartProvider;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
 public class OrderCartRequirerImpl implements OrderCartRequirer {
-	private final CartOrderProvider cartOrderProvider;
+	private final CartProvider cartOrderProvider;
 
 	public List<CartData> getCartLines(UUID cartId) {
-		List<CartData> cartData = cartOrderProvider.getCartLines(cartId);
-		return cartData;
+		return null;
 	}
 }

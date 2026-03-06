@@ -48,4 +48,16 @@ public class UserEntity extends BaseEntity {
 		return create(username, encodedPassword, nickname, email, UserRole.MASTER);
 	}
 
+	public void update(String nickname, String email, String encodedPassword) {
+		if (nickname != null) {
+			this.nickname = nickname;
+		}
+		if (email != null) {
+			this.email = email;
+		}
+		if (encodedPassword != null) {
+			this.password = encodedPassword;
+		}
+	}
+
 }

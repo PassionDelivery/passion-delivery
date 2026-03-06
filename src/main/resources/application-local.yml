@@ -5,13 +5,13 @@ spring:
   application:
     name: pdelivery
   datasource:
-    url: "${DB_URL}"
+    url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
-    username: "${DB_USERNAME}"
-    password: "${DB_PASSWORD}"
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
@@ -22,12 +22,12 @@ spring:
 
 app:
   jwt:
-    secret: "${JWT_SECRET}"
+    secret: "${JWT_SECRET:passion-delivery-jwt-secret-key-must-be-at-least-32-characters}"
     expiration-ms: 3600000
   master:
-    username: "${MASTER_USERNAME}"
-    password: "${MASTER_PASSWORD}"
-    nickname: "${MASTER_NICKNAME}"
-    email: "${MASTER_EMAIL}"
+    username: "${MASTER_USERNAME:master}"
+    password: "${MASTER_PASSWORD:Master1234!}"
+    nickname: "${MASTER_NICKNAME:마스터}"
+    email: "${MASTER_EMAIL:master@pdelivery.com}"
   cors:
-    allowed-origins: "${CORS_ALLOWED_ORIGINS}"
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:http://localhost:3000}"
