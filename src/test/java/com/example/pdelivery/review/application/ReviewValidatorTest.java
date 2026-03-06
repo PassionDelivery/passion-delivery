@@ -36,7 +36,6 @@ class ReviewValidatorTest {
 	@Mock
 	ReviewOrderRequirer reviewOrderRequirer;
 
-
 	@Test
 	@DisplayName("리뷰 검증 성공")
 	void validate() {

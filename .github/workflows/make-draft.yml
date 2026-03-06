@@ -14,7 +14,6 @@ jobs:
       - name: Convert to draft
         # GitHub CLI를 사용하여 생성된 PR을 바로 Draft로 전환합니다.
         run: gh pr ready --undo "$PR_URL"
-        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
