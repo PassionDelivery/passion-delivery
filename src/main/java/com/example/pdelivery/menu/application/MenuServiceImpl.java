@@ -72,6 +72,8 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public MenuResponse updateMenu(UUID storeId, UUID menuId, MenuUpdateRequest request) {
+		menuStoreRequirer.getStore(storeId);
+
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
@@ -89,6 +91,8 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public void deleteMenu(UUID storeId, UUID menuId, UUID userId) {
+		menuStoreRequirer.getStore(storeId);
+
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
