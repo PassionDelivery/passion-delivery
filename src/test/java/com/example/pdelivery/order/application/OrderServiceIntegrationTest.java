@@ -1,7 +1,9 @@
 package com.example.pdelivery.order.application;
 
+import static com.example.pdelivery.shared.enums.OrderStatus.*;
 import static org.assertj.core.api.Assertions.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,10 +13,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.order.error.OrderErrorCode;
+import com.example.pdelivery.order.error.OrderException;
 
 import jakarta.transaction.Transactional;
 
@@ -65,6 +70,49 @@ public class OrderServiceIntegrationTest {
 
 			Order findResult = orderRepository.findById(order1.getId()).get();
 			assertThat(findResult.checkCancellatioin()).isTrue();
+		}
+
+		@Test
+		@DisplayName("주문 취소 성공")
+		public void cancelOrder_TimeoutBoundary() {
+			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+
+			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(4).minusSeconds(59));
+			orderRepository.save(order1);
+
+			assertThat(order1.checkCancellatioin()).isFalse();
+			orderService.cancelOrder(order1.getId(), req);
+
+			Order findResult = orderRepository.findById(order1.getId()).get();
+			assertThat(findResult.checkCancellatioin()).isTrue();
+		}
+
+		@Test
+		@DisplayName("주문 취소 실패 - 시간초과")
+		public void cancelOrder_Timeout() {
+			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+
+			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(5));
+			orderRepository.save(order1);
+
+			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
+				.isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.CANCEL_TIMEOUT);
+		}
+
+		@Test
+		@DisplayName("주문 취소 실패 - 중복 취소")
+		public void cancelOrder_AlreadyCancel() {
+			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+
+			ReflectionTestUtils.setField(order1, "status", CANCELLED);
+			orderRepository.save(order1);
+
+			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
+				.isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.ALREADY_CANCELED);
 		}
 	}
 }
