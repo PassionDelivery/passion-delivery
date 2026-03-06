@@ -1,5 +1,8 @@
 package com.example.pdelivery.order.infrastructure;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +20,10 @@ public class OrderJpaPersistence implements OrderRepository {
 	@Override
 	public Order save(Order order) {
 		return orderJpaRepository.save(order);
+	}
+
+	@Override
+	public Optional<Order> findById(UUID orderId) {
+		return orderJpaRepository.findById(orderId);
 	}
 }
