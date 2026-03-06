@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.pdelivery.order.application.provider.OrderInfo;
 import com.example.pdelivery.shared.BaseEntity;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
@@ -84,6 +85,21 @@ public class Order extends BaseEntity {
 		order.calculateTotalPrice();
 
 		return order;
+	}
+
+	public OrderInfo toOrderInfo() {
+		return new OrderInfo(
+			this.getId(), // BaseEntity에 getId()가 있다고 가정
+			this.storeId,
+			this.customerId,
+			this.address,
+			this.status,
+			this.reason,
+			this.totalPrice,
+			this.orderLines.stream()
+				.map(line -> line.toVO())
+				.toList()
+		);
 	}
 
 	@Getter // test 위해서만

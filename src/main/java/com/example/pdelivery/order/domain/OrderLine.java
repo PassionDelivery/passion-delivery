@@ -34,4 +34,13 @@ public class OrderLine extends AbstractEntity {
 	public int calculateSubTotalPrice() {
 		return this.price * this.quantity;
 	}
+
+	public OrderLineVO toVO() {
+		return new OrderLineVO(
+			this.menuId,
+			this.menuName,
+			this.quantity,
+			this.price
+		);
+	}
 }
