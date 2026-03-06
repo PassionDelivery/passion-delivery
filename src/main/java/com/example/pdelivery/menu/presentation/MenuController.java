@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import com.example.pdelivery.menu.application.MenuService;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
@@ -40,7 +42,7 @@ public class MenuController {
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<MenuResponse>> createMenu(
 		@PathVariable UUID storeId,
-		@RequestBody MenuCreateRequest request
+		@RequestBody @Valid MenuCreateRequest request
 	) {
 		MenuResponse response = menuService.createMenu(storeId, request);
 		return ApiResponse.create(response);
@@ -66,16 +68,18 @@ public class MenuController {
 	}
 
 	@PutMapping("/{menuId}")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<MenuResponse>> updateMenu(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,
-		@RequestBody MenuUpdateRequest request
+		@RequestBody @Valid MenuUpdateRequest request
 	) {
 		MenuResponse response = menuService.updateMenu(storeId, menuId, request);
 		return ApiResponse.ok(response);
 	}
 
 	@DeleteMapping("/{menuId}")
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<Void> deleteMenu(
 		@PathVariable UUID storeId,
 		@PathVariable UUID menuId,

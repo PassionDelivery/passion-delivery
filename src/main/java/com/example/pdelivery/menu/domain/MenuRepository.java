@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.domain;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,7 +11,11 @@ public interface MenuRepository {
 
 	Optional<MenuEntity> findById(UUID menuId);
 
-	Optional<MenuEntity> findByIdForUpdate(UUID menuId);
+	List<MenuEntity> findAllByIdIn(List<UUID> menuIds);
+
+	Optional<MenuEntity> findByIdAndStoreId(UUID menuId, UUID storeId);
+
+	Optional<MenuEntity> findByIdAndStoreIdForUpdate(UUID menuId, UUID storeId);
 
 	MenuEntity save(MenuEntity menuEntity);
 

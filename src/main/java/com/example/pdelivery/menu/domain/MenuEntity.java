@@ -30,8 +30,8 @@ public class MenuEntity extends BaseEntity {
 		this.menu = menu;
 	}
 
-	public static MenuEntity create(UUID storeId, String name, Integer price, String description) {
-		Menu menu = new Menu(name, price, description);
+	public static MenuEntity create(UUID storeId, String name, Integer price, String description, Boolean isHidden) {
+		Menu menu = new Menu(name, price, description, isHidden);
 		return MenuEntity.builder()
 			.storeId(storeId)
 			.menu(menu)

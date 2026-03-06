@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,13 +25,23 @@ public class MenuJpaPersistence implements MenuRepository {
 	}
 
 	@Override
-	public MenuEntity save(MenuEntity menuEntity) {
-		return menuJpaRepository.save(menuEntity);
+	public List<MenuEntity> findAllByIdIn(List<UUID> menuIds) {
+		return menuJpaRepository.findAllById(menuIds);
 	}
 
 	@Override
-	public Optional<MenuEntity> findByIdForUpdate(UUID menuId) {
-		return menuJpaRepository.findByIdForUpdate(menuId);
+	public Optional<MenuEntity> findByIdAndStoreId(UUID menuId, UUID storeId) {
+		return menuJpaRepository.findByIdAndStoreId(menuId, storeId);
+	}
+
+	@Override
+	public Optional<MenuEntity> findByIdAndStoreIdForUpdate(UUID menuId, UUID storeId) {
+		return menuJpaRepository.findByIdAndStoreIdForUpdate(menuId, storeId);
+	}
+
+	@Override
+	public MenuEntity save(MenuEntity menuEntity) {
+		return menuJpaRepository.save(menuEntity);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.application.provided;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public class MenuProviderImpl implements MenuProvider {
 
 		// exception 안하고 empty() 반환
 		return menuRepository.findById(menuId)
+			.filter(entity -> !entity.isDeleted())
 			.map(entity -> new MenuInfo(
 				entity.getId(),
 				entity.getMenu().getName(),
@@ -27,5 +29,19 @@ public class MenuProviderImpl implements MenuProvider {
 				entity.getMenu().getDescription(),
 				entity.getMenu().getIsHidden()
 			));
+	}
+
+	@Override
+	public List<MenuInfo> getMenus(List<UUID> menuIds) {
+		return menuRepository.findAllByIdIn(menuIds).stream()
+			.filter(entity -> !entity.isDeleted())
+			.map(entity -> new MenuInfo(
+				entity.getId(),
+				entity.getMenu().getName(),
+				entity.getMenu().getPrice(),
+				entity.getMenu().getDescription(),
+				entity.getMenu().getIsHidden()
+			))
+			.toList();
 	}
 }

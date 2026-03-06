@@ -1,5 +1,8 @@
 package com.example.pdelivery.menu.domain;
 
+import com.example.pdelivery.menu.error.MenuErrorCode;
+import com.example.pdelivery.menu.error.MenuException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -31,15 +34,15 @@ public class Menu {
 
 	public Menu(String name, Integer price, String description, Boolean isHidden) {
 		if (name == null || name.isBlank() || name.length() > 100) {
-			throw new IllegalArgumentException("메뉴 이름은 공백이면 안되고, 100자 이하여야 합니다.");
+			throw new MenuException(MenuErrorCode.INVALID_MENU_NAME);
 		}
 
 		if (description != null && description.length() > 500) {
-			throw new IllegalArgumentException("메뉴 설명은 500자 이하여야 합니다.");
+			throw new MenuException(MenuErrorCode.INVALID_MENU_DESCRIPTION);
 		}
 
 		if (price == null || price < 0) {
-			throw new IllegalArgumentException("가격은 0원 이상이어야 합니다.");
+			throw new MenuException(MenuErrorCode.INVALID_MENU_PRICE);
 		}
 
 		this.name = name;

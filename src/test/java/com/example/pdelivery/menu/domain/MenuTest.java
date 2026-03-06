@@ -6,6 +6,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.example.pdelivery.menu.error.MenuErrorCode;
+import com.example.pdelivery.menu.error.MenuException;
+
 class MenuTest {
 
 	@Nested
@@ -59,16 +62,18 @@ class MenuTest {
 		@DisplayName("이름이 null이면 실패한다")
 		void failWithNullName() {
 			assertThatThrownBy(() -> new Menu(null, 20000, null))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("메뉴 이름은 공백이면 안되고, 100자 이하여야 합니다.");
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> assertThat(((MenuException) e).getErrorCode())
+					.isEqualTo(MenuErrorCode.INVALID_MENU_NAME));
 		}
 
 		@Test
 		@DisplayName("이름이 빈 문자열이면 실패한다")
 		void failWithBlankName() {
 			assertThatThrownBy(() -> new Menu("  ", 20000, null))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("메뉴 이름은 공백이면 안되고, 100자 이하여야 합니다.");
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> assertThat(((MenuException) e).getErrorCode())
+					.isEqualTo(MenuErrorCode.INVALID_MENU_NAME));
 		}
 
 		@Test
@@ -76,24 +81,27 @@ class MenuTest {
 		void failWithTooLongName() {
 			String longName = "가".repeat(101);
 			assertThatThrownBy(() -> new Menu(longName, 20000, null))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("메뉴 이름은 공백이면 안되고, 100자 이하여야 합니다.");
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> assertThat(((MenuException) e).getErrorCode())
+					.isEqualTo(MenuErrorCode.INVALID_MENU_NAME));
 		}
 
 		@Test
 		@DisplayName("가격이 null이면 실패한다")
 		void failWithNullPrice() {
 			assertThatThrownBy(() -> new Menu("치킨", null, null))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("가격은 0원 이상이어야 합니다.");
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> assertThat(((MenuException) e).getErrorCode())
+					.isEqualTo(MenuErrorCode.INVALID_MENU_PRICE));
 		}
 
 		@Test
 		@DisplayName("가격이 음수이면 실패한다")
 		void failWithNegativePrice() {
 			assertThatThrownBy(() -> new Menu("치킨", -1, null))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("가격은 0원 이상이어야 합니다.");
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> assertThat(((MenuException) e).getErrorCode())
+					.isEqualTo(MenuErrorCode.INVALID_MENU_PRICE));
 		}
 
 		@Test
@@ -101,8 +109,9 @@ class MenuTest {
 		void failWithTooLongDescription() {
 			String longDesc = "가".repeat(501);
 			assertThatThrownBy(() -> new Menu("치킨", 20000, longDesc))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("메뉴 설명은 500자 이하여야 합니다.");
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> assertThat(((MenuException) e).getErrorCode())
+					.isEqualTo(MenuErrorCode.INVALID_MENU_DESCRIPTION));
 		}
 	}
 }

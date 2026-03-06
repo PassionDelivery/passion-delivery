@@ -57,7 +57,7 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴를 정상적으로 생성한다")
 		void success() {
 			MenuCreateRequest request = new MenuCreateRequest("치킨", 20000, "바삭한 치킨", null, null);
-			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 
 			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
 			given(menuRepository.save(any(MenuEntity.class))).willReturn(menuEntity);
@@ -80,9 +80,9 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴를 정상적으로 조회한다")
 		void success() {
 			UUID menuId = UUID.randomUUID();
-			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 
-			given(menuRepository.findById(menuId)).willReturn(Optional.of(menuEntity));
+			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
 
 			MenuResponse response = menuService.getMenu(storeId, menuId);
 
@@ -94,7 +94,7 @@ class MenuServiceImplTest {
 		@DisplayName("존재하지 않는 메뉴를 조회하면 예외가 발생한다")
 		void failNotFound() {
 			UUID menuId = UUID.randomUUID();
-			given(menuRepository.findById(menuId)).willReturn(Optional.empty());
+			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.getMenu(storeId, menuId))
 				.isInstanceOf(MenuException.class)
@@ -113,8 +113,8 @@ class MenuServiceImplTest {
 		@DisplayName("키워드 없이 메뉴 목록을 조회한다")
 		void successWithoutKeyword() {
 			Pageable pageable = PageRequest.of(0, 10);
-			MenuEntity menu1 = MenuEntity.create(storeId, "치킨", 20000, null);
-			MenuEntity menu2 = MenuEntity.create(storeId, "피자", 25000, null);
+			MenuEntity menu1 = MenuEntity.create(storeId, "치킨", 20000, null, null);
+			MenuEntity menu2 = MenuEntity.create(storeId, "피자", 25000, null, null);
 
 			given(menuRepository.findAllByStoreId(storeId, pageable))
 				.willReturn(new SliceImpl<>(List.of(menu1, menu2), pageable, false));
@@ -129,7 +129,7 @@ class MenuServiceImplTest {
 		@DisplayName("키워드로 메뉴를 검색한다")
 		void successWithKeyword() {
 			Pageable pageable = PageRequest.of(0, 10);
-			MenuEntity menu1 = MenuEntity.create(storeId, "양념치킨", 22000, null);
+			MenuEntity menu1 = MenuEntity.create(storeId, "양념치킨", 22000, null, null);
 
 			given(menuRepository.searchByStoreIdAndName(storeId, "치킨", pageable))
 				.willReturn(new SliceImpl<>(List.of(menu1), pageable, false));
@@ -149,10 +149,10 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴를 정상적으로 수정한다")
 		void success() {
 			UUID menuId = UUID.randomUUID();
-			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
-			given(menuRepository.findByIdForUpdate(menuId)).willReturn(Optional.of(menuEntity));
+			given(menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)).willReturn(Optional.of(menuEntity));
 
 			MenuResponse response = menuService.updateMenu(storeId, menuId, request);
 
@@ -167,7 +167,7 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
-			given(menuRepository.findByIdForUpdate(menuId)).willReturn(Optional.empty());
+			given(menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.updateMenu(storeId, menuId, request))
 				.isInstanceOf(MenuException.class)
@@ -188,11 +188,11 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			UUID userId = UUID.randomUUID();
 			String username = "test_user";
-			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null);
+			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null, null);
 			UserEntity user = mock(UserEntity.class);
 			given(user.getId()).willReturn(userId);
 
-			given(menuRepository.findById(menuId)).willReturn(Optional.of(menuEntity));
+			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
 			given(userRepository.findByUsername(username)).willReturn(Optional.of(user));
 
 			menuService.deleteMenu(storeId, menuId, username);
@@ -206,7 +206,7 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			String username = "test_user";
 
-			given(menuRepository.findById(menuId)).willReturn(Optional.empty());
+			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.deleteMenu(storeId, menuId, username))
 				.isInstanceOf(MenuException.class)

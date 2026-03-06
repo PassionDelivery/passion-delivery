@@ -26,7 +26,7 @@ class MenuEntityTest {
 	@DisplayName("메뉴를 DB에 저장하고 조회한다")
 	void saveAndFind() {
 		UUID storeId = UUID.randomUUID();
-		MenuEntity menu = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨");
+		MenuEntity menu = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 
 		MenuEntity saved = menuRepository.save(menu);
 

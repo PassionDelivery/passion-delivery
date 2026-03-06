@@ -16,9 +16,17 @@ import jakarta.persistence.LockModeType;
 
 public interface MenuJpaRepository extends JpaRepository<MenuEntity, UUID> {
 
+	@Query("select m from MenuEntity m where m.id = :menuId and m.storeId = :storeId and m.deletedAt is null")
+	Optional<MenuEntity> findByIdAndStoreId(@Param("menuId") UUID menuId, @Param("storeId") UUID storeId);
+
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("select m from MenuEntity m where m.id = :menuId")
-	Optional<MenuEntity> findByIdForUpdate(@Param("menuId") UUID menuId);
+	@Query("""
+		select m from MenuEntity m
+		where m.id = :menuId
+		  and m.storeId = :storeId
+		  and m.deletedAt is null
+		""")
+	Optional<MenuEntity> findByIdAndStoreIdForUpdate(@Param("menuId") UUID menuId, @Param("storeId") UUID storeId);
 
 	@Query("select m from MenuEntity m where m.storeId = :storeId and m.deletedAt is null order by m.createdAt desc")
 	Slice<MenuEntity> findAllByStoreId(@Param("storeId") UUID storeId, Pageable pageable);

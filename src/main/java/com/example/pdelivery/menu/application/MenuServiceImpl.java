@@ -42,34 +42,18 @@ public class MenuServiceImpl implements MenuService {
 			log.warn("AI 설명 생성이 요청되었지만 아직 구현되지 않았습니다. storeId={}", storeId);
 		}
 
-		MenuEntity menuEntity;
-		try {
-			menuEntity = MenuEntity.create(storeId, request.name(), request.price(), request.description());
-		} catch (IllegalArgumentException e) {
-			throw toMenuException(e);
-		}
-
+		MenuEntity menuEntity = MenuEntity.create(
+			storeId, request.name(), request.price(), request.description(), null);
 		MenuEntity saved = menuRepository.save(menuEntity);
 
 		return MenuResponse.from(saved);
 	}
 
-	private MenuException toMenuException(IllegalArgumentException e) {
-		String msg = e.getMessage();
-		if (msg != null && msg.contains("이름")) {
-			return new MenuException(MenuErrorCode.INVALID_MENU_NAME);
-		}
-		if (msg != null && msg.contains("설명")) {
-			return new MenuException(MenuErrorCode.INVALID_MENU_DESCRIPTION);
-		}
-		return new MenuException(MenuErrorCode.INVALID_MENU_PRICE);
-	}
-
 	@Override
 	@Transactional(readOnly = true)
 	public MenuResponse getMenu(UUID storeId, UUID menuId) {
-		MenuEntity menuEntity = findMenuOrThrow(menuId);
-		validateNotDeleted(menuEntity);
+		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
+			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
 		return MenuResponse.from(menuEntity);
 	}
@@ -91,8 +75,8 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public MenuResponse updateMenu(UUID storeId, UUID menuId, MenuUpdateRequest request) {
-		MenuEntity menuEntity = findMenuForUpdateOrThrow(menuId);
-		validateNotDeleted(menuEntity);
+		MenuEntity menuEntity = menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)
+			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
 		Menu updatedMenu = new Menu(
 			request.name(),
@@ -108,28 +92,12 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	public void deleteMenu(UUID storeId, UUID menuId, String username) {
-		MenuEntity menuEntity = findMenuOrThrow(menuId);
-		validateNotDeleted(menuEntity);
+		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
+			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
 
 		UserEntity user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
+			.orElseThrow(() -> new MenuException(MenuErrorCode.USER_NOT_FOUND));
 
 		menuEntity.softDelete(user.getId());
-	}
-
-	private MenuEntity findMenuOrThrow(UUID menuId) {
-		return menuRepository.findById(menuId)
-			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
-	}
-
-	private MenuEntity findMenuForUpdateOrThrow(UUID menuId) {
-		return menuRepository.findByIdForUpdate(menuId)
-			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
-	}
-
-	private void validateNotDeleted(MenuEntity menuEntity) {
-		if (menuEntity.isDeleted()) {
-			throw new MenuException(MenuErrorCode.MENU_ALREADY_DELETED);
-		}
 	}
 }
