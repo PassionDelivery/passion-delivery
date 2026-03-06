@@ -2,10 +2,13 @@ package com.example.pdelivery.user.presentation.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,13 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.shared.security.JwtAccessDeniedHandler;
 import com.example.pdelivery.shared.security.JwtAuthFilter;
 import com.example.pdelivery.shared.security.JwtAuthenticationEntryPoint;
@@ -74,44 +79,53 @@ class UserControllerTest {
 		}).when(jwtAuthFilter).doFilter(any(), any(), any());
 	}
 
-	@Test
-	@WithMockUser(username = "testuser", roles = "CUSTOMER")
-	void getUser_success() throws Exception {
-		// given
-		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-			.thenReturn(Optional.of(
-				UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
+	private Authentication customerAuth(UUID userId, String username) {
+		return new UsernamePasswordAuthenticationToken(
+			new AuthUser(userId, username), null,
+			List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"))
+		);
+	}
 
-		// when & then
-		mockMvc.perform(get("/api/users/testuser"))
+	private UserEntity userEntityWithId(UUID id) throws Exception {
+		UserEntity user = UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER);
+		Field idField = com.example.pdelivery.shared.AbstractEntity.class.getDeclaredField("id");
+		idField.setAccessible(true);
+		idField.set(user, id);
+		return user;
+	}
+
+	@Test
+	void getUser_success() throws Exception {
+		UUID userId = UUID.randomUUID();
+		when(userRepository.findByIdAndDeletedAtIsNull(userId))
+			.thenReturn(Optional.of(UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
+
+		mockMvc.perform(get("/api/users/" + userId)
+				.with(authentication(customerAuth(userId, "testuser"))))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.username").value("testuser"));
 	}
 
 	@Test
-	@WithMockUser(username = "nobody", roles = "CUSTOMER")
 	void getUser_notFound() throws Exception {
-		// given
-		when(userRepository.findByUsernameAndDeletedAtIsNull("nobody"))
-			.thenReturn(Optional.empty());
+		UUID userId = UUID.randomUUID();
+		when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
-		// when & then
-		mockMvc.perform(get("/api/users/nobody"))
+		mockMvc.perform(get("/api/users/" + userId)
+				.with(authentication(customerAuth(userId, "testuser"))))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.code").value("USER_001"));
 	}
 
 	@Test
-	@WithMockUser(username = "testuser", roles = "CUSTOMER")
 	void updateUser_success() throws Exception {
-		// given
-		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-			.thenReturn(Optional.of(
-				UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
-		when(userRepository.existsByNicknameAndUsernameNotAndDeletedAtIsNull("newNick", "testuser")).thenReturn(false);
+		UUID userId = UUID.randomUUID();
+		when(userRepository.findByIdAndDeletedAtIsNull(userId))
+			.thenReturn(Optional.of(UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
+		when(userRepository.existsByNicknameAndIdNotAndDeletedAtIsNull("newNick", userId)).thenReturn(false);
 
-		// when & then
-		mockMvc.perform(patch("/api/users/testuser")
+		mockMvc.perform(patch("/api/users/" + userId)
+				.with(authentication(customerAuth(userId, "testuser")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"nickname\":\"newNick\"}"))
 			.andExpect(status().isOk())
@@ -119,26 +133,24 @@ class UserControllerTest {
 	}
 
 	@Test
-	@WithMockUser(username = "testuser", roles = "CUSTOMER")
 	void updateUser_validationFail() throws Exception {
-		// "weak" fails @Pattern (too short, missing uppercase/number/special)
-		mockMvc.perform(patch("/api/users/testuser")
+		UUID userId = UUID.randomUUID();
+
+		mockMvc.perform(patch("/api/users/" + userId)
+				.with(authentication(customerAuth(userId, "testuser")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"password\":\"weak\"}"))
 			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	@WithMockUser(username = "testuser", roles = "CUSTOMER")
 	void deleteUser_success() throws Exception {
-		// given — entity needs a UUID id so softDelete(user.getId()) does not NPE
-		UserEntity user = UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER);
-		ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
-		when(userRepository.findByUsernameAndDeletedAtIsNull("testuser"))
-			.thenReturn(Optional.of(user));
+		UUID userId = UUID.randomUUID();
+		when(userRepository.findByIdAndDeletedAtIsNull(userId))
+			.thenReturn(Optional.of(userEntityWithId(userId)));
 
-		// when & then
-		mockMvc.perform(delete("/api/users/testuser"))
+		mockMvc.perform(delete("/api/users/" + userId)
+				.with(authentication(customerAuth(userId, "testuser"))))
 			.andExpect(status().isNoContent());
 	}
 

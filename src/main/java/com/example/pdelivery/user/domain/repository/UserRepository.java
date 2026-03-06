@@ -25,9 +25,11 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
 
 	boolean existsByUsernameAndDeletedAtIsNull(String username);
 
-	boolean existsByNicknameAndUsernameNotAndDeletedAtIsNull(String nickname, String username);
+	Optional<UserEntity> findByIdAndDeletedAtIsNull(UUID id);
 
-	boolean existsByEmailAndUsernameNotAndDeletedAtIsNull(String email, String username);
+	boolean existsByNicknameAndIdNotAndDeletedAtIsNull(String nickname, UUID id);
+
+	boolean existsByEmailAndIdNotAndDeletedAtIsNull(String email, UUID id);
 
 	Page<UserEntity> findByUsernameContainingIgnoreCaseAndDeletedAtIsNull(String username, Pageable pageable);
 }

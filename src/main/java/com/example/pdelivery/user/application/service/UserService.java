@@ -1,6 +1,7 @@
 package com.example.pdelivery.user.application.service;
 
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,25 +37,25 @@ public class UserService {
 			.map(UserResponseDto::from);
 	}
 
-	public UserResponseDto getUser(String username) {
-		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
+	public UserResponseDto getUser(UUID userId) {
+		UserEntity user = userRepository.findByIdAndDeletedAtIsNull(userId)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		return UserResponseDto.from(user);
 	}
 
 	@Transactional
-	public UserResponseDto updateUser(String username, UpdateUserRequestDto dto) {
+	public UserResponseDto updateUser(UUID userId, UpdateUserRequestDto dto) {
 		if (dto.getNickname() == null && dto.getEmail() == null && dto.getPassword() == null) {
 			throw new UserException(UserErrorCode.NO_UPDATE_FIELD);
 		}
-		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
+		UserEntity user = userRepository.findByIdAndDeletedAtIsNull(userId)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		if (dto.getNickname() != null
-			&& userRepository.existsByNicknameAndUsernameNotAndDeletedAtIsNull(dto.getNickname(), username)) {
+			&& userRepository.existsByNicknameAndIdNotAndDeletedAtIsNull(dto.getNickname(), userId)) {
 			throw new UserException(UserErrorCode.DUPLICATE_NICKNAME);
 		}
 		if (dto.getEmail() != null
-			&& userRepository.existsByEmailAndUsernameNotAndDeletedAtIsNull(dto.getEmail(), username)) {
+			&& userRepository.existsByEmailAndIdNotAndDeletedAtIsNull(dto.getEmail(), userId)) {
 			throw new UserException(UserErrorCode.DUPLICATE_EMAIL);
 		}
 		String encodedPassword = dto.getPassword() != null
@@ -65,10 +66,10 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deleteUser(String username) {
-		UserEntity user = userRepository.findByUsernameAndDeletedAtIsNull(username)
+	public void deleteUser(UUID userId, UUID deletedBy) {
+		UserEntity user = userRepository.findByIdAndDeletedAtIsNull(userId)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-		user.softDelete(user.getId());
+		user.softDelete(deletedBy);
 	}
 
 }
