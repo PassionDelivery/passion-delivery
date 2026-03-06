@@ -23,12 +23,12 @@ import com.example.pdelivery.menu.domain.MenuEntity;
 import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
+import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
+import com.example.pdelivery.menu.infrastructure.required.store.StoreData;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
-import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
-import com.example.pdelivery.menu.infrastructure.required.store.StoreData;
 
 @ExtendWith(MockitoExtension.class)
 class MenuServiceImplTest {
@@ -54,7 +54,7 @@ class MenuServiceImplTest {
 			MenuCreateRequest request = new MenuCreateRequest("치킨", 20000, "바삭한 치킨", null, null);
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 
-			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.save(any(MenuEntity.class))).willReturn(menuEntity);
 
 			MenuResponse response = menuService.createMenu(storeId, request);
@@ -147,7 +147,7 @@ class MenuServiceImplTest {
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, "바삭한 치킨", null);
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
-			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)).willReturn(Optional.of(menuEntity));
 
 			MenuResponse response = menuService.updateMenu(storeId, menuId, request);
@@ -163,7 +163,7 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			MenuUpdateRequest request = new MenuUpdateRequest("양념치킨", 22000, "매콤한 양념치킨", false);
 
-			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreIdForUpdate(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.updateMenu(storeId, menuId, request))
@@ -186,7 +186,7 @@ class MenuServiceImplTest {
 			UUID userId = UUID.randomUUID();
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null, null);
 
-			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
 
 			menuService.deleteMenu(storeId, menuId, userId);
@@ -200,7 +200,7 @@ class MenuServiceImplTest {
 			UUID menuId = UUID.randomUUID();
 			UUID userId = UUID.randomUUID();
 
-			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId));
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.deleteMenu(storeId, menuId, userId))

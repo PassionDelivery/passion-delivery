@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class MenuStoreRequirerImpl implements MenuStoreRequirer {
 
 	// private final StoreProvider storeProvider;
-	private final StoreData storeData = new StoreData(UUID.randomUUID());
+	private final StoreData storeData = new StoreData(UUID.randomUUID(), UUID.randomUUID());
 
 	@Override
 	public StoreData getStore(UUID storeId) {
