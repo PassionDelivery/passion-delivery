@@ -15,7 +15,7 @@ public enum PaymentErrorCode implements ErrorCode {
 	INVALID_PAYMENT_METHOD("PAYMENT_006", HttpStatus.BAD_REQUEST, "결제 수단이 유효하지 않습니다."),
 	INVALID_PAYMENT_PROVIDER("PAYMENT_007", HttpStatus.BAD_REQUEST, "결제사가 유효하지 않습니다."),
 	UNAUTHORIZED_ORDER_ACCESS("PAYMENT_008", HttpStatus.BAD_REQUEST, "본인의 주문만 결제할 수 있습니다."),
-	INVALID_CUSTOMER("PAYMENT_009", HttpStatus.BAD_REQUEST, "고객 ID가 유효하지 않습니다."),
+	INVALID_CUSTOMER("PAYMENT_009", HttpStatus.FORBIDDEN, "고객 ID가 유효하지 않습니다."),
 
 	// 조회/상태
 	PAYMENT_NOT_FOUND("PAYMENT_101", HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
@@ -23,7 +23,7 @@ public enum PaymentErrorCode implements ErrorCode {
 
 	// 외부 오류
 	PROVIDER_ERROR("PAYMENT_201", HttpStatus.BAD_GATEWAY, "결제사 처리 중 오류가 발생했습니다."),
-	PROVIDER_TIMEOUT("PAYMENT_202", HttpStatus.GATEWAY_TIMEOUT, "결제사 응답이 지연 되고 있습니다.");
+	PROVIDER_TIMEOUT("PAYMENT_202", HttpStatus.GATEWAY_TIMEOUT, "결제사 응답이 지연되고 있습니다.");
 
 	private final String code;
 	private final HttpStatus status;

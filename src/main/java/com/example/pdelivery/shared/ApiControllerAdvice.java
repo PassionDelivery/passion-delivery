@@ -73,7 +73,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 		HttpServletRequest request) {
 		log.warn("Authorization denied: {}", request.getRequestURI());
 		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
-		problemDetail.setTitle("접급 권한이 없습니다.");
+		problemDetail.setTitle("접근 권한이 없습니다.");
 		problemDetail.setProperty("timestamp", Instant.now());
 
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problemDetail);
