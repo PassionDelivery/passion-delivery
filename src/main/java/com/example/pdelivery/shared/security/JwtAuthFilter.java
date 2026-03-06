@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.user.domain.repository.UserRepository;
 
@@ -48,11 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		}
 
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			if (!userRepository.existsByUsernameAndDeletedAtIsNull(username)) {
-				filterChain.doFilter(request, response);
-				return;
-			}
-
 			String roleStr;
 			try {
 				roleStr = jwtUtil.extractRole(token);
@@ -73,6 +69,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			try {
 				userId = jwtUtil.extractUserId(token);
 			} catch (Exception e) {
+				filterChain.doFilter(request, response);
+				return;
+			}
+
+			UserEntity user = userRepository.findByIdAndDeletedAtIsNull(userId).orElse(null);
+			if (user == null || !user.getUsername().equals(username)) {
 				filterChain.doFilter(request, response);
 				return;
 			}
