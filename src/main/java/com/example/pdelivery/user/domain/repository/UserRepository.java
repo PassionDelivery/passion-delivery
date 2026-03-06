@@ -19,4 +19,8 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
 	boolean existsByEmail(String email);
 
 	Optional<UserEntity> findByUsername(String username);
+
+	Optional<UserEntity> findByUsernameAndDeletedAtIsNull(String username);
+
+	boolean existsByUsernameAndDeletedAtIsNull(String username);
 }
