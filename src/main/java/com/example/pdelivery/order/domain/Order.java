@@ -52,7 +52,7 @@ public class Order extends BaseEntity {
 		this.storeId = storeId;
 		this.address = address;
 		this.customerId = customerId;
-		this.status = OrderStatus.ACCEPTED;
+		this.status = OrderStatus.PENDING;
 		this.orderType = OrderType.ONLINE;
 	}
 
@@ -113,6 +113,10 @@ public class Order extends BaseEntity {
 
 	public boolean checkCancellatioin() {
 		return this.status.equals(OrderStatus.CANCELLED);
+	}
+
+	public boolean checkPending() {
+		return this.status.equals(OrderStatus.PENDING);
 	}
 
 	@Getter // test 위해서만
