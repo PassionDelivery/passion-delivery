@@ -4,6 +4,7 @@ import com.example.pdelivery.shared.ApiResponse;
 import com.example.pdelivery.user.application.service.AuthService;
 import com.example.pdelivery.user.presentation.dto.SignupRequestDto;
 import com.example.pdelivery.user.presentation.dto.SignupResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class AuthController {
 
 	private final AuthService authService;
 
+	@Operation(security = {})
 	@PostMapping("/users")
 	public ResponseEntity<ApiResponse<SignupResponseDto>> signup(@Valid @RequestBody SignupRequestDto dto) {
 		return ApiResponse.create(authService.signup(dto));
