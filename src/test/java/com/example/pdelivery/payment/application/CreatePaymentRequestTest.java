@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
 import com.example.pdelivery.payment.domain.PaymentMethod;
 import com.example.pdelivery.payment.domain.PaymentProvider;
@@ -35,7 +34,7 @@ class CreatePaymentRequestTest {
 
 	@Test
 	@DisplayName("결제 생성 요청 DTO 생성 성공")
-	void createPaymentRequest_success() throws OrderException {
+	void createPaymentRequest_success() {
 		CreatePaymentRequest request = new CreatePaymentRequest(ORDER_ID, STORE_ID, PaymentMethod.CARD,
 			PaymentProvider.TOSS, AMOUNT);
 
