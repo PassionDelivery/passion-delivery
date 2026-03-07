@@ -95,36 +95,36 @@ class UserControllerTest {
 	}
 
 	@Test
-	void getUser_success() throws Exception {
+	void getMe_success() throws Exception {
 		UUID userId = UUID.randomUUID();
 		when(userRepository.findByIdAndDeletedAtIsNull(userId))
 			.thenReturn(Optional.of(UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
 
-		mockMvc.perform(get("/api/users/" + userId)
+		mockMvc.perform(get("/api/users/me")
 				.with(authentication(customerAuth(userId, "testuser"))))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.username").value("testuser"));
 	}
 
 	@Test
-	void getUser_notFound() throws Exception {
+	void getMe_notFound() throws Exception {
 		UUID userId = UUID.randomUUID();
 		when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
-		mockMvc.perform(get("/api/users/" + userId)
+		mockMvc.perform(get("/api/users/me")
 				.with(authentication(customerAuth(userId, "testuser"))))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.code").value("USER_001"));
 	}
 
 	@Test
-	void updateUser_success() throws Exception {
+	void updateMe_success() throws Exception {
 		UUID userId = UUID.randomUUID();
 		when(userRepository.findByIdAndDeletedAtIsNull(userId))
 			.thenReturn(Optional.of(UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER)));
 		when(userRepository.existsByNicknameAndIdNotAndDeletedAtIsNull("newNick", userId)).thenReturn(false);
 
-		mockMvc.perform(patch("/api/users/" + userId)
+		mockMvc.perform(patch("/api/users/me")
 				.with(authentication(customerAuth(userId, "testuser")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"nickname\":\"newNick\"}"))
@@ -133,10 +133,10 @@ class UserControllerTest {
 	}
 
 	@Test
-	void updateUser_validationFail() throws Exception {
+	void updateMe_validationFail() throws Exception {
 		UUID userId = UUID.randomUUID();
 
-		mockMvc.perform(patch("/api/users/" + userId)
+		mockMvc.perform(patch("/api/users/me")
 				.with(authentication(customerAuth(userId, "testuser")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"password\":\"weak\"}"))
@@ -144,12 +144,12 @@ class UserControllerTest {
 	}
 
 	@Test
-	void deleteUser_success() throws Exception {
+	void deleteMe_success() throws Exception {
 		UUID userId = UUID.randomUUID();
 		when(userRepository.findByIdAndDeletedAtIsNull(userId))
 			.thenReturn(Optional.of(userEntityWithId(userId)));
 
-		mockMvc.perform(delete("/api/users/" + userId)
+		mockMvc.perform(delete("/api/users/me")
 				.with(authentication(customerAuth(userId, "testuser"))))
 			.andExpect(status().isNoContent());
 	}
