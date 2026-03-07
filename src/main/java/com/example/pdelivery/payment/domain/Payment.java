@@ -61,6 +61,22 @@ public class Payment extends BaseEntity {
 
 	public static Payment create(UUID orderId, UUID storeId, PaymentProvider paymentProvider,
 		PaymentMethod paymentMethod, long amount) {
+		if (orderId == null) {
+			throw new PaymentException(PaymentErrorCode.INVALID_ORDER_ID);
+		}
+		if (storeId == null) {
+			throw new PaymentException(PaymentErrorCode.INVALID_STORE_ID);
+		}
+		if (amount <= 0) {
+			throw new PaymentException(PaymentErrorCode.INVALID_AMOUNT);
+		}
+		if (paymentMethod == null) {
+			throw new PaymentException(PaymentErrorCode.INVALID_PAYMENT_METHOD);
+		}
+		if (paymentProvider == null) {
+			throw new PaymentException(PaymentErrorCode.INVALID_PAYMENT_PROVIDER);
+		}
+
 		return new Payment(orderId, storeId, paymentProvider, paymentMethod, amount);
 	}
 
