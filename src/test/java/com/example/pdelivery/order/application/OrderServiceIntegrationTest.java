@@ -1,7 +1,11 @@
 package com.example.pdelivery.order.application;
 
+import static com.example.pdelivery.order.application.OrderRequest.*;
+import static com.example.pdelivery.order.domain.Order.*;
+import static com.example.pdelivery.order.error.OrderErrorCode.*;
 import static com.example.pdelivery.shared.enums.OrderStatus.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.InstanceOfAssertFactories.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -53,8 +57,8 @@ public class OrderServiceIntegrationTest {
 				new OrderLineVO(chicken, "chicken", 2, 20000)
 			);
 
-			order1 = Order.create(storeId, address, customerId, orderLineVOs1);
-			order2 = Order.create(storeId, address, customerId, orderLineVOs2);
+			order1 = create(storeId, address, customerId, orderLineVOs1);
+			order2 = create(storeId, address, customerId, orderLineVOs2);
 
 			orderRepository.save(order1);
 			orderRepository.save(order2);
@@ -63,34 +67,34 @@ public class OrderServiceIntegrationTest {
 		@Test
 		@DisplayName("주문 취소 성공 test")
 		public void cancelOrder_Success() {
-			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
-			assertThat(order1.checkCancellatioin()).isFalse();
+			assertThat(order1.checkCancellation()).isFalse();
 			orderService.cancelOrder(order1.getId(), req);
 
 			Order findResult = orderRepository.findById(order1.getId()).get();
-			assertThat(findResult.checkCancellatioin()).isTrue();
+			assertThat(findResult.checkCancellation()).isTrue();
 		}
 
 		@Test
 		@DisplayName("주문 취소 성공")
 		public void cancelOrder_TimeoutBoundary() {
-			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
 			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(4).minusSeconds(59));
 			orderRepository.save(order1);
 
-			assertThat(order1.checkCancellatioin()).isFalse();
+			assertThat(order1.checkCancellation()).isFalse();
 			orderService.cancelOrder(order1.getId(), req);
 
 			Order findResult = orderRepository.findById(order1.getId()).get();
-			assertThat(findResult.checkCancellatioin()).isTrue();
+			assertThat(findResult.checkCancellation()).isTrue();
 		}
 
 		@Test
 		@DisplayName("주문 취소 실패 - 시간초과")
 		public void cancelOrder_Timeout() {
-			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
 			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(5));
 			orderRepository.save(order1);
@@ -104,7 +108,7 @@ public class OrderServiceIntegrationTest {
 		@Test
 		@DisplayName("주문 취소 실패 - 중복 취소")
 		public void cancelOrder_AlreadyCancel() {
-			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
 			ReflectionTestUtils.setField(order1, "status", CANCELLED);
 			orderRepository.save(order1);
@@ -118,7 +122,7 @@ public class OrderServiceIntegrationTest {
 		@Test
 		@DisplayName("주문 취소 실패 - 이미 수락 상태")
 		public void cancelOrder_AlreadyAccepted() {
-			OrderRequest.OrderCancelRequest req = new OrderRequest.OrderCancelRequest("단순 변심");
+			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
 			ReflectionTestUtils.setField(order1, "status", ACCEPTED);
 			orderRepository.save(order1);
@@ -128,5 +132,83 @@ public class OrderServiceIntegrationTest {
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.INVALID_CANCEL_STATUS);
 		}
+
+		@Test
+		@DisplayName("주문 상태 변경 - 성공")
+		public void changeOrderStatus_Success() {
+			OrderChangeStatusRequest req = new OrderChangeStatusRequest(ACCEPTED, null);
+			UUID orderId = order2.getId();
+
+			Order beforeOrder = orderRepository.findById(orderId).orElseThrow();
+			OrderView beforeOrderView = new OrderView(beforeOrder);
+			assertThat(beforeOrderView.getStatus()).isNotEqualTo(ACCEPTED);
+
+			orderService.changeStatusOrder(orderId, req);
+
+			Order afterOrder = orderRepository.findById(orderId).orElseThrow();
+			OrderView afterOrderView = new OrderView(afterOrder);
+			assertThat(afterOrderView.getStatus()).isEqualTo(ACCEPTED);
+		}
+
+		@Test
+		@DisplayName("주문 거절 성공")
+		public void changeOrderStatus_Rejected() {
+			OrderChangeStatusRequest req = new OrderChangeStatusRequest(REJECTED, "재료 소진");
+			UUID orderId = order2.getId();
+
+			Order beforeOrder = orderRepository.findById(orderId).orElseThrow();
+			OrderView beforeOrderView = new OrderView(beforeOrder);
+			assertThat(beforeOrderView.getStatus()).isNotEqualTo(REJECTED);
+
+			orderService.changeStatusOrder(orderId, req);
+
+			Order afterOrder = orderRepository.findById(orderId).orElseThrow();
+			OrderView afterOrderView = new OrderView(afterOrder);
+			assertThat(afterOrderView.getStatus()).isEqualTo(REJECTED);
+		}
+
+		@Test
+		@DisplayName("주문 실패 - 이미 취소된 주문")
+		public void changeOrderStatus_CancelledStatus() {
+			OrderChangeStatusRequest req = new OrderChangeStatusRequest(REJECTED, "재료 소진");
+			UUID orderId = order2.getId();
+			ReflectionTestUtils.setField(order2, "status", CANCELLED);
+			orderRepository.save(order2);
+
+			assertThatThrownBy(() -> orderService.changeStatusOrder(orderId, req))
+				.isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.ALREADY_CANCELED);
+		}
+
+		@Test
+		@DisplayName("주문 실패 - 이미 완료된 주문")
+		public void changeOrderStatus_CompletedStatus() {
+			OrderChangeStatusRequest req = new OrderChangeStatusRequest(COOKED, null);
+			UUID orderId = order2.getId();
+			ReflectionTestUtils.setField(order2, "status", COMPLETED);
+			orderRepository.save(order2);
+
+			assertThatThrownBy(() -> orderService.changeStatusOrder(orderId, req))
+				.isInstanceOf(OrderException.class)
+				.extracting("errorCode")
+				.isEqualTo(OrderErrorCode.ALREADY_ORDER_COMPLETED);
+		}
+
+		@Test
+		@DisplayName("주문 실패 - PENDING 상태 아닌 주문")
+		public void changeOrderStatus_NoPendingStatus() {
+			OrderChangeStatusRequest req = new OrderChangeStatusRequest(REJECTED, "재료소진");
+			UUID orderId = order2.getId();
+			ReflectionTestUtils.setField(order2, "status", ACCEPTED);
+			orderRepository.save(order2);
+
+			assertThatThrownBy(() -> orderService.changeStatusOrder(orderId, req))
+				// .isInstanceOf(OrderException.class)
+				.asInstanceOf(type(OrderException.class)) // AssertJ의 검증 대상 타입이 OrderException 바꿈
+				.returns(INVALID_CHANGE_STATUS, from(OrderException::getErrorCode))
+				.returns("reject는 PENDING 상태에서만 가능합니다.", from(OrderException::getMessage));
+		}
 	}
+
 }
