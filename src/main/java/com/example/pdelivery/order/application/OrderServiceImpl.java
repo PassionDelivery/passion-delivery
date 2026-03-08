@@ -135,5 +135,15 @@ public class OrderServiceImpl implements OrderService {
 		order.updateStatus(req.orderStatus());
 	}
 
-	//TO DO: 환불 요청 추가시 관련 로직 필요 
+	//TO DO: 환불 요청 추가시 관련 로직 필요
+
+	@Transactional
+	@Override
+	public void deleteOrder(UUID orderId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+
+		order.softDelete(customerId); //수정: customerId
+
+	}
 }

@@ -211,4 +211,29 @@ public class OrderServiceIntegrationTest {
 		}
 	}
 
+	@Nested
+	@Transactional
+	@DisplayName("주문 삭제 테스트")
+	class OrderDeleteTest {
+		Order order;
+
+		@Test
+		@DisplayName("주문 삭제 test")
+		void deleteTest() {
+			UUID chicken = UUID.randomUUID();
+			UUID pizza = UUID.randomUUID();
+			UUID customerId = UUID.randomUUID();
+			String address = "서울시 종로구 12-54";
+			List<OrderLineVO> orderLineVOs = List.of(
+				new OrderLineVO(pizza, "pizza", 2, 17000),
+				new OrderLineVO(chicken, "chicken", 1, 20000)
+			);
+			order = create(storeId, address, customerId, orderLineVOs);
+			orderRepository.save(order);
+
+			assertThat(order.getDeletedAt()).isNull();
+			orderService.deleteOrder(order.getId());
+			assertThat(order.getDeletedAt()).isNotNull();
+		}
+	}
 }
