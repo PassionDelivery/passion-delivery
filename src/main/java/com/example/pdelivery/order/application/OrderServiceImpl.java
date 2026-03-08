@@ -79,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
 			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
 		//중복 취소
-		if (order.checkCancellatioin()) {
+		if (order.checkCancellation()) {
 			throw new OrderException(OrderErrorCode.ALREADY_CANCELED);
 		}
 		//PENDING 상태에서만 취소 가능
@@ -103,4 +103,37 @@ public class OrderServiceImpl implements OrderService {
 
 		return now.isAfter(timeoutLimit);
 	}
+
+	@Transactional
+	@Override
+	public void changeStatusOrder(UUID orderId, OrderChangeStatusRequest req) {
+		//owner, manager인지 체크 필요
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
+
+		if (order.checkCancellation()) {
+			throw new OrderException(OrderErrorCode.ALREADY_CANCELED);
+		}
+
+		//완료 시 더 이상 상태 변경 불가능
+		if (order.checkCompleted()) {
+			throw new OrderException(OrderErrorCode.ALREADY_ORDER_COMPLETED);
+		}
+
+		if (req.orderStatus().equals(OrderStatus.REJECTED)) {
+			if (req.reason() == null || req.reason().isBlank()) {
+				throw new OrderException(OrderErrorCode.INVALID_REASON, "거절 사유를 입력해주세요.");
+			}
+			//reject는 PENDING 상태에서만 가능
+			if (!order.checkPending()) {
+				throw new OrderException(OrderErrorCode.INVALID_CHANGE_STATUS, "reject는 PENDING 상태에서만 가능합니다.");
+			}
+			//TO DO: 결제 취소 요청
+			order.updateReason(req.reason());
+		}
+
+		order.updateStatus(req.orderStatus());
+	}
+
+	//TO DO: 환불 요청 추가시 관련 로직 필요 
 }

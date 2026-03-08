@@ -111,7 +111,7 @@ public class Order extends BaseEntity {
 		this.status = status;
 	}
 
-	public boolean checkCancellatioin() {
+	public boolean checkCancellation() {
 		return this.status.equals(OrderStatus.CANCELLED);
 	}
 
@@ -119,16 +119,22 @@ public class Order extends BaseEntity {
 		return this.status.equals(OrderStatus.PENDING);
 	}
 
+	public boolean checkCompleted() {
+		return this.status.equals(OrderStatus.COMPLETED);
+	}
+
 	@Getter // test 위해서만
 	public static class OrderView {
 		private final String address;
 		private final Integer totalPrice;
+		private final OrderStatus status;
 		private final List<OrderLine> orderLines;
 
 		public OrderView(Order order) {
 			this.address = order.address;
 			this.totalPrice = order.totalPrice;
 			this.orderLines = order.orderLines;
+			this.status = order.status;
 		}
 	}
 

@@ -16,6 +16,7 @@ public enum OrderErrorCode implements ErrorCode {
 
 	REQUIRED_PARAMETER_MISSING("ORDER_006", HttpStatus.BAD_REQUEST, "request가 NULL입니다."),
 	INVALID_REASON("ORDER_007", HttpStatus.BAD_REQUEST, "사유를 입력해주세요."),
+	INVALID_STATUS("ORDER_008", HttpStatus.BAD_REQUEST, "status가 올바르지 않습니다."),
 
 	// 조회
 	ORDER_NOT_FOUND("ORDER_101", HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
@@ -25,6 +26,8 @@ public enum OrderErrorCode implements ErrorCode {
 
 	ALREADY_CANCELED("ORDER_301", HttpStatus.CONFLICT, "이미 취소된 주문입니다."),
 	INVALID_CANCEL_STATUS("ORDER_302", HttpStatus.CONFLICT, "취소 불가능한 상태입니다."),
+	ALREADY_ORDER_COMPLETED("ORDER_303", HttpStatus.CONFLICT, "이미 주문 완료(COMPLETED) 상태입니다."),
+	INVALID_CHANGE_STATUS("ORDER_304", HttpStatus.CONFLICT, "주문 상태를 변경할 수 없습니다."),
 
 	// TO DO: provider 오류
 	PROVIDER_ERROR("ORDER_501", HttpStatus.BAD_GATEWAY, "외부 서비스 호출 중 오류가 발생했습니다."),

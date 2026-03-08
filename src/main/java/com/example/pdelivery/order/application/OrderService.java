@@ -10,4 +10,6 @@ public interface OrderService {
 	Order createOrder(OrderCreateRequest req);
 
 	void cancelOrder(UUID orderId, OrderCancelRequest req);
+
+	void changeStatusOrder(UUID orderId, OrderChangeStatusRequest req);
 }
