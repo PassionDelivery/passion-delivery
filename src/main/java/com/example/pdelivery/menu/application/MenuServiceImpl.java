@@ -143,6 +143,14 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<MenuResponse> searchMenus(String keyword, Pageable pageable) {
+		Slice<MenuEntity> slice = menuRepository.searchByName(keyword.trim(), pageable);
+		Slice<MenuResponse> responseSlice = slice.map(MenuResponse::from);
+		return PageResponse.of(responseSlice);
+	}
+
+	@Override
 	public void deleteMenu(UUID storeId, UUID menuId, UUID userId) {
 		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);

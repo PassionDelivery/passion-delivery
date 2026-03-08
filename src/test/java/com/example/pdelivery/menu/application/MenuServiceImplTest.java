@@ -220,6 +220,43 @@ class MenuServiceImplTest {
 	}
 
 	@Nested
+	@DisplayName("전체 메뉴 검색")
+	class SearchMenus {
+
+		@Test
+		@DisplayName("키워드로 전체 메뉴를 검색한다")
+		void success() {
+			Pageable pageable = PageRequest.of(0, 10);
+			MenuEntity menu1 = MenuEntity.create(storeId, "소고기탕수육", 18000, null, null, null);
+			MenuEntity menu2 = MenuEntity.create(UUID.randomUUID(), "탕수육", 15000, null, null, null);
+
+			given(menuRepository.searchByName("탕수", pageable))
+				.willReturn(new SliceImpl<>(List.of(menu1, menu2), pageable, false));
+
+			PageResponse<MenuResponse> response = menuService.searchMenus("탕수", pageable);
+
+			assertThat(response.contents()).hasSize(2);
+			assertThat(response.contents().get(0).name()).isEqualTo("소고기탕수육");
+			assertThat(response.contents().get(1).name()).isEqualTo("탕수육");
+			assertThat(response.hasNext()).isFalse();
+		}
+
+		@Test
+		@DisplayName("검색 결과가 없으면 빈 목록을 반환한다")
+		void successEmpty() {
+			Pageable pageable = PageRequest.of(0, 10);
+
+			given(menuRepository.searchByName("존재하지않는메뉴", pageable))
+				.willReturn(new SliceImpl<>(List.of(), pageable, false));
+
+			PageResponse<MenuResponse> response = menuService.searchMenus("존재하지않는메뉴", pageable);
+
+			assertThat(response.contents()).isEmpty();
+			assertThat(response.hasNext()).isFalse();
+		}
+	}
+
+	@Nested
 	@DisplayName("AI 메뉴 설명 생성")
 	class GenerateAiDescription {
 

@@ -45,11 +45,6 @@ public class MenuJpaPersistence implements MenuRepository {
 	}
 
 	@Override
-	public boolean existsById(UUID menuId) {
-		return menuJpaRepository.existsById(menuId);
-	}
-
-	@Override
 	public Slice<MenuEntity> findAllByStoreId(UUID storeId, Pageable pageable) {
 		return menuJpaRepository.findAllByStoreId(storeId, pageable);
 	}
@@ -57,5 +52,10 @@ public class MenuJpaPersistence implements MenuRepository {
 	@Override
 	public Slice<MenuEntity> searchByStoreIdAndName(UUID storeId, String keyword, Pageable pageable) {
 		return menuJpaRepository.searchByStoreIdAndName(storeId, keyword, pageable);
+	}
+
+	@Override
+	public Slice<MenuEntity> searchByName(String keyword, Pageable pageable) {
+		return menuJpaRepository.searchByName(keyword, pageable);
 	}
 }

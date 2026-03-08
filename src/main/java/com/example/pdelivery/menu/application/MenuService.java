@@ -28,4 +28,6 @@ public interface MenuService {
 	MenuResponse updateMenu(UUID storeId, UUID menuId, MenuUpdateRequest request);
 
 	void deleteMenu(UUID storeId, UUID menuId, UUID userId);
+
+	PageResponse<MenuResponse> searchMenus(String keyword, Pageable pageable);
 }
