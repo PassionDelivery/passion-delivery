@@ -1,9 +1,11 @@
 package com.example.pdelivery.menu.application;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionHistoryResponse;
 import com.example.pdelivery.menu.presentation.dto.AiDescriptionRequest;
 import com.example.pdelivery.menu.presentation.dto.AiDescriptionResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
@@ -16,6 +18,8 @@ public interface MenuService {
 	MenuResponse createMenu(UUID storeId, MenuCreateRequest request);
 
 	AiDescriptionResponse generateAiDescription(UUID storeId, UUID menuId, UUID userId, AiDescriptionRequest request);
+
+	List<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId);
 
 	MenuResponse getMenu(UUID storeId, UUID menuId);
 

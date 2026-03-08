@@ -13,6 +13,9 @@ spring:
     google:
       genai:
         api-key: "${GENAI_API_KEY}"
+        chat:
+          options:
+            model: gemini-2.5-flash
   jpa:
     hibernate:
       ddl-auto: update

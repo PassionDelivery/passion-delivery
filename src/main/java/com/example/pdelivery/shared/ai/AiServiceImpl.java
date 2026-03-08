@@ -62,4 +62,10 @@ public class AiServiceImpl implements AiService {
 
 		return new AiResponse(saved.getId(), content);
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<AiRequestEntity> getHistory(UUID userId) {
+		return aiRequestJpaRepository.findRecentByUserId(userId, MAX_HISTORY_SIZE);
+	}
 }

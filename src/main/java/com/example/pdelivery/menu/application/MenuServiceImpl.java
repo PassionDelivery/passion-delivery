@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.application;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
@@ -14,6 +15,7 @@ import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionHistoryResponse;
 import com.example.pdelivery.menu.presentation.dto.AiDescriptionRequest;
 import com.example.pdelivery.menu.presentation.dto.AiDescriptionResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
@@ -86,6 +88,14 @@ public class MenuServiceImpl implements MenuService {
 		}
 
 		return sb.toString();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId) {
+		return aiService.getHistory(userId).stream()
+			.map(AiDescriptionHistoryResponse::from)
+			.toList();
 	}
 
 	@Override

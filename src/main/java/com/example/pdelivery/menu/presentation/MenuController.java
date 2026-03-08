@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.presentation;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.pdelivery.menu.application.MenuService;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionHistoryResponse;
 import com.example.pdelivery.menu.presentation.dto.AiDescriptionRequest;
 import com.example.pdelivery.menu.presentation.dto.AiDescriptionResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
@@ -37,6 +39,15 @@ import lombok.RequiredArgsConstructor;
 public class MenuController {
 
 	private final MenuService menuService;
+
+	@GetMapping("/ai/history")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<ApiResponse<List<AiDescriptionHistoryResponse>>> getAiDescriptionHistory(
+		@AuthenticationPrincipal AuthUser authUser
+	) {
+		List<AiDescriptionHistoryResponse> response = menuService.getAiDescriptionHistory(authUser.userId());
+		return ApiResponse.ok(response);
+	}
 
 	@PostMapping("/{menuId}/ai/description")
 	@PreAuthorize("hasRole('OWNER')")
