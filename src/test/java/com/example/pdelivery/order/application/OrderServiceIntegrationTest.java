@@ -39,7 +39,7 @@ public class OrderServiceIntegrationTest {
 	@Nested
 	@Transactional
 	@DisplayName("주문 상태 변경 테스트")
-	class OrderStatus {
+	class OrderStatusServiceTest {
 		Order order1;
 		Order order2;
 
