@@ -4,9 +4,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record MenuCreateRequest(
-	String name,
-	Integer price,
+public record AiDescriptionResponse(
 	String description,
 	@JsonProperty("ai_request_id") UUID aiRequestId
 ) {

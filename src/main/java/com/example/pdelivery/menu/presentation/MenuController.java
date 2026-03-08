@@ -6,11 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import com.example.pdelivery.shared.security.AuthUser;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,15 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-
 import com.example.pdelivery.menu.application.MenuService;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionRequest;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.ApiResponse;
 import com.example.pdelivery.shared.PageResponse;
+import com.example.pdelivery.shared.security.AuthUser;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -38,6 +37,19 @@ import lombok.RequiredArgsConstructor;
 public class MenuController {
 
 	private final MenuService menuService;
+
+	@PostMapping("/{menuId}/ai/description")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<ApiResponse<AiDescriptionResponse>> generateAiDescription(
+		@PathVariable UUID storeId,
+		@PathVariable UUID menuId,
+		@RequestBody @Valid AiDescriptionRequest request,
+		@AuthenticationPrincipal AuthUser authUser
+	) {
+		AiDescriptionResponse response = menuService.generateAiDescription(
+			storeId, menuId, authUser.userId(), request);
+		return ApiResponse.ok(response);
+	}
 
 	@PostMapping
 	@PreAuthorize("hasRole('OWNER')")

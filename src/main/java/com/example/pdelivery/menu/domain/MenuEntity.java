@@ -24,17 +24,23 @@ public class MenuEntity extends BaseEntity {
 	@Embedded
 	private Menu menu;
 
+	@Column(name = "ai_request_id")
+	private UUID aiRequestId;
+
 	@Builder
-	private MenuEntity(UUID storeId, Menu menu) {
+	private MenuEntity(UUID storeId, Menu menu, UUID aiRequestId) {
 		this.storeId = storeId;
 		this.menu = menu;
+		this.aiRequestId = aiRequestId;
 	}
 
-	public static MenuEntity create(UUID storeId, String name, Integer price, String description, Boolean isHidden) {
+	public static MenuEntity create(UUID storeId, String name, Integer price, String description, Boolean isHidden,
+		UUID aiRequestId) {
 		Menu menu = new Menu(name, price, description, isHidden);
 		return MenuEntity.builder()
 			.storeId(storeId)
 			.menu(menu)
+			.aiRequestId(aiRequestId)
 			.build();
 	}
 
