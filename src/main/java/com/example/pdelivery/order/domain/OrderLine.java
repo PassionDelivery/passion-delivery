@@ -7,8 +7,11 @@ import com.example.pdelivery.shared.AbstractEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "p_order_line")
 public class OrderLine extends AbstractEntity {

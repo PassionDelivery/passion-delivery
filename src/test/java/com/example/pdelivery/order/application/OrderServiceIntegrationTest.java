@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
@@ -25,7 +26,7 @@ import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 public class OrderServiceIntegrationTest {
@@ -33,6 +34,8 @@ public class OrderServiceIntegrationTest {
 	OrderService orderService;
 	@Autowired
 	OrderRepository orderRepository;
+	@Autowired
+	EntityManager em;
 
 	private UUID storeId = UUID.randomUUID();
 
@@ -72,6 +75,9 @@ public class OrderServiceIntegrationTest {
 			assertThat(order1.checkCancellation()).isFalse();
 			orderService.cancelOrder(order1.getId(), req);
 
+			em.flush();
+			em.clear();
+
 			Order findResult = orderRepository.findById(order1.getId()).get();
 			assertThat(findResult.checkCancellation()).isTrue();
 		}
@@ -83,9 +89,14 @@ public class OrderServiceIntegrationTest {
 
 			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(4).minusSeconds(59));
 			orderRepository.save(order1);
+			em.flush();
+			em.clear();
 
 			assertThat(order1.checkCancellation()).isFalse();
 			orderService.cancelOrder(order1.getId(), req);
+
+			em.flush();
+			em.clear();
 
 			Order findResult = orderRepository.findById(order1.getId()).get();
 			assertThat(findResult.checkCancellation()).isTrue();
@@ -98,6 +109,9 @@ public class OrderServiceIntegrationTest {
 
 			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(5));
 			orderRepository.save(order1);
+
+			em.flush();
+			em.clear();
 
 			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
 				.isInstanceOf(OrderException.class)
@@ -112,6 +126,8 @@ public class OrderServiceIntegrationTest {
 
 			ReflectionTestUtils.setField(order1, "status", CANCELLED);
 			orderRepository.save(order1);
+			em.flush();
+			em.clear();
 
 			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
 				.isInstanceOf(OrderException.class)
@@ -126,6 +142,8 @@ public class OrderServiceIntegrationTest {
 
 			ReflectionTestUtils.setField(order1, "status", ACCEPTED);
 			orderRepository.save(order1);
+			em.flush();
+			em.clear();
 
 			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
 				.isInstanceOf(OrderException.class)
@@ -144,6 +162,8 @@ public class OrderServiceIntegrationTest {
 			assertThat(beforeOrderView.getStatus()).isNotEqualTo(ACCEPTED);
 
 			orderService.changeStatusOrder(orderId, req);
+			em.flush();
+			em.clear();
 
 			Order afterOrder = orderRepository.findById(orderId).orElseThrow();
 			OrderView afterOrderView = new OrderView(afterOrder);
@@ -161,6 +181,8 @@ public class OrderServiceIntegrationTest {
 			assertThat(beforeOrderView.getStatus()).isNotEqualTo(REJECTED);
 
 			orderService.changeStatusOrder(orderId, req);
+			em.flush();
+			em.clear();
 
 			Order afterOrder = orderRepository.findById(orderId).orElseThrow();
 			OrderView afterOrderView = new OrderView(afterOrder);
@@ -174,6 +196,8 @@ public class OrderServiceIntegrationTest {
 			UUID orderId = order2.getId();
 			ReflectionTestUtils.setField(order2, "status", CANCELLED);
 			orderRepository.save(order2);
+			em.flush();
+			em.clear();
 
 			assertThatThrownBy(() -> orderService.changeStatusOrder(orderId, req))
 				.isInstanceOf(OrderException.class)
@@ -188,6 +212,8 @@ public class OrderServiceIntegrationTest {
 			UUID orderId = order2.getId();
 			ReflectionTestUtils.setField(order2, "status", COMPLETED);
 			orderRepository.save(order2);
+			em.flush();
+			em.clear();
 
 			assertThatThrownBy(() -> orderService.changeStatusOrder(orderId, req))
 				.isInstanceOf(OrderException.class)
@@ -202,6 +228,8 @@ public class OrderServiceIntegrationTest {
 			UUID orderId = order2.getId();
 			ReflectionTestUtils.setField(order2, "status", ACCEPTED);
 			orderRepository.save(order2);
+			em.flush();
+			em.clear();
 
 			assertThatThrownBy(() -> orderService.changeStatusOrder(orderId, req))
 				// .isInstanceOf(OrderException.class)
@@ -233,7 +261,11 @@ public class OrderServiceIntegrationTest {
 
 			assertThat(order.getDeletedAt()).isNull();
 			orderService.deleteOrder(order.getId());
-			assertThat(order.getDeletedAt()).isNotNull();
+			em.flush();
+			em.clear();
+
+			Order deletedOrder = orderRepository.findById(order.getId()).orElseThrow();
+			assertThat(deletedOrder.getDeletedAt()).isNotNull();
 		}
 	}
 }
