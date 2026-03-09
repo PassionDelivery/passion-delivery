@@ -24,6 +24,7 @@ public class MenuProviderImpl implements MenuProvider {
 			.filter(entity -> !entity.isDeleted())
 			.map(entity -> new MenuInfo(
 				entity.getId(),
+				entity.getStoreId(),
 				entity.getMenu().getName(),
 				entity.getMenu().getPrice(),
 				entity.getMenu().getDescription(),
@@ -37,6 +38,7 @@ public class MenuProviderImpl implements MenuProvider {
 			.filter(entity -> !entity.isDeleted())
 			.map(entity -> new MenuInfo(
 				entity.getId(),
+				entity.getStoreId(),
 				entity.getMenu().getName(),
 				entity.getMenu().getPrice(),
 				entity.getMenu().getDescription(),

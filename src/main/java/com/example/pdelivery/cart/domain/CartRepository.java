@@ -7,4 +7,6 @@ public interface CartRepository {
 	CartEntity save(CartEntity cart);
 
 	Optional<CartEntity> findById(UUID cartId);
+
+	Optional<CartEntity> findByUserId(UUID userId);
 }
