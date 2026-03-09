@@ -1,0 +1,28 @@
+package com.example.pdelivery.order.infrastructure.required.store;
+
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Component
+public class OrdeStoreRequirerImpl implements OrderStoreRequirer {
+	// private final StoreProvider storeProvider;
+
+	@Override
+	public String getStoreName(UUID storeId) {
+		/*
+		String storeName = storeProvider.getStoreName(deliveryAddressId);
+		store존재 체크 필요
+		 */
+
+		return "";
+		/*
+			TO DO:
+			ex) http 통신 시 timeout check -> SocketTimeoutException
+			//throw new OrderException(OrderErrorCode.PROVIDER_ERROR);
+		 */
+	}
+}

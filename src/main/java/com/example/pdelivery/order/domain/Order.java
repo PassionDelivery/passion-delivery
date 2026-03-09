@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.pdelivery.order.application.provider.OrderInfo;
+import com.example.pdelivery.order.presentation.OrderResponse;
 import com.example.pdelivery.shared.BaseEntity;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
@@ -44,6 +45,7 @@ public class Order extends BaseEntity {
 	//MSA 확장 고려하여 논리적 연관관계 맵핑
 	private UUID customerId;
 
+	@Getter
 	private UUID storeId;
 
 	@OneToMany(cascade = CascadeType.PERSIST)
@@ -88,6 +90,37 @@ public class Order extends BaseEntity {
 		order.calculateTotalPrice();
 
 		return order;
+	}
+
+	//작은 프로젝트라 res entity에서 바로 생성하지만 레이어 경계 다시 생각해보기
+	public OrderResponse.OrderListData toSummaryResponse() {
+		return new OrderResponse.OrderListData(
+			this.getId(),
+			this.address,
+			generateOrderTitle(),
+			this.totalPrice,
+			this.status.name(),
+			this.getCreatedAt(),
+			this.orderLines.stream()
+				.map(line -> {
+					OrderLineVO orderLineVO = line.toVO();
+					return new OrderResponse.OrderLineResponse(
+						orderLineVO.menuName(),
+						orderLineVO.price(),
+						orderLineVO.quantity()
+					);
+				})
+				.toList()
+		);
+	}
+
+	private String generateOrderTitle() {
+		if (orderLines.isEmpty()) {
+			return "주문 내역 없음";
+		}
+		String firstItemName = orderLines.get(0).toVO().menuName();
+		int extraCount = orderLines.size() - 1;
+		return extraCount > 0 ? firstItemName + " 외 " + extraCount + "건" : firstItemName;
 	}
 
 	//OrderInfo는 application 단, 레이어 경계 다시 생각 필요성 있음

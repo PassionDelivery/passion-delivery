@@ -2,6 +2,7 @@ package com.example.pdelivery.order.application;
 
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.error.OrderErrorCode.*;
+import static com.example.pdelivery.order.presentation.OrderResponse.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,7 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
@@ -22,9 +26,10 @@ import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequire
 import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
+import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
+import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderAddressRequirer orderAddressRequirer;
 	private final OrderPaymentRequirer orderPaymentRequirer;
 	private final OrderMenuRequirer orderMenuRequirer;
+	private final OrderStoreRequirer orderStoreRequirer;
 
 	//추후 삭제 예정
 	private UUID customerId = UUID.randomUUID();
@@ -68,6 +74,54 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		return order;
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponse getOrderItemsByCustomer(Pageable pageable) {
+		//TO DO: customer 존재 확인
+
+		Slice<Order> orderItems = orderRepository.findAllByCustomerId(customerId, pageable);
+
+		List<OrderListData> orderListData = orderItems.getContent().stream()
+			.map(order -> {
+				OrderListData summaryResponse = order.toSummaryResponse();
+				UUID storeId = order.getStoreId();
+				String storeName = orderStoreRequirer.getStoreName((storeId));
+
+				summaryResponse.updateStoreInfo(storeId, storeName);
+				return summaryResponse;
+			})
+			.toList();
+
+		PageResponse data = new PageResponse(
+			orderListData,
+			// orderItems.getNumber(),
+			// orderItems.getSize(),
+			orderItems.hasNext()
+		);
+
+		return data;
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponse getOrderItemsByStore(UUID storeId, Pageable pageable) {
+		//TO DO: store 존재 확인
+
+		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
+
+		List<OrderListData> orderListData = orderItems.getContent().stream()
+			.map(order -> {
+				OrderListData summaryResponse = order.toSummaryResponse();
+				return summaryResponse;
+			})
+			.toList();
+
+		PageResponse data = new PageResponse(
+			orderListData,
+			orderItems.hasNext()
+		);
+
+		return data;
 	}
 
 	@Transactional
