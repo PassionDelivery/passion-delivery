@@ -18,6 +18,7 @@ import com.example.pdelivery.review.domain.ReviewRepository;
 import com.example.pdelivery.review.presentation.dto.ReviewResponse;
 import com.example.pdelivery.review.presentation.dto.StoreReviewResponse;
 import com.example.pdelivery.review.presentation.dto.UpdateReviewRequest;
+import com.example.pdelivery.shared.PageResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -60,6 +61,18 @@ public class ReviewServiceImpl implements ReviewService {
 		int reviewCnt = ratingStat != null ? ratingStat.getReviewCnt() : 0;
 
 		return new StoreReviewResponse(reviews, avgRating, reviewCnt, slice.hasNext());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<ReviewResponse> getMyReviews(UUID customerId, Pageable pageable) {
+		Slice<ReviewEntity> slice = reviewRepository.findByCustomerId(customerId, pageable);
+
+		List<ReviewResponse> reviews = slice.getContent().stream()
+			.map(ReviewResponse::from)
+			.toList();
+
+		return new PageResponse<>(reviews, slice.hasNext());
 	}
 
 	@Override

@@ -11,4 +11,6 @@ import com.example.pdelivery.review.domain.ReviewEntity;
 public interface ReviewJpaRepository extends JpaRepository<ReviewEntity, UUID> {
 
 	Slice<ReviewEntity> findByStoreIdAndDeletedAtIsNull(UUID storeId, Pageable pageable);
+
+	Slice<ReviewEntity> findByCustomerIdAndDeletedAtIsNull(UUID customerId, Pageable pageable);
 }

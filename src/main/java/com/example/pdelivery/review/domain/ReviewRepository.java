@@ -13,4 +13,6 @@ public interface ReviewRepository {
 	Optional<ReviewEntity> findById(UUID reviewId);
 
 	Slice<ReviewEntity> findByStoreId(UUID storeId, Pageable pageable);
+
+	Slice<ReviewEntity> findByCustomerId(UUID customerId, Pageable pageable);
 }

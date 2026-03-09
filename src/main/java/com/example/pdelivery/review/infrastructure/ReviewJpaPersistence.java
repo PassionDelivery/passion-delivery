@@ -32,4 +32,9 @@ public class ReviewJpaPersistence implements ReviewRepository {
 	public Slice<ReviewEntity> findByStoreId(UUID storeId, Pageable pageable) {
 		return reviewJpaRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable);
 	}
+
+	@Override
+	public Slice<ReviewEntity> findByCustomerId(UUID customerId, Pageable pageable) {
+		return reviewJpaRepository.findByCustomerIdAndDeletedAtIsNull(customerId, pageable);
+	}
 }
