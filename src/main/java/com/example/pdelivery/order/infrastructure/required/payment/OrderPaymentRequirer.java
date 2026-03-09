@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
 
 public interface OrderPaymentRequirer {
-	public Boolean processPayment(UUID customerId, CreatePaymentRequest request);
+	public boolean processPayment(UUID customerId, CreatePaymentRequest request);
 
-	public Boolean cancelPaymentByOrder(UUID orderId);
+	public boolean cancelPaymentByOrder(UUID orderId);
 }
