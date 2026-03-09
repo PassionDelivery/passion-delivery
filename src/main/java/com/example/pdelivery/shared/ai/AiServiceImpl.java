@@ -47,8 +47,12 @@ public class AiServiceImpl implements AiService {
 		Collections.reverse(chronological);
 		List<Message> messages = new ArrayList<>();
 		for (AiRequestEntity entity : chronological) {
-			messages.add(new UserMessage(entity.getRequestText()));
-			messages.add(new AssistantMessage(entity.getResponseText()));
+			String requestText = entity.getRequestText();
+			String responseText = entity.getResponseText();
+			if (requestText != null && responseText != null) {
+				messages.add(new UserMessage(requestText));
+				messages.add(new AssistantMessage(responseText));
+			}
 		}
 
 		if (!messages.isEmpty()) {

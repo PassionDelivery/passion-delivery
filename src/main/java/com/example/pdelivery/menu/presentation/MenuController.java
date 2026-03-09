@@ -42,11 +42,12 @@ public class MenuController {
 	@GetMapping("/ai/history")
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<PageResponse<AiDescriptionHistoryResponse>>> getAiDescriptionHistory(
+		@PathVariable UUID storeId,
 		@AuthenticationPrincipal AuthUser authUser,
 		@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
 		PageResponse<AiDescriptionHistoryResponse> response = menuService.getAiDescriptionHistory(
-			authUser.userId(), pageable);
+			storeId, authUser.userId(), pageable);
 		return ApiResponse.ok(response);
 	}
 

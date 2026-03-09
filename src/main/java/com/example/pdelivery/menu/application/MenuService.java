@@ -18,7 +18,7 @@ public interface MenuService {
 
 	AiDescriptionResponse generateAiDescription(UUID storeId, UUID menuId, UUID userId, AiDescriptionRequest request);
 
-	PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId, Pageable pageable);
+	PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID storeId, UUID userId, Pageable pageable);
 
 	MenuResponse getMenu(UUID storeId, UUID menuId);
 

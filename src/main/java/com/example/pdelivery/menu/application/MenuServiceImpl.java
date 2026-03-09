@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.application;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
@@ -100,7 +101,9 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId, Pageable pageable) {
+	public PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID storeId, UUID userId,
+		Pageable pageable) {
+		menuStoreRequirer.getStore(storeId);
 		Slice<AiDescriptionHistoryResponse> slice = aiService.getHistory(userId, pageable)
 			.map(AiDescriptionHistoryResponse::from);
 		return PageResponse.of(slice);
@@ -153,6 +156,9 @@ public class MenuServiceImpl implements MenuService {
 	@Override
 	@Transactional(readOnly = true)
 	public PageResponse<MenuResponse> searchMenus(String keyword, Pageable pageable) {
+		if (keyword == null || keyword.isBlank()) {
+			return new PageResponse<>(List.of(), false);
+		}
 		Slice<MenuEntity> slice = menuRepository.searchByName(keyword.trim(), pageable);
 		Slice<MenuResponse> responseSlice = slice.map(MenuResponse::from);
 		return PageResponse.of(responseSlice);
