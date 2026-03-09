@@ -124,6 +124,14 @@ public class OrderServiceImpl implements OrderService {
 		return data;
 	}
 
+	@Transactional(readOnly = true)
+	public Order getOrder(UUID orderId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new OrderException(ORDER_NOT_FOUND));
+		
+		return order;
+	}
+
 	@Transactional
 	@Override
 	public void cancelOrder(UUID orderId, OrderCancelRequest req) {
