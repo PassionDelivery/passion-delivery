@@ -26,7 +26,7 @@ public class ReviewJpaPersistence implements ReviewRepository {
 
 	@Override
 	public Optional<ReviewEntity> findById(UUID reviewId) {
-		return reviewJpaRepository.findById(reviewId);
+		return reviewJpaRepository.findByIdAndDeletedAtIsNull(reviewId);
 	}
 
 	@Override

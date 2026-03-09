@@ -124,7 +124,6 @@ public class ReviewServiceImpl implements ReviewService {
 
 	private ReviewEntity findReviewOrThrow(UUID reviewId) {
 		return reviewRepository.findById(reviewId)
-			.filter(r -> r.getDeletedAt() == null)
 			.orElseThrow(() -> new ReviewException(REVIEW_NOT_FOUND));
 	}
 

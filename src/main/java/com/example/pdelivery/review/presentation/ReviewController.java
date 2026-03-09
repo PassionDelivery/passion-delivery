@@ -50,7 +50,7 @@ public class ReviewController {
 	@GetMapping("/stores/{storeId}")
 	public ResponseEntity<ApiResponse<StoreReviewResponse>> getStoreReviews(
 		@PathVariable UUID storeId,
-		@PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
+		@PageableDefault(size = 10, sort = {"createdAt", "id"}, direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
 	) {
 		StoreReviewResponse response = reviewService.getStoreReviews(storeId, pageable);
 		return ApiResponse.ok(response);
@@ -61,7 +61,7 @@ public class ReviewController {
 	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<ApiResponse<PageResponse<ReviewResponse>>> getMyReviews(
 		@AuthenticationPrincipal AuthUser authUser,
-		@PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
+		@PageableDefault(size = 10, sort = {"createdAt", "id"}, direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
 	) {
 		PageResponse<ReviewResponse> response = reviewService.getMyReviews(authUser.userId(), pageable);
 		return ApiResponse.ok(response);
@@ -72,7 +72,7 @@ public class ReviewController {
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<PageResponse<ReviewResponse>>> getOwnerStoreReviews(
 		@AuthenticationPrincipal AuthUser authUser,
-		@PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
+		@PageableDefault(size = 10, sort = {"createdAt", "id"}, direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
 	) {
 		PageResponse<ReviewResponse> response = reviewService.getOwnerStoreReviews(authUser.userId(), pageable);
 		return ApiResponse.ok(response);
