@@ -21,13 +21,13 @@ public class OrderCartRequirerImpl implements OrderCartRequirer {
 	@Override
 	public CartData getCartLines(UUID cartId) {
 		CartInfo cartInfo = cartProvider.getCartInfo(cartId)
-			.orElseThrow(() -> new OrderException(OrderErrorCode.REQUIRED_PARAMETER_MISSING, "cart not found"));
+			.orElseThrow(() -> new OrderException(OrderErrorCode.CART_NOT_FOUND));
 
 		//데이터가 없거나 빈 경우
-		if (cartInfo.storeId() == null) {
-			throw new OrderException(OrderErrorCode.REQUIRED_PARAMETER_MISSING, "storeId is missing");
+		if (cartInfo.storeId() == null || cartInfo.cartItems() == null) {
+			throw new OrderException(OrderErrorCode.PROVIDER_ERROR, "cart provider returned incomplete data");
 		}
-		if (cartInfo.cartItems() == null || cartInfo.cartItems().isEmpty()) {
+		if (cartInfo.cartItems().isEmpty()) {
 			throw new OrderException(OrderErrorCode.CART_EMPTY);
 		}
 

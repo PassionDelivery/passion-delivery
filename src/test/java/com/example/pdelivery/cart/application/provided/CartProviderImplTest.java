@@ -40,4 +40,18 @@ class CartProviderImplTest {
 		assertThat(savedCart.getStoreId()).isEqualTo(storeId);
 		assertThat(savedCart.getCartLineEntities()).hasSize(2);
 	}
+
+	@Test
+	void addOrUpdateItem_sameMenu_shouldAccumulateQuantity() {
+		UUID userId = UUID.randomUUID();
+		UUID storeId = UUID.randomUUID();
+		UUID menuId = UUID.randomUUID();
+
+		CartEntity cart = CartEntity.create(userId, storeId);
+		cart.addOrUpdateItem(menuId, 2);
+		cart.addOrUpdateItem(menuId, 3);
+
+		assertThat(cart.getCartLineEntities()).hasSize(1);
+		assertThat(cart.getCartLineEntities().get(0).quantity()).isEqualTo(5);
+	}
 }

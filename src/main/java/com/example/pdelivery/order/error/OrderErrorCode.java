@@ -21,6 +21,7 @@ public enum OrderErrorCode implements ErrorCode {
 	// 조회
 	ORDER_NOT_FOUND("ORDER_101", HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
 	ORDER_MENU_NOT_FOUND("ORDER_102", HttpStatus.NOT_FOUND, "주문한 메뉴를 찾을 수 없습니다."),
+	CART_NOT_FOUND("ORDER_103", HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
 
 	CANCEL_TIMEOUT("ORDER_201", HttpStatus.FORBIDDEN, "주문한지 5분이 지나 취소할 수 없습니다."),
 
