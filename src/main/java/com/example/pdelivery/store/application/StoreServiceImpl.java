@@ -79,6 +79,9 @@ public class StoreServiceImpl implements StoreService {
 	public StoreResponse updateStoreStatus(UUID storeId, StoreStatusUpdateRequest request) {
 		StoreEntity storeEntity = findStoreOrThrow(storeId);
 
+		if (request.status() == null) {
+			throw new StoreException(StoreErrorCode.INVALID_STATUS_CHANGE);
+		}
 		StoreStatus targetStatus;
 		try {
 			targetStatus = StoreStatus.valueOf(request.status());

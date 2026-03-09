@@ -1,5 +1,5 @@
 package com.example.pdelivery.store.domain;
 
 public enum StoreStatus {
-	PENDING, APPROVED, REJECTED, CANCELED
+	PENDING, APPROVED, REJECTED, CANCELLED
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.pdelivery.shared.ApiResponse;
+import jakarta.validation.Valid;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.store.application.StoreService;
@@ -44,7 +45,7 @@ public class StoreController {
 	@PostMapping("/me")
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<StoreResponse>> createMyStore(
-		@RequestBody StoreCreateRequest request,
+		@RequestBody @Valid StoreCreateRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
 		StoreResponse response = storeService.createMyStore(request, authUser.userId());
@@ -55,7 +56,7 @@ public class StoreController {
 	@PostMapping
 	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<ApiResponse<StoreResponse>> createStore(
-		@RequestBody StoreCreateRequest request,
+		@RequestBody @Valid StoreCreateRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
 		StoreResponse response = storeService.createStore(request, authUser.userId());
@@ -105,7 +106,7 @@ public class StoreController {
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<StoreResponse>> updateMyStore(
 		@PathVariable UUID storeId,
-		@RequestBody StoreUpdateRequest request,
+		@RequestBody @Valid StoreUpdateRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
 		StoreResponse response = storeService.updateMyStore(storeId, request, authUser.userId());
@@ -117,7 +118,7 @@ public class StoreController {
 	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
 		@PathVariable UUID storeId,
-		@RequestBody StoreUpdateRequest request,
+		@RequestBody @Valid StoreUpdateRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
 		StoreResponse response = storeService.updateStore(storeId, request, authUser.userId());
