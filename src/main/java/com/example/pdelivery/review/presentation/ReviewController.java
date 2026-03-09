@@ -3,6 +3,7 @@ package com.example.pdelivery.review.presentation;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,7 +49,7 @@ public class ReviewController {
 	@GetMapping("/stores/{storeId}")
 	public ResponseEntity<ApiResponse<StoreReviewResponse>> getStoreReviews(
 		@PathVariable UUID storeId,
-		Pageable pageable
+		@PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
 	) {
 		StoreReviewResponse response = reviewService.getStoreReviews(storeId, pageable);
 		return ApiResponse.ok(response);

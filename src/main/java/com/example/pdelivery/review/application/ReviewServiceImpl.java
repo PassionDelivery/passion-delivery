@@ -70,8 +70,7 @@ public class ReviewServiceImpl implements ReviewService {
 		int oldRating = review.getReview().rating();
 		review.updateReview(request.rating(), request.content());
 
-		RatingStatEntity ratingStat = ratingStatRepository.findByStoreId(review.getStoreId())
-			.orElseThrow(() -> new ReviewException(REVIEW_STORE_NOT_FOUND));
+		RatingStatEntity ratingStat = getOrCreateRatingStat(review.getStoreId());
 		ratingStat.updateRating(oldRating, request.rating());
 		ratingStatRepository.save(ratingStat);
 
@@ -86,8 +85,7 @@ public class ReviewServiceImpl implements ReviewService {
 		int rating = review.getReview().rating();
 		review.softDelete(customerId);
 
-		RatingStatEntity ratingStat = ratingStatRepository.findByStoreId(review.getStoreId())
-			.orElseThrow(() -> new ReviewException(REVIEW_STORE_NOT_FOUND));
+		RatingStatEntity ratingStat = getOrCreateRatingStat(review.getStoreId());
 		ratingStat.removeRating(rating);
 		ratingStatRepository.save(ratingStat);
 	}
@@ -102,5 +100,10 @@ public class ReviewServiceImpl implements ReviewService {
 		if (!review.isOwnedBy(customerId)) {
 			throw new ReviewException(REVIEW_NOT_OWNER);
 		}
+	}
+
+	private RatingStatEntity getOrCreateRatingStat(UUID storeId) {
+		return ratingStatRepository.findByStoreId(storeId)
+			.orElseGet(() -> RatingStatEntity.create(storeId));
 	}
 }

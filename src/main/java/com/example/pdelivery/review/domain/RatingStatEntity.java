@@ -7,6 +7,7 @@ import com.example.pdelivery.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,9 @@ public class RatingStatEntity extends BaseEntity {
 
 	@Column(name = "review_cnt", nullable = false)
 	private int reviewCnt;
+
+	@Version
+	private Long version;
 
 	public static RatingStatEntity create(UUID storeId) {
 		RatingStatEntity entity = new RatingStatEntity();
