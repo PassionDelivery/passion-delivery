@@ -15,7 +15,11 @@ import com.example.pdelivery.store.presentation.dto.StoreUpdateRequest;
 
 public interface StoreService {
 
-	StoreResponse createStore(StoreCreateRequest request, UUID userId, boolean isManagerOrMaster);
+	// OWNER: 본인 가게 등록 (PENDING)
+	StoreResponse createMyStore(StoreCreateRequest request, UUID ownerId);
+
+	// MANAGER/MASTER: 가게 등록 (APPROVED)
+	StoreResponse createStore(StoreCreateRequest request, UUID adminId);
 
 	StoreDetailResponse getStore(UUID storeId);
 
@@ -25,7 +29,15 @@ public interface StoreService {
 
 	StoreResponse updateStoreStatus(UUID storeId, StoreStatusUpdateRequest request);
 
-	StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, UUID userId, boolean isManagerOrMaster);
+	// OWNER: 본인 가게만 수정
+	StoreResponse updateMyStore(UUID storeId, StoreUpdateRequest request, UUID ownerId);
 
-	void deleteStore(UUID storeId, UUID userId, boolean isManagerOrMaster);
+	// MANAGER/MASTER: 모든 가게 수정
+	StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, UUID adminId);
+
+	// OWNER: 본인 가게만 삭제
+	void deleteMyStore(UUID storeId, UUID ownerId);
+
+	// MANAGER/MASTER: 모든 가게 삭제
+	void deleteStore(UUID storeId, UUID adminId);
 }

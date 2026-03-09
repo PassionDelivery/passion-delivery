@@ -34,23 +34,20 @@ public class StoreServiceImpl implements StoreService {
 	private final CategoryJpaRepository categoryJpaRepository;
 
 	@Override
-	public StoreResponse createStore(StoreCreateRequest request, UUID userId, boolean isManagerOrMaster) {
-		if (!categoryJpaRepository.existsById(request.categoryId())) {
-			throw new StoreException(StoreErrorCode.CATEGORY_NOT_FOUND);
-		}
+	public StoreResponse createMyStore(StoreCreateRequest request, UUID ownerId) {
+		validateCategory(request.categoryId());
+		StoreEntity saved = storeRepository.save(
+			StoreEntity.create(ownerId, request.categoryId(), request.name(), request.address(), request.phone(),
+				StoreStatus.PENDING));
+		return StoreResponse.from(saved);
+	}
 
-		StoreStatus initialStatus = isManagerOrMaster ? StoreStatus.APPROVED : StoreStatus.PENDING;
-
-		StoreEntity storeEntity = StoreEntity.create(
-			userId,
-			request.categoryId(),
-			request.name(),
-			request.address(),
-			request.phone(),
-			initialStatus
-		);
-
-		StoreEntity saved = storeRepository.save(storeEntity);
+	@Override
+	public StoreResponse createStore(StoreCreateRequest request, UUID adminId) {
+		validateCategory(request.categoryId());
+		StoreEntity saved = storeRepository.save(
+			StoreEntity.create(adminId, request.categoryId(), request.name(), request.address(), request.phone(),
+				StoreStatus.APPROVED));
 		return StoreResponse.from(saved);
 	}
 
@@ -68,16 +65,14 @@ public class StoreServiceImpl implements StoreService {
 	@Transactional(readOnly = true)
 	public PageResponse<StoreSearchResponse> searchStores(String search, UUID categoryId, Pageable pageable) {
 		Slice<StoreEntity> slice = storeRepository.searchByNameAndCategory(search, categoryId, pageable);
-		Slice<StoreSearchResponse> result = slice.map(StoreSearchResponse::from);
-		return PageResponse.of(result);
+		return PageResponse.of(slice.map(StoreSearchResponse::from));
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public PageResponse<StoreResponse> getStoresByStatus(StoreStatus status, Pageable pageable) {
 		Slice<StoreEntity> slice = storeRepository.findByStatus(status, pageable);
-		Slice<StoreResponse> result = slice.map(StoreResponse::from);
-		return PageResponse.of(result);
+		return PageResponse.of(slice.map(StoreResponse::from));
 	}
 
 	@Override
@@ -103,32 +98,48 @@ public class StoreServiceImpl implements StoreService {
 	}
 
 	@Override
-	public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, UUID userId,
-		boolean isManagerOrMaster) {
+	public StoreResponse updateMyStore(UUID storeId, StoreUpdateRequest request, UUID ownerId) {
 		StoreEntity storeEntity = findStoreOrThrow(storeId);
-
-		if (!isManagerOrMaster && !storeEntity.isOwnedBy(userId)) {
+		if (!storeEntity.isOwnedBy(ownerId)) {
 			throw new StoreException(StoreErrorCode.NOT_STORE_OWNER);
 		}
-
-		if (request.categoryId() != null && !categoryJpaRepository.existsById(request.categoryId())) {
-			throw new StoreException(StoreErrorCode.CATEGORY_NOT_FOUND);
-		}
-
-		storeEntity.updateInfo(request.categoryId(), request.name(), request.address(), request.phone());
-
+		applyUpdate(storeEntity, request);
 		return StoreResponse.from(storeEntity);
 	}
 
 	@Override
-	public void deleteStore(UUID storeId, UUID userId, boolean isManagerOrMaster) {
+	public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, UUID adminId) {
 		StoreEntity storeEntity = findStoreOrThrow(storeId);
+		applyUpdate(storeEntity, request);
+		return StoreResponse.from(storeEntity);
+	}
 
-		if (!isManagerOrMaster && !storeEntity.isOwnedBy(userId)) {
+	@Override
+	public void deleteMyStore(UUID storeId, UUID ownerId) {
+		StoreEntity storeEntity = findStoreOrThrow(storeId);
+		if (!storeEntity.isOwnedBy(ownerId)) {
 			throw new StoreException(StoreErrorCode.NOT_STORE_OWNER);
 		}
+		storeEntity.softDelete(ownerId);
+	}
 
-		storeEntity.softDelete(userId);
+	@Override
+	public void deleteStore(UUID storeId, UUID adminId) {
+		StoreEntity storeEntity = findStoreOrThrow(storeId);
+		storeEntity.softDelete(adminId);
+	}
+
+	private void validateCategory(UUID categoryId) {
+		if (!categoryJpaRepository.existsById(categoryId)) {
+			throw new StoreException(StoreErrorCode.CATEGORY_NOT_FOUND);
+		}
+	}
+
+	private void applyUpdate(StoreEntity storeEntity, StoreUpdateRequest request) {
+		if (request.categoryId() != null) {
+			validateCategory(request.categoryId());
+		}
+		storeEntity.updateInfo(request.categoryId(), request.name(), request.address(), request.phone());
 	}
 
 	private StoreEntity findStoreOrThrow(UUID storeId) {
