@@ -4,6 +4,7 @@ import com.example.pdelivery.shared.ApiResponse;
 import com.example.pdelivery.user.application.service.LoginService;
 import com.example.pdelivery.user.presentation.dto.LoginRequestDto;
 import com.example.pdelivery.user.presentation.dto.LoginResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class AuthTokenController {
 
 	private final LoginService loginService;
 
+	@Operation(security = {})
 	@PostMapping("/auth/tokens")
 	public ResponseEntity<ApiResponse<LoginResponseDto>> login(
 		@Valid @RequestBody LoginRequestDto dto) {
