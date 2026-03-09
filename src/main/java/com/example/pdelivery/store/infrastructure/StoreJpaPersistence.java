@@ -1,5 +1,6 @@
 package com.example.pdelivery.store.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,5 +43,10 @@ public class StoreJpaPersistence implements StoreRepository {
 	@Override
 	public boolean existsById(UUID storeId) {
 		return storeJpaRepository.findByIdAndNotDeleted(storeId).isPresent();
+	}
+
+	@Override
+	public List<UUID> findStoreIdsByOwnerId(UUID ownerId) {
+		return storeJpaRepository.findStoreIdsByOwnerId(ownerId);
 	}
 }

@@ -10,8 +10,10 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "p_review")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,5 +36,13 @@ public class ReviewEntity extends BaseEntity {
 		reviewEntity.review = new Review(reviewRequest.rating(), reviewRequest.content());
 
 		return reviewEntity;
+	}
+
+	public void updateReview(int rating, String content) {
+		this.review = new Review(rating, content);
+	}
+
+	public boolean isOwnedBy(UUID customerId) {
+		return this.customerId.equals(customerId);
 	}
 }

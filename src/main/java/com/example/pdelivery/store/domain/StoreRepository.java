@@ -1,5 +1,6 @@
 package com.example.pdelivery.store.domain;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,4 +18,6 @@ public interface StoreRepository {
 	Slice<StoreEntity> findByStatus(StoreStatus status, Pageable pageable);
 
 	boolean existsById(UUID storeId);
+
+	List<UUID> findStoreIdsByOwnerId(UUID ownerId);
 }

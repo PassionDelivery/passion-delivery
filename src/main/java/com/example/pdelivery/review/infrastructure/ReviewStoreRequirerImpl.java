@@ -1,5 +1,6 @@
 package com.example.pdelivery.review.infrastructure;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.example.pdelivery.shared.Requirer;
@@ -16,5 +17,10 @@ public class ReviewStoreRequirerImpl implements ReviewStoreRequirer {
 	@Override
 	public boolean existsBy(UUID storeId) {
 		return storeProvider.existsById(storeId);
+	}
+
+	@Override
+	public List<UUID> findStoreIdsByOwnerId(UUID ownerId) {
+		return storeProvider.findStoreIdsByOwnerId(ownerId);
 	}
 }

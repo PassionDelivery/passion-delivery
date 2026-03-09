@@ -2,21 +2,26 @@ package com.example.pdelivery.review.infrastructure;
 
 import static com.example.pdelivery.review.ReviewErrorCode.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
+import com.example.pdelivery.order.application.provider.OrderInfo;
+import com.example.pdelivery.order.application.provider.OrderProvider;
 import com.example.pdelivery.review.ReviewException;
 import com.example.pdelivery.shared.Requirer;
-import com.example.pdelivery.shared.enums.OrderStatus;
+
+import lombok.RequiredArgsConstructor;
 
 @Requirer
+@RequiredArgsConstructor
 public class ReviewOrderRequirerImpl implements ReviewOrderRequirer {
+
+	private final OrderProvider orderProvider;
+
 	@Override
 	public OrderData getOrderInfo(UUID orderId) {
-		//todo: provider에서 받은 값으로 변경 필요
-		Optional<OrderData> orderData = Optional.of(new OrderData(OrderStatus.COMPLETED));
-		return orderData.orElseThrow(
-			() -> new ReviewException(REVIEW_USER_NOT_FOUND)
-		);
+		OrderInfo orderInfo = orderProvider.getOrderInfo(orderId)
+			.orElseThrow(() -> new ReviewException(REVIEW_ORDER_NOT_FOUND));
+
+		return new OrderData(orderInfo.status());
 	}
 }
