@@ -2,7 +2,10 @@ package com.example.pdelivery.user.presentation.controller;
 
 import java.util.UUID;
 
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -32,6 +35,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/users")
 public class UserController {
 
+	private static final Set<Integer> ALLOWED_SIZES = Set.of(10, 30, 50);
+
 	private final UserService userService;
 
 	@GetMapping
@@ -40,7 +45,9 @@ public class UserController {
 		@RequestParam(defaultValue = "") String username,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		return ApiResponse.ok(userService.getUsers(username, pageable));
+		int normalizedSize = ALLOWED_SIZES.contains(pageable.getPageSize()) ? pageable.getPageSize() : 10;
+		Pageable normalized = PageRequest.of(pageable.getPageNumber(), normalizedSize, pageable.getSort());
+		return ApiResponse.ok(userService.getUsers(username, normalized));
 	}
 
 	@GetMapping("/me")
