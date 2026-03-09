@@ -79,7 +79,10 @@ public class StoreEntity extends BaseEntity {
 		this.rejectReason = rejectReason;
 	}
 
-	public void updateInfo(String name, String address, String phone) {
+	public void updateInfo(UUID categoryId, String name, String address, String phone) {
+		if (categoryId != null) {
+			this.categoryId = categoryId;
+		}
 		this.store = new Store(name, address, phone);
 	}
 
@@ -88,6 +91,6 @@ public class StoreEntity extends BaseEntity {
 	}
 
 	public boolean isOwnedBy(UUID userId) {
-		return this.ownerId.equals(userId);
+		return userId != null && this.ownerId.equals(userId);
 	}
 }

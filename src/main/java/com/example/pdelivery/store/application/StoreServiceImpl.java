@@ -58,6 +58,9 @@ public class StoreServiceImpl implements StoreService {
 	@Transactional(readOnly = true)
 	public StoreDetailResponse getStore(UUID storeId) {
 		StoreEntity storeEntity = findStoreOrThrow(storeId);
+		if (storeEntity.getStatus() != StoreStatus.APPROVED) {
+			throw new StoreException(StoreErrorCode.STORE_NOT_FOUND);
+		}
 		return StoreDetailResponse.from(storeEntity);
 	}
 
@@ -81,7 +84,12 @@ public class StoreServiceImpl implements StoreService {
 	public StoreResponse updateStoreStatus(UUID storeId, StoreStatusUpdateRequest request) {
 		StoreEntity storeEntity = findStoreOrThrow(storeId);
 
-		StoreStatus targetStatus = StoreStatus.valueOf(request.status());
+		StoreStatus targetStatus;
+		try {
+			targetStatus = StoreStatus.valueOf(request.status());
+		} catch (IllegalArgumentException e) {
+			throw new StoreException(StoreErrorCode.INVALID_STATUS_CHANGE, e);
+		}
 
 		if (targetStatus == StoreStatus.APPROVED) {
 			storeEntity.approve();
@@ -107,7 +115,7 @@ public class StoreServiceImpl implements StoreService {
 			throw new StoreException(StoreErrorCode.CATEGORY_NOT_FOUND);
 		}
 
-		storeEntity.updateInfo(request.name(), request.address(), request.phone());
+		storeEntity.updateInfo(request.categoryId(), request.name(), request.address(), request.phone());
 
 		return StoreResponse.from(storeEntity);
 	}
