@@ -81,7 +81,7 @@ class UserControllerTest {
 
 	private Authentication customerAuth(UUID userId, String username) {
 		return new UsernamePasswordAuthenticationToken(
-			new AuthUser(userId, username), null,
+			new AuthUser(userId, username, UserRole.CUSTOMER), null,
 			List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"))
 		);
 	}
