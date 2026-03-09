@@ -53,7 +53,7 @@ public class RatingStatEntity extends BaseEntity {
 	}
 
 	/**
-	 * 리뷰 삭제 시: N이 1이면 초기화, 아니면 A += -(편차) / (N - 1)
+	 * 리뷰 삭제 시: N이 1 이하이면 초기화, 아니면 A += -(편차) / (N - 1)
 	 */
 	public void removeRating(int rating) {
 		if (this.reviewCnt <= 1) {
