@@ -86,8 +86,8 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	// Order에서 사용하는 승인 로직
-	@Transactional
 	@Override
+	@Transactional
 	public boolean approvePaymentByOrder(UUID orderId, Long amount) {
 		Payment payment = paymentRepository.findByOrderId(orderId)
 			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
@@ -100,6 +100,15 @@ public class PaymentServiceImpl implements PaymentService {
 		payment.markPaid(providerPaymentKey, approvedAt);
 
 		return true;
+	}
+
+	@Override
+	@Transactional
+	public void cancelPaymentByOrder(UUID orderId) {
+		Payment payment = paymentRepository.findByOrderId(orderId)
+			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+		payment.cancel();
 	}
 
 	@Transactional(readOnly = true)

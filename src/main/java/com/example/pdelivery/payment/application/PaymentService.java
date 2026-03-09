@@ -24,4 +24,6 @@ public interface PaymentService {
 		Pageable pageable);
 
 	PaymentResponse getPayment(UUID paymentId);
+
+	void cancelPaymentByOrder(UUID orderId);
 }

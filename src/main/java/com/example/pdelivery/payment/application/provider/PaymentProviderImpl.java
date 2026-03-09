@@ -19,5 +19,11 @@ public class PaymentProviderImpl implements PaymentProvider {
 	public void processPayment(UUID orderId, Long amount) {
 		paymentService.approvePaymentByOrder(orderId, amount);
 	}
+
+	@Override
+	@Transactional
+	public void cancelPaymentByOrder(UUID orderId) {
+		paymentService.cancelPaymentByOrder(orderId);
+	}
 }
 

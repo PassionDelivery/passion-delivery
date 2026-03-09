@@ -84,7 +84,7 @@ public class Payment extends BaseEntity {
 		if (this.paymentStatus == PaymentStatus.PAID) {
 			throw new PaymentException(PaymentErrorCode.ALREADY_PAID, "이미 결제된 건입니다.");
 		}
-		
+
 		if (this.paymentStatus != PaymentStatus.READY) {
 			throw new PaymentException(PaymentErrorCode.INVALID_STATUS_TRANSITION,
 				"READY 상태가 아닌 결제는 승인할 수 없습니다. (current=" + this.paymentStatus + ")");
@@ -113,6 +113,20 @@ public class Payment extends BaseEntity {
 			this.approvedAt = approvedAt;
 		}
 		this.paymentStatus = PaymentStatus.FAILED;
+	}
+
+	public void cancel() {
+		if (paymentStatus == PaymentStatus.PAID) {
+			paymentStatus = PaymentStatus.CANCELLED;
+			return;
+		}
+
+		if (paymentStatus == PaymentStatus.READY) {
+			paymentStatus = PaymentStatus.CANCELLED;
+			return;
+		}
+
+		throw new PaymentException(PaymentErrorCode.INVALID_STATUS_TRANSITION);
 	}
 
 }
