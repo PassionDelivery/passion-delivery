@@ -38,7 +38,7 @@ public class ReviewController {
 	@PostMapping
 	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<ApiResponse<ReviewResponse>> createReview(
-		@RequestBody CreateReviewRequest reviewRequest,
+		@RequestBody @Valid CreateReviewRequest reviewRequest,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
 		var review = reviewService.createReview(authUser.userId(), reviewRequest);
