@@ -32,6 +32,7 @@ import com.example.pdelivery.payment.domain.PaymentMethod;
 import com.example.pdelivery.payment.domain.PaymentProvider;
 import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.shared.security.JwtAccessDeniedHandler;
+import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.shared.security.JwtAuthFilter;
 import com.example.pdelivery.shared.security.JwtAuthenticationEntryPoint;
 import com.example.pdelivery.shared.security.SecurityConfig;
@@ -78,14 +79,14 @@ public class PaymentControllerTest {
 
 	private Authentication customerAuth(UUID userId, String username) {
 		return new UsernamePasswordAuthenticationToken(
-			new AuthUser(userId, username), null,
+			new AuthUser(userId, username, UserRole.CUSTOMER), null,
 			List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"))
 		);
 	}
 
 	private Authentication ownerAuth(UUID userId, String username) {
 		return new UsernamePasswordAuthenticationToken(
-			new AuthUser(userId, username), null,
+			new AuthUser(userId, username, UserRole.OWNER), null,
 			List.of(new SimpleGrantedAuthority("ROLE_OWNER"))
 		);
 	}
