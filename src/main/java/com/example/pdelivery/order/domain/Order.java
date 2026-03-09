@@ -41,7 +41,7 @@ public class Order extends BaseEntity {
 	private String reason;
 
 	@Getter
-	private Integer totalPrice;
+	private Long totalPrice;
 
 	//MSA 확장 고려하여 논리적 연관관계 맵핑
 	private UUID customerId;
@@ -74,7 +74,7 @@ public class Order extends BaseEntity {
 
 	private void calculateTotalPrice() {
 		this.totalPrice = this.orderLines.stream()
-			.mapToInt(line -> line.calculateSubTotalPrice())
+			.mapToLong(line -> line.calculateSubTotalPrice())
 			.sum();
 	}
 
@@ -167,7 +167,7 @@ public class Order extends BaseEntity {
 	@Getter // test 위해서만
 	public static class OrderView {
 		private final String address;
-		private final Integer totalPrice;
+		private final Long totalPrice;
 		private final OrderStatus status;
 		private final List<OrderLine> orderLines;
 

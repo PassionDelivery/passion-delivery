@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.pdelivery.order.application.OrderService;
 import com.example.pdelivery.order.domain.Order;
+import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 import com.example.pdelivery.shared.ApiResponse;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 import com.example.pdelivery.shared.security.AuthUser;
+import com.example.pdelivery.user.domain.entity.UserRole;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class OrderController {
 	private final OrderService orderService;
+	private final OrderStoreRequirer orderStoreRequirer;
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<OrderCreateResponse>> createOrder(@AuthenticationPrincipal AuthUser authUser,
@@ -71,7 +74,13 @@ public class OrderController {
 
 		OrderDataResponse res = order.toSummaryResponse();
 
-		// role에 따라 response 다름 if (authUser.)
+		// role에 따라 response 다름
+		if (authUser.role() == UserRole.CUSTOMER) {
+			UUID storeId = order.getStoreId();
+			res.updateStoreInfo(storeId, orderStoreRequirer.getStoreName(storeId));
+		} else {
+			res.updateUsername(authUser.username());
+		}
 		return ApiResponse.create(res);
 	}
 
@@ -85,6 +94,7 @@ public class OrderController {
 		return ApiResponse.create(new OrderStatusResponse(orderId, OrderStatus.CANCELLED));
 	}
 
+	@PreAuthorize("hasRole('OWNER') or hasRols('Manager')")
 	@PatchMapping("/{orderId}/status")
 	public ResponseEntity<ApiResponse<OrderStatusResponse>> changeOrderStatus(
 		@AuthenticationPrincipal AuthUser authUser,

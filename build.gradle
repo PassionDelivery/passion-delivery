@@ -58,6 +58,9 @@ dependencies {
     // --- Swagger UI (Springdoc OpenAPI 2.x for Spring Boot 3.x) ---
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 
+    //env auto read
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
     constraints {
         implementation('org.apache.commons:commons-lang3:3.17.1') {
             because 'security vulnerability CVE-2025-48924 in 3.17.0'

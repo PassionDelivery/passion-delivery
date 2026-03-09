@@ -27,9 +27,10 @@ public class OrderResponse {
 		UUID orderId;
 		UUID storeId;
 		String storeName;
+		String username;
 		String deliveryAddress;
 		String orderTitle;
-		int totalPrice;
+		Long totalPrice;
 		String orderStatus;
 		LocalDateTime createdAt;
 		List<OrderLineResponse> orderMenus;
@@ -38,7 +39,7 @@ public class OrderResponse {
 			UUID orderId,
 			String deliveryAddress,
 			String orderTitle,
-			int totalPrice,
+			Long totalPrice,
 			String orderStatus,
 			LocalDateTime createdAt,
 			List<OrderLineResponse> orderMenus
@@ -55,6 +56,10 @@ public class OrderResponse {
 		public void updateStoreInfo(UUID storeId, String storeName) {
 			this.storeId = storeId;
 			this.storeName = storeName;
+		}
+
+		public void updateUsername(String username) {
+			this.username = username;
 		}
 
 	}

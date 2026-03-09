@@ -156,7 +156,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new OrderException(CANCEL_TIMEOUT);
 		}
 
-		//TO DO: 결제 취소 요청
+		orderPaymentRequirer.cancelPaymentByOrder(orderId);
 
 		order.updateStatus(OrderStatus.CANCELLED);
 		order.updateReason(req.reason());

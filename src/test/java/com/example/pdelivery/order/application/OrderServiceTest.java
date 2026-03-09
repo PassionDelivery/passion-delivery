@@ -90,7 +90,7 @@ class OrderServiceTest {
 			// Stubbing
 			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
-			when(orderPaymentRequirer.processPayment(any(), eq(54000))).thenReturn(true);
+			when(orderPaymentRequirer.processPayment(any(), eq(54000L))).thenReturn(true);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
 			Order result = orderService.createOrder(customerId, req);
@@ -116,7 +116,7 @@ class OrderServiceTest {
 			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
-			when(orderPaymentRequirer.processPayment(any(), anyInt())).thenThrow(
+			when(orderPaymentRequirer.processPayment(any(), anyLong())).thenThrow(
 				new OrderException(OrderErrorCode.PAYMENT_FAILED));
 
 			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)

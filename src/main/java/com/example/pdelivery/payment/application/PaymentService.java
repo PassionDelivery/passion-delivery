@@ -25,5 +25,5 @@ public interface PaymentService {
 
 	PaymentResponse getPayment(UUID paymentId);
 
-	void cancelPaymentByOrder(UUID orderId);
+	boolean cancelPaymentByOrder(UUID orderId);
 }

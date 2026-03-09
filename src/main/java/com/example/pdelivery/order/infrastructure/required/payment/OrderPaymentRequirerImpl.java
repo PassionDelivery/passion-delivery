@@ -6,22 +6,35 @@ import org.springframework.stereotype.Component;
 
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
+import com.example.pdelivery.payment.application.provider.PaymentProvider;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
 public class OrderPaymentRequirerImpl implements OrderPaymentRequirer {
-	// private final PaymentProvider paymentProvider;
+	private final PaymentProvider paymentProvider;
 
-	private boolean paymentOrderProvider = true;
+	// private boolean paymentOrderProvider = true;
 
-	public Boolean processPayment(UUID orderId, Integer amount) {
-		//return paymentOrderProvider의 결제 성공/실패 로직
-		if (paymentOrderProvider)
+	public Boolean processPayment(UUID orderId, Long amount) {
+		if (paymentProvider.processPayment(orderId, amount))
 			return true;
 		else
 			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
+		/*
+			TO DO:
+			ex) http 통신 시 timeout check -> SocketTimeoutException
+			//throw new OrderException(OrderErrorCode.PROVIDER_ERROR);
+		 */
+	}
+
+	public Boolean cancelPaymentByOrder(UUID orderId) {
+		//return paymentOrderProvider의 결제 성공/실패 로직
+		if (paymentProvider.cancelPaymentByOrder(orderId))
+			return true;
+		else
+			throw new OrderException(OrderErrorCode.PAYMENT_FAILED, "결제 취소 실패");
 		/*
 			TO DO:
 			ex) http 통신 시 timeout check -> SocketTimeoutException

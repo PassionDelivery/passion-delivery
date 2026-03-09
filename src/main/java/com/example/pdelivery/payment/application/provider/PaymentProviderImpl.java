@@ -16,14 +16,14 @@ public class PaymentProviderImpl implements PaymentProvider {
 
 	@Override
 	@Transactional
-	public void processPayment(UUID orderId, Long amount) {
-		paymentService.approvePaymentByOrder(orderId, amount);
+	public boolean processPayment(UUID orderId, Long amount) {
+		return paymentService.approvePaymentByOrder(orderId, amount);
 	}
 
 	@Override
 	@Transactional
-	public void cancelPaymentByOrder(UUID orderId) {
-		paymentService.cancelPaymentByOrder(orderId);
+	public boolean cancelPaymentByOrder(UUID orderId) {
+		return paymentService.cancelPaymentByOrder(orderId);
 	}
 }
 

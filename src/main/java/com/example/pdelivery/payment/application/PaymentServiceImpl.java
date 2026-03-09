@@ -104,11 +104,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	@Transactional
-	public void cancelPaymentByOrder(UUID orderId) {
+	public boolean cancelPaymentByOrder(UUID orderId) {
 		Payment payment = paymentRepository.findByOrderId(orderId)
 			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
 		payment.cancel();
+		return true;
 	}
 
 	@Transactional(readOnly = true)

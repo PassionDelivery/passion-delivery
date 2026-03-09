@@ -12,6 +12,6 @@ public record OrderInfo(UUID orderId,
 						String address,
 						OrderStatus status,
 						String reason,
-						Integer totalPrice,
+						Long totalPrice,
 						List<OrderLineVO> orderLines) {
 }
