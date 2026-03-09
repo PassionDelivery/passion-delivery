@@ -55,7 +55,7 @@ public class OrderController {
 		return ApiResponse.create(res);
 	}
 
-	@PreAuthorize("hasRole('OWNER') or hasRols('Manager')")
+	@PreAuthorize("hasRole('OWNER') or hasRole('Manager')")
 	@GetMapping("/stores/{storeId}")
 	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByStore(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable(name = "storeId") UUID storeId,
