@@ -18,7 +18,7 @@ public class OrderPaymentRequirerImpl implements OrderPaymentRequirer {
 
 	// private boolean paymentOrderProvider = true;
 
-	public Boolean processPayment(UUID customerId, CreatePaymentRequest request) {
+	public boolean processPayment(UUID customerId, CreatePaymentRequest request) {
 		if (paymentProvider.processPayment(customerId, request))
 			return true;
 		else
@@ -30,7 +30,7 @@ public class OrderPaymentRequirerImpl implements OrderPaymentRequirer {
 		 */
 	}
 
-	public Boolean cancelPaymentByOrder(UUID orderId) {
+	public boolean cancelPaymentByOrder(UUID orderId) {
 		//return paymentOrderProvider의 결제 성공/실패 로직
 		if (paymentProvider.cancelPaymentByOrder(orderId))
 			return true;
