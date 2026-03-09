@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
+import com.example.pdelivery.store.application.provided.StoreProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,20 +14,14 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class MenuStoreRequirerImpl implements MenuStoreRequirer {
 
-	// private final StoreProvider storeProvider;
-	private final StoreData storeData = new StoreData(UUID.randomUUID(), UUID.randomUUID());
+	private final StoreProvider storeProvider;
 
 	@Override
 	public StoreData getStore(UUID storeId) {
-		// StoreData storeData = storeProvider.getStore(storeId);
-		if (storeData == null) {
+		com.example.pdelivery.store.application.provided.StoreInfo data = storeProvider.getStore(storeId);
+		if (data == null) {
 			throw new MenuException(MenuErrorCode.STORE_NOT_FOUND);
 		}
-		return storeData;
-		/*
-			TODO: Store 모듈 구현 후 StoreProvider에 위임하도록 교체
-			ex) http 통신 시 timeout check -> SocketTimeoutException
-			//throw new MenuException(MenuErrorCode.PROVIDER_ERROR);
-		 */
+		return new StoreData(data.storeId(), data.ownerId());
 	}
 }
