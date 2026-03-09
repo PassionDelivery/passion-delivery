@@ -54,7 +54,7 @@ public class StoreController {
 
 	// MANAGER/MASTER: 가게 등록 (APPROVED)
 	@PostMapping
-	@PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
+	@PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
 	public ResponseEntity<ApiResponse<StoreResponse>> createStore(
 		@RequestBody @Valid StoreCreateRequest request,
 		@AuthenticationPrincipal AuthUser authUser
