@@ -1,9 +1,12 @@
 package com.example.pdelivery.order.infrastructure.required.cart;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.example.pdelivery.cart.application.provided.CartInfo;
+import com.example.pdelivery.cart.application.provided.CartProvider;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
 
@@ -12,23 +15,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class OrderCartRequirerImpl implements OrderCartRequirer {
-	// private final CartProvider cartProvider;
-	private CartData cartData;
 
+	private final CartProvider cartProvider;
+
+	@Override
 	public CartData getCartLines(UUID cartId) {
+		CartInfo cartInfo = cartProvider.getCartInfo(cartId)
+			.orElseThrow(() -> new OrderException(OrderErrorCode.REQUIRED_PARAMETER_MISSING, "cart not found"));
 
-		//데이터가 없거나 빈 경우
-		if (cartData.storeId() == null) {
+		if (cartInfo.storeId() == null) {
 			throw new OrderException(OrderErrorCode.REQUIRED_PARAMETER_MISSING, "storeId is missing");
 		}
-		if (cartData.cartItems() == null || cartData.cartItems().isEmpty()) {
+		if (cartInfo.cartItems() == null || cartInfo.cartItems().isEmpty()) {
 			throw new OrderException(OrderErrorCode.CART_EMPTY);
 		}
-		return cartData;
-		/*
-			TO DO:
-			ex) http 통신 시 timeout check -> SocketTimeoutException
-			//throw new OrderException(OrderErrorCode.PROVIDER_ERROR);
-		 */
+
+		List<CartData.CartItems> cartItems = cartInfo.cartItems().stream()
+			.map(item -> new CartData.CartItems(item.menuId(), item.quantity()))
+			.toList();
+
+		return new CartData(cartInfo.storeId(), cartItems);
 	}
 }

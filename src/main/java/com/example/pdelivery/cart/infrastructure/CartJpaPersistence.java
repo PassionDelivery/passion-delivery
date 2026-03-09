@@ -24,4 +24,9 @@ public class CartJpaPersistence implements CartRepository {
 	public Optional<CartEntity> findById(UUID cartId) {
 		return cartJpaRepository.findById(cartId);
 	}
+
+	@Override
+	public Optional<CartEntity> findByUserId(UUID userId) {
+		return cartJpaRepository.findByUserId(userId);
+	}
 }
