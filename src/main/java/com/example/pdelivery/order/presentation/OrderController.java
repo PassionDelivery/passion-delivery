@@ -60,7 +60,7 @@ public class OrderController {
 	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByStore(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable(name = "storeId") UUID storeId,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @Parameter Pageable pageable) {
-		//store의 ownerid
+		//TODO: store의 ownerid와 auth userid 동일 확인
 		PageResponse res = orderService.getOrderItemsByStore(storeId, pageable);
 
 		return ApiResponse.create(res);
@@ -71,7 +71,7 @@ public class OrderController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId) {
 		Order order = orderService.getOrder(orderId);
-		//TO DO: userId와 orderId의 customerId같은지 확인 필요
+		//TODO: userId와 orderId의 customerId같은지 확인 필요
 
 		OrderDataResponse res = order.toSummaryResponse();
 
@@ -89,7 +89,7 @@ public class OrderController {
 	public ResponseEntity<ApiResponse<OrderStatusResponse>> cancelOrder(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId,
 		@RequestBody OrderCancelRequest req) {
-		//TO DO: userId와 orderId의 customerId같은지 확인 필요
+		//TODO: userId와 orderId의 customerId같은지 확인 필요
 		orderService.cancelOrder(orderId, req);
 
 		return ApiResponse.create(new OrderStatusResponse(orderId, OrderStatus.CANCELLED));
@@ -101,7 +101,7 @@ public class OrderController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId,
 		@RequestBody OrderChangeStatusRequest req) {
-		//TO DO: userId와 orderId의 customerId같은지 확인 필요
+		//TODO: userId와 orderId의 ownerId같은지 확인 필요
 		orderService.changeStatusOrder(orderId, req);
 
 		return ApiResponse.create(new OrderStatusResponse(orderId, req.orderStatus()));
