@@ -1,11 +1,12 @@
 package com.example.pdelivery.order.domain;
 
+import static com.example.pdelivery.order.presentation.OrderResponse.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.example.pdelivery.order.application.provider.OrderInfo;
-import com.example.pdelivery.order.presentation.OrderResponse;
 import com.example.pdelivery.shared.BaseEntity;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
@@ -93,8 +94,8 @@ public class Order extends BaseEntity {
 	}
 
 	//작은 프로젝트라 res entity에서 바로 생성하지만 레이어 경계 다시 생각해보기
-	public OrderResponse.OrderListData toSummaryResponse() {
-		return new OrderResponse.OrderListData(
+	public OrderDataResponse toSummaryResponse() {
+		return new OrderDataResponse(
 			this.getId(),
 			this.address,
 			generateOrderTitle(),
@@ -104,7 +105,7 @@ public class Order extends BaseEntity {
 			this.orderLines.stream()
 				.map(line -> {
 					OrderLineVO orderLineVO = line.toVO();
-					return new OrderResponse.OrderLineResponse(
+					return new OrderLineResponse(
 						orderLineVO.menuName(),
 						orderLineVO.price(),
 						orderLineVO.quantity()
@@ -112,6 +113,10 @@ public class Order extends BaseEntity {
 				})
 				.toList()
 		);
+	}
+
+	public OrderCreateResponse toCreateResponse() {
+		return new OrderCreateResponse(this.getId(), this.status.name());
 	}
 
 	private String generateOrderTitle() {

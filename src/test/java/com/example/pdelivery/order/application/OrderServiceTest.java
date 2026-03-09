@@ -48,7 +48,9 @@ class OrderServiceTest {
 	// 공통 가짜 데이터 필드
 	private UUID storeId;
 	private UUID cartId;
-	private UUID addressId;
+	private UUID customerId;
+	// private UUID addressId;
+	private String address;
 	private UUID chickenId;
 	private UUID pizzaId;
 	private List<CartItems> items;
@@ -59,11 +61,12 @@ class OrderServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		customerId = UUID.randomUUID();
 		storeId = UUID.randomUUID();
 		cartId = UUID.randomUUID();
-		addressId = UUID.randomUUID();
+		address = "서울시 중구 14-25";
 
-		req = new OrderRequest.OrderCreateRequest(cartId, addressId);
+		req = new OrderRequest.OrderCreateRequest(cartId, address);
 
 		chickenId = UUID.randomUUID();
 		pizzaId = UUID.randomUUID();
@@ -85,18 +88,18 @@ class OrderServiceTest {
 		@DisplayName("주문 생성 성공 테스트")
 		void createOrder_Success() {
 			// Stubbing
-			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderPaymentRequirer.processPayment(any(), eq(54000))).thenReturn(true);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
-			Order result = orderService.createOrder(req);
+			Order result = orderService.createOrder(customerId, req);
 
 			// Assert
 			Order.OrderView orderView = new Order.OrderView(result);
 
 			assertThat(result).isNotNull();
-			assertThat(orderView.getAddress()).isEqualTo("서울시 강남구");
+			assertThat(orderView.getAddress()).isEqualTo("서울시 중구 14-25");
 			assertThat(orderView.getTotalPrice()).isEqualTo(54000);
 
 			assertThat(orderView.getOrderLines()).extracting("menuId", "quantity", "price")
@@ -110,13 +113,13 @@ class OrderServiceTest {
 		@DisplayName("결제 실패 테스트")
 		void createOrder_Payment() {
 			//Stubbing
-			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 			when(orderPaymentRequirer.processPayment(any(), anyInt())).thenThrow(
 				new OrderException(OrderErrorCode.PAYMENT_FAILED));
 
-			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
 				.hasMessageContaining("결제 실패")
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.PAYMENT_FAILED);
@@ -133,10 +136,10 @@ class OrderServiceTest {
 			List<UUID> emptyMenuIds = new ArrayList<>();
 			List<MenuData> emptyMenuData = new ArrayList<>();
 
-			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenThrow(new OrderException(OrderErrorCode.CART_EMPTY));
 
-			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.CART_EMPTY);
 
@@ -149,10 +152,10 @@ class OrderServiceTest {
 		@DisplayName("빈 주소 실패 테스트")
 		void createOrder_Address() {
 			//null or 빈 문자열 왔다고 가정
-			when(orderAddressRequirer.getAddress(addressId)).thenThrow(
-				new OrderException(OrderErrorCode.ADDRESS_INVALID));
+			// when(orderAddressRequirer.getAddress(addressId)).thenThrow(
+			// 	new OrderException(OrderErrorCode.ADDRESS_INVALID));
 
-			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.ADDRESS_INVALID);
 
@@ -169,11 +172,11 @@ class OrderServiceTest {
 			menuIds.add(kimbap);
 			menuData.add(new MenuData(kimbap, "kimbap", 4000));
 
-			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
-			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
 				.hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.INVALID_QUANTITY);
 		}
 
@@ -185,11 +188,11 @@ class OrderServiceTest {
 			menuIds.add(kimbap);
 			menuData.add(new MenuData(kimbap, "kimbap", -1));
 
-			when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
-			assertThatThrownBy(() -> orderService.createOrder(req)).isInstanceOf(OrderException.class)
+			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
 				.hasFieldOrPropertyWithValue("errorCode", OrderErrorCode.INVALID_PRICE);
 		}
 	}

@@ -20,7 +20,6 @@ import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
-import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
 import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
@@ -37,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderServiceImpl implements OrderService {
 	private final OrderRepository orderRepository;
 	private final OrderCartRequirer orderCartRequirer;
-	private final OrderAddressRequirer orderAddressRequirer;
+	// private final OrderAddressRequirer orderAddressRequirer;
 	private final OrderPaymentRequirer orderPaymentRequirer;
 	private final OrderMenuRequirer orderMenuRequirer;
 	private final OrderStoreRequirer orderStoreRequirer;
@@ -47,8 +46,9 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional
 	@Override
-	public Order createOrder(OrderCreateRequest req) {
-		String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
+	public Order createOrder(UUID customerId, OrderCreateRequest req) {
+		// String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
+		String address = req.address();
 		CartData cartLines = orderCartRequirer.getCartLines(req.cartId());
 		List<UUID> menuIds = cartLines.cartItems().stream().map(CartData.CartItems::menuId).toList();
 		List<MenuData> menuData = orderMenuRequirer.getMenus(menuIds);
@@ -77,14 +77,15 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public PageResponse getOrderItemsByCustomer(Pageable pageable) {
+	@Override
+	public PageResponse getOrderItemsByCustomer(UUID customerId, Pageable pageable) {
 		//TO DO: customer 존재 확인
 
 		Slice<Order> orderItems = orderRepository.findAllByCustomerId(customerId, pageable);
 
-		List<OrderListData> orderListData = orderItems.getContent().stream()
+		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
 			.map(order -> {
-				OrderListData summaryResponse = order.toSummaryResponse();
+				OrderDataResponse summaryResponse = order.toSummaryResponse();
 				UUID storeId = order.getStoreId();
 				String storeName = orderStoreRequirer.getStoreName((storeId));
 
@@ -104,14 +105,15 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Transactional(readOnly = true)
+	@Override
 	public PageResponse getOrderItemsByStore(UUID storeId, Pageable pageable) {
 		//TO DO: store 존재 확인
 
 		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
 
-		List<OrderListData> orderListData = orderItems.getContent().stream()
+		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
 			.map(order -> {
-				OrderListData summaryResponse = order.toSummaryResponse();
+				OrderDataResponse summaryResponse = order.toSummaryResponse();
 				return summaryResponse;
 			})
 			.toList();
@@ -125,10 +127,11 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Transactional(readOnly = true)
+	@Override
 	public Order getOrder(UUID orderId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new OrderException(ORDER_NOT_FOUND));
-		
+
 		return order;
 	}
 

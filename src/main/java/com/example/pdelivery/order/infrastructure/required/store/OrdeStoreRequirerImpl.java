@@ -18,7 +18,7 @@ public class OrdeStoreRequirerImpl implements OrderStoreRequirer {
 		store존재 체크 필요
 		 */
 
-		return "";
+		return "storename";
 		/*
 			TO DO:
 			ex) http 통신 시 timeout check -> SocketTimeoutException

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class OrderPaymentRequirerImpl implements OrderPaymentRequirer {
-	//private final PaymentOrderProvider paymentOrderProvider;
+	// private final PaymentProvider paymentProvider;
 
 	private boolean paymentOrderProvider = true;
 

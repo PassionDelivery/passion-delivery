@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.pdelivery.shared.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Getter;
@@ -11,7 +12,18 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse {
 	@Getter
-	public static class OrderListData {
+	public static class OrderCreateResponse {
+		UUID orderId;
+		String orderStatus;
+
+		public OrderCreateResponse(UUID orderId, String orderStatus) {
+			this.orderId = orderId;
+			this.orderStatus = orderStatus;
+		}
+	}
+
+	@Getter
+	public static class OrderDataResponse {
 		UUID orderId;
 		UUID storeId;
 		String storeName;
@@ -22,7 +34,7 @@ public class OrderResponse {
 		LocalDateTime createdAt;
 		List<OrderLineResponse> orderMenus;
 
-		public OrderListData(
+		public OrderDataResponse(
 			UUID orderId,
 			String deliveryAddress,
 			String orderTitle,
@@ -54,4 +66,15 @@ public class OrderResponse {
 	) {
 
 	}
+
+	public static class OrderStatusResponse {
+		UUID orderId;
+		OrderStatus status;
+
+		public OrderStatusResponse(UUID orderId, OrderStatus status) {
+			this.orderId = orderId;
+			this.status = status;
+		}
+	}
+
 }
