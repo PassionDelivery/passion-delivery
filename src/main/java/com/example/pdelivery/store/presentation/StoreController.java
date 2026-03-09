@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.pdelivery.shared.ApiResponse;
-import jakarta.validation.Valid;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.store.application.StoreService;
@@ -32,6 +31,7 @@ import com.example.pdelivery.store.presentation.dto.StoreSearchResponse;
 import com.example.pdelivery.store.presentation.dto.StoreStatusUpdateRequest;
 import com.example.pdelivery.store.presentation.dto.StoreUpdateRequest;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController

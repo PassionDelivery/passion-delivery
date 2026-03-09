@@ -8,16 +8,14 @@ import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
 public class OrderRequest {
-	public record OrderCreateRequest(UUID cartId, UUID deliveryAddressId) {
+	public record OrderCreateRequest(UUID cartId, String address) {
 
 		public OrderCreateRequest {
-			validate(cartId, "cartId");
-			validate(deliveryAddressId, "deliveryAddressId");
-		}
-
-		private void validate(UUID id, String fieldName) {
-			if (id == null) {
-				throw new OrderException(REQUIRED_PARAMETER_MISSING, fieldName + " is missing");
+			if (cartId == null) {
+				throw new OrderException(REQUIRED_PARAMETER_MISSING, "cartId is missing");
+			}
+			if (address == null || address.isBlank()) {
+				throw new OrderException(REQUIRED_PARAMETER_MISSING, "cartId is missing");
 			}
 		}
 	}

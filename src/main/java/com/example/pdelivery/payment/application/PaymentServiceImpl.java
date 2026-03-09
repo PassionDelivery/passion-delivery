@@ -88,7 +88,10 @@ public class PaymentServiceImpl implements PaymentService {
 	// Order에서 사용하는 승인 로직
 	@Override
 	@Transactional
-	public boolean approvePaymentByOrder(UUID orderId, Long amount) {
+	public boolean approvePaymentByOrder(UUID customerId, CreatePaymentRequest request) {
+		createPayment(customerId, request);
+		UUID orderId = request.orderId();
+		Long amount = request.amount();
 		Payment payment = paymentRepository.findByOrderId(orderId)
 			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 		if (amount == null || payment.getAmount() != amount) {
@@ -104,11 +107,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	@Transactional
-	public void cancelPaymentByOrder(UUID orderId) {
+	public boolean cancelPaymentByOrder(UUID orderId) {
 		Payment payment = paymentRepository.findByOrderId(orderId)
 			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 
 		payment.cancel();
+		return true;
 	}
 
 	@Transactional(readOnly = true)

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.pdelivery.shared.Provider;
-import com.example.pdelivery.store.domain.StoreEntity;
 import com.example.pdelivery.store.domain.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,7 @@ public class StoreProviderImpl implements StoreProvider {
 	@Override
 	public StoreInfo getStore(UUID storeId) {
 		return storeRepository.findById(storeId)
-			.map(entity -> new StoreInfo(entity.getId(), entity.getOwnerId()))
+			.map(entity -> new StoreInfo(entity.getId(), entity.getOwnerId(), entity.getStore().getName()))
 			.orElse(null);
 	}
 

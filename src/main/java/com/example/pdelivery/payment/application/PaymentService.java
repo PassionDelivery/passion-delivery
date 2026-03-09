@@ -18,12 +18,12 @@ public interface PaymentService {
 
 	ApprovePaymentResponse approvePayment(UUID customerId, UUID paymentId);
 
-	boolean approvePaymentByOrder(UUID orderId, Long amount);
+	boolean approvePaymentByOrder(UUID customerId, CreatePaymentRequest request);
 
 	PageResponse<PaymentResponse> search(AuthUser authUser, PaymentSearchCondition condition,
 		Pageable pageable);
 
 	PaymentResponse getPayment(UUID paymentId);
 
-	void cancelPaymentByOrder(UUID orderId);
+	boolean cancelPaymentByOrder(UUID orderId);
 }

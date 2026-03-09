@@ -2,8 +2,10 @@ package com.example.pdelivery.payment.application.provider;
 
 import java.util.UUID;
 
-public interface PaymentProvider {
-	void processPayment(UUID orderId, Long amount);
+import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
 
-	void cancelPaymentByOrder(UUID orderId);
+public interface PaymentProvider {
+	boolean processPayment(UUID customerId, CreatePaymentRequest request);
+
+	boolean cancelPaymentByOrder(UUID orderId);
 }

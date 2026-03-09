@@ -2,6 +2,8 @@ package com.example.pdelivery.order.application;
 
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.error.OrderErrorCode.*;
+import static com.example.pdelivery.order.presentation.OrderResponse.*;
+import static com.example.pdelivery.payment.domain.PaymentMethod.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,22 +11,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
-import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
 import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequirer;
 import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
+import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
+import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
+import com.example.pdelivery.payment.domain.PaymentProvider;
+import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -32,17 +39,19 @@ import lombok.RequiredArgsConstructor;
 public class OrderServiceImpl implements OrderService {
 	private final OrderRepository orderRepository;
 	private final OrderCartRequirer orderCartRequirer;
-	private final OrderAddressRequirer orderAddressRequirer;
+	// private final OrderAddressRequirer orderAddressRequirer;
 	private final OrderPaymentRequirer orderPaymentRequirer;
 	private final OrderMenuRequirer orderMenuRequirer;
+	private final OrderStoreRequirer orderStoreRequirer;
 
 	//추후 삭제 예정
 	private UUID customerId = UUID.randomUUID();
 
 	@Transactional
 	@Override
-	public Order createOrder(OrderCreateRequest req) {
-		String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
+	public Order createOrder(UUID customerId, OrderCreateRequest req) {
+		// String address = orderAddressRequirer.getAddress(req.deliveryAddressId());
+		String address = req.address();
 		CartData cartLines = orderCartRequirer.getCartLines(req.cartId());
 		List<UUID> menuIds = cartLines.cartItems().stream().map(CartData.CartItems::menuId).toList();
 		List<MenuData> menuData = orderMenuRequirer.getMenus(menuIds);
@@ -63,9 +72,72 @@ public class OrderServiceImpl implements OrderService {
 		UUID storeId = cartLines.storeId();
 		Order order = Order.create(storeId, address, customerId, orderLineVOs);
 
-		if (orderPaymentRequirer.processPayment(order.getId(), order.getTotalPrice())) {
-			orderRepository.save(order);
+		orderRepository.save(order);
+
+		CreatePaymentRequest paymentRequest = new CreatePaymentRequest(order.getId(), storeId, CARD,
+			PaymentProvider.TOSS, order.getTotalPrice());
+		if (!orderPaymentRequirer.processPayment(customerId, paymentRequest)) {
+			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
 		}
+
+		return order;
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public PageResponse getOrderItemsByCustomer(UUID customerId, Pageable pageable) {
+		//TO DO: customer 존재 확인
+
+		Slice<Order> orderItems = orderRepository.findAllByCustomerId(customerId, pageable);
+
+		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
+			.map(order -> {
+				OrderDataResponse summaryResponse = order.toSummaryResponse();
+				UUID storeId = order.getStoreId();
+				String storeName = orderStoreRequirer.getStoreName((storeId));
+
+				summaryResponse.updateStoreInfo(storeId, storeName);
+				return summaryResponse;
+			})
+			.toList();
+
+		PageResponse data = new PageResponse(
+			orderListData,
+			// orderItems.getNumber(),
+			// orderItems.getSize(),
+			orderItems.hasNext()
+		);
+
+		return data;
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public PageResponse getOrderItemsByStore(UUID storeId, Pageable pageable) {
+		//TO DO: store 존재 확인
+
+		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
+
+		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
+			.map(order -> {
+				OrderDataResponse summaryResponse = order.toSummaryResponse();
+				return summaryResponse;
+			})
+			.toList();
+
+		PageResponse data = new PageResponse(
+			orderListData,
+			orderItems.hasNext()
+		);
+
+		return data;
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public Order getOrder(UUID orderId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new OrderException(ORDER_NOT_FOUND));
 
 		return order;
 	}
@@ -91,7 +163,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new OrderException(CANCEL_TIMEOUT);
 		}
 
-		//TO DO: 결제 취소 요청
+		orderPaymentRequirer.cancelPaymentByOrder(orderId);
 
 		order.updateStatus(OrderStatus.CANCELLED);
 		order.updateReason(req.reason());

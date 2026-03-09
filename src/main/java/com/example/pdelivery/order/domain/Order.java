@@ -1,5 +1,7 @@
 package com.example.pdelivery.order.domain;
 
+import static com.example.pdelivery.order.presentation.OrderResponse.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,11 +41,13 @@ public class Order extends BaseEntity {
 	private String reason;
 
 	@Getter
-	private Integer totalPrice;
+	private Long totalPrice;
 
 	//MSA 확장 고려하여 논리적 연관관계 맵핑
+	@Getter
 	private UUID customerId;
 
+	@Getter
 	private UUID storeId;
 
 	@OneToMany(cascade = CascadeType.PERSIST)
@@ -71,7 +75,7 @@ public class Order extends BaseEntity {
 
 	private void calculateTotalPrice() {
 		this.totalPrice = this.orderLines.stream()
-			.mapToInt(line -> line.calculateSubTotalPrice())
+			.mapToLong(line -> line.calculateSubTotalPrice())
 			.sum();
 	}
 
@@ -88,6 +92,41 @@ public class Order extends BaseEntity {
 		order.calculateTotalPrice();
 
 		return order;
+	}
+
+	//작은 프로젝트라 res entity에서 바로 생성하지만 레이어 경계 다시 생각해보기
+	public OrderDataResponse toSummaryResponse() {
+		return new OrderDataResponse(
+			this.getId(),
+			this.address,
+			generateOrderTitle(),
+			this.totalPrice,
+			this.status.name(),
+			this.getCreatedAt(),
+			this.orderLines.stream()
+				.map(line -> {
+					OrderLineVO orderLineVO = line.toVO();
+					return new OrderLineResponse(
+						orderLineVO.menuName(),
+						orderLineVO.price(),
+						orderLineVO.quantity()
+					);
+				})
+				.toList()
+		);
+	}
+
+	public OrderCreateResponse toCreateResponse() {
+		return new OrderCreateResponse(this.getId(), this.status.name());
+	}
+
+	private String generateOrderTitle() {
+		if (orderLines.isEmpty()) {
+			return "주문 내역 없음";
+		}
+		String firstItemName = orderLines.get(0).toVO().menuName();
+		int extraCount = orderLines.size() - 1;
+		return extraCount > 0 ? firstItemName + " 외 " + extraCount + "건" : firstItemName;
 	}
 
 	//OrderInfo는 application 단, 레이어 경계 다시 생각 필요성 있음
@@ -129,7 +168,7 @@ public class Order extends BaseEntity {
 	@Getter // test 위해서만
 	public static class OrderView {
 		private final String address;
-		private final Integer totalPrice;
+		private final Long totalPrice;
 		private final OrderStatus status;
 		private final List<OrderLine> orderLines;
 

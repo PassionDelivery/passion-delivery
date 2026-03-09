@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class OrderCartRequirerImpl implements OrderCartRequirer {
-
 	private final CartProvider cartProvider;
 
 	@Override
@@ -23,6 +22,9 @@ public class OrderCartRequirerImpl implements OrderCartRequirer {
 		CartInfo cartInfo = cartProvider.getCartInfo(cartId)
 			.orElseThrow(() -> new OrderException(OrderErrorCode.CART_NOT_FOUND));
 
+		List<CartData.CartItems> cartItems = cartInfo.cartItems().stream().map(cartLineInfo
+				-> new CartData.CartItems(cartLineInfo.menuId(), cartLineInfo.quantity()))
+			.toList();
 		//데이터가 없거나 빈 경우
 		if (cartInfo.storeId() == null || cartInfo.cartItems() == null) {
 			throw new OrderException(OrderErrorCode.PROVIDER_ERROR, "cart provider returned incomplete data");
@@ -30,10 +32,6 @@ public class OrderCartRequirerImpl implements OrderCartRequirer {
 		if (cartInfo.cartItems().isEmpty()) {
 			throw new OrderException(OrderErrorCode.CART_EMPTY);
 		}
-
-		List<CartData.CartItems> cartItems = cartInfo.cartItems().stream()
-			.map(item -> new CartData.CartItems(item.menuId(), item.quantity()))
-			.toList();
 
 		return new CartData(cartInfo.storeId(), cartItems);
 		/*

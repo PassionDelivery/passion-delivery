@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 import com.example.pdelivery.order.domain.Order;
@@ -25,5 +27,15 @@ public class OrderJpaPersistence implements OrderRepository {
 	@Override
 	public Optional<Order> findById(UUID orderId) {
 		return orderJpaRepository.findById(orderId);
+	}
+
+	@Override
+	public Slice<Order> findAllByCustomerId(UUID customerId, Pageable pageable) {
+		return orderJpaRepository.findAllByCustomerId(customerId, pageable);
+	}
+
+	@Override
+	public Slice<Order> findAllByStoreId(UUID storeId, Pageable pageable) {
+		return orderJpaRepository.findAllByStoreId(storeId, pageable);
 	}
 }
