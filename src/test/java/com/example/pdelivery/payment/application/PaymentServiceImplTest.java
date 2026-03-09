@@ -165,7 +165,7 @@ public class PaymentServiceImplTest {
 			);
 
 			payment.markPaid("test_existing_key", LocalDateTime.now());
-			
+
 			given(paymentOrderRequirer.getOrderSummary(ORDER_ID)).willReturn(summary);
 
 			given(paymentRepository.findById(PAYMENT_ID)).willReturn(Optional.of(payment));
@@ -189,7 +189,7 @@ public class PaymentServiceImplTest {
 	class GetPayment {
 
 		@Test
-		@DisplayName("성공")
+		@DisplayName("단건 조회 성공")
 		void getPayment_success() {
 			Payment payment = Payment.create(
 				ORDER_ID,
@@ -218,7 +218,7 @@ public class PaymentServiceImplTest {
 		}
 
 		@Test
-		@DisplayName("실패 - 존재하지 않는 결제")
+		@DisplayName("단건 조회 실패 - 존재하지 않는 결제")
 		void getPayment_fail_whenPaymentNotFound() {
 			given(paymentJpaRepository.findById(PAYMENT_ID))
 				.willReturn(Optional.empty());
@@ -302,6 +302,143 @@ public class PaymentServiceImplTest {
 				eq("%test%"),
 				eq(pageable)
 			);
+		}
+	}
+
+	@Nested
+	@DisplayName("주문 기준 결제 승인")
+	class ApprovePaymentByOrder {
+
+		@Test
+		@DisplayName("성공")
+		void approvePaymentByOrder_success() {
+			Payment payment = Payment.create(
+				ORDER_ID,
+				STORE_ID,
+				PaymentProvider.TOSS,
+				PaymentMethod.CARD,
+				AMOUNT
+			);
+
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(payment));
+
+			boolean result = paymentService.approvePaymentByOrder(ORDER_ID, AMOUNT);
+
+			assertThat(result).isTrue();
+			assertThat(payment.getPaymentStatus()).isEqualTo(PaymentStatus.PAID);
+			assertThat(payment.getProviderPaymentKey()).startsWith("test_");
+			assertThat(payment.getApprovedAt()).isNotNull();
+
+			verify(paymentRepository).findByOrderId(ORDER_ID);
+		}
+
+		@Test
+		@DisplayName("실패 - 결제가 존재하지 않음")
+		void approvePaymentByOrder_fail_whenPaymentNotFound() {
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.empty());
+
+			assertThatThrownBy(() -> paymentService.approvePaymentByOrder(ORDER_ID, AMOUNT))
+				.isInstanceOf(PaymentException.class)
+				.hasFieldOrPropertyWithValue("errorCode", PaymentErrorCode.PAYMENT_NOT_FOUND);
+
+			verify(paymentRepository).findByOrderId(ORDER_ID);
+		}
+
+		@Test
+		@DisplayName("실패 - 금액 불일치")
+		void approvePaymentByOrder_fail_whenAmountMismatch() {
+			Payment payment = Payment.create(
+				ORDER_ID,
+				STORE_ID,
+				PaymentProvider.TOSS,
+				PaymentMethod.CARD,
+				AMOUNT
+			);
+
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(payment));
+
+			assertThatThrownBy(() -> paymentService.approvePaymentByOrder(ORDER_ID, 20_000L))
+				.isInstanceOf(PaymentException.class)
+				.hasFieldOrPropertyWithValue("errorCode", PaymentErrorCode.INVALID_AMOUNT);
+
+			verify(paymentRepository).findByOrderId(ORDER_ID);
+		}
+	}
+
+	@Nested
+	@DisplayName("주문 기준 결제 취소")
+	class CancelPaymentByOrder {
+
+		@Test
+		@DisplayName("취소 성공 - READY 상태")
+		void cancelPaymentByOrder_success_whenReady() {
+			Payment payment = Payment.create(
+				ORDER_ID,
+				STORE_ID,
+				PaymentProvider.TOSS,
+				PaymentMethod.CARD,
+				AMOUNT
+			);
+
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(payment));
+
+			paymentService.cancelPaymentByOrder(ORDER_ID);
+
+			assertThat(payment.getPaymentStatus()).isEqualTo(PaymentStatus.CANCELLED);
+			verify(paymentRepository).findByOrderId(ORDER_ID);
+		}
+
+		@Test
+		@DisplayName("취소 성공 - PAID")
+		void cancelPaymentByOrder_success_whenPaid() {
+			Payment payment = Payment.create(
+				ORDER_ID,
+				STORE_ID,
+				PaymentProvider.TOSS,
+				PaymentMethod.CARD,
+				AMOUNT
+			);
+			payment.markPaid("test_key", LocalDateTime.now());
+
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(payment));
+
+			paymentService.cancelPaymentByOrder(ORDER_ID);
+
+			assertThat(payment.getPaymentStatus()).isEqualTo(PaymentStatus.CANCELLED);
+			verify(paymentRepository).findByOrderId(ORDER_ID);
+		}
+
+		@Test
+		@DisplayName("취소 실패 - 존재하지 않는 결제")
+		void cancelPaymentByOrder_fail_whenPaymentNotFound() {
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.empty());
+
+			assertThatThrownBy(() -> paymentService.cancelPaymentByOrder(ORDER_ID))
+				.isInstanceOf(PaymentException.class)
+				.hasFieldOrPropertyWithValue("errorCode", PaymentErrorCode.PAYMENT_NOT_FOUND);
+
+			verify(paymentRepository).findByOrderId(ORDER_ID);
+		}
+
+		@Test
+		@DisplayName("취소 실패 - CANCELLED 상태")
+		void cancelPaymentByOrder_fail_whenAlreadyCancelled() {
+			Payment payment = Payment.create(
+				ORDER_ID,
+				STORE_ID,
+				PaymentProvider.TOSS,
+				PaymentMethod.CARD,
+				AMOUNT
+			);
+			payment.cancel();
+
+			given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(payment));
+
+			assertThatThrownBy(() -> paymentService.cancelPaymentByOrder(ORDER_ID))
+				.isInstanceOf(PaymentException.class)
+				.hasFieldOrPropertyWithValue("errorCode", PaymentErrorCode.INVALID_STATUS_TRANSITION);
+
+			verify(paymentRepository).findByOrderId(ORDER_ID);
 		}
 	}
 }

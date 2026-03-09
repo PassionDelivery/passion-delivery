@@ -28,6 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.pdelivery.payment.application.PaymentService;
+import com.example.pdelivery.payment.application.dto.ApprovePaymentResponse;
 import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
 import com.example.pdelivery.payment.application.dto.CreatePaymentResponse;
 import com.example.pdelivery.payment.application.dto.PaymentResponse;
@@ -52,6 +53,7 @@ import jakarta.servlet.ServletResponse;
 
 @WebMvcTest(PaymentController.class)
 @Import(SecurityConfig.class)
+@DisplayName("결제 controller 테스트")
 public class PaymentControllerTest {
 
 	@Autowired
@@ -256,6 +258,62 @@ public class PaymentControllerTest {
 					.with(csrf())
 					.with(authentication(customerAuth(UUID.randomUUID(), "customer@test.com"))))
 				.andExpect(status().isForbidden());
+		}
+	}
+
+	@Nested
+	@DisplayName("결제 승인 테스트")
+	class ApprovePayment {
+
+		@Test
+		@DisplayName("결제 승인 성공")
+		void approvePayment_success() throws Exception {
+			UUID customerId = UUID.randomUUID();
+			UUID paymentId = UUID.randomUUID();
+
+			ApprovePaymentResponse response = new ApprovePaymentResponse(
+				paymentId,
+				"test_" + UUID.randomUUID(),
+				PaymentStatus.PAID,
+				LocalDateTime.of(2026, 3, 9, 12, 0)
+			);
+
+			when(paymentService.approvePayment(customerId, paymentId)).thenReturn(response);
+
+			mockMvc.perform(post("/api/payments/{paymentId}/approve", paymentId)
+					.with(csrf())
+					.with(authentication(customerAuth(customerId, "customer@test.com"))))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.data.paymentId").value(paymentId.toString()))
+				.andExpect(jsonPath("$.data.paymentStatus").value("PAID"))
+				.andExpect(jsonPath("$.data.providerPaymentKey").value(response.providerPaymentKey()))
+				.andExpect(jsonPath("$.data.approvedAt").value("2026-03-09T12:00:00"));
+		}
+
+		@Test
+		@DisplayName("결제 승인 실패 - OWNER 권한 없음")
+		void approvePayment_forbidden_owner() throws Exception {
+			UUID paymentId = UUID.randomUUID();
+
+			mockMvc.perform(post("/api/payments/{paymentId}/approve", paymentId)
+					.with(csrf())
+					.with(authentication(ownerAuth(UUID.randomUUID(), "owner@test.com"))))
+				.andExpect(status().isForbidden());
+		}
+
+		@Test
+		@DisplayName("결제 승인 실패 - 존재하지 않는 결제")
+		void approvePayment_notFound() throws Exception {
+			UUID customerId = UUID.randomUUID();
+			UUID paymentId = UUID.randomUUID();
+
+			when(paymentService.approvePayment(customerId, paymentId))
+				.thenThrow(new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+			mockMvc.perform(post("/api/payments/{paymentId}/approve", paymentId)
+					.with(csrf())
+					.with(authentication(customerAuth(customerId, "customer@test.com"))))
+				.andExpect(status().isNotFound());
 		}
 	}
 
