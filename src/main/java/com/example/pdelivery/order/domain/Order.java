@@ -16,9 +16,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_order")
 @Entity
 public class Order extends BaseEntity {
@@ -52,7 +55,7 @@ public class Order extends BaseEntity {
 		this.storeId = storeId;
 		this.address = address;
 		this.customerId = customerId;
-		this.status = OrderStatus.ACCEPTED;
+		this.status = OrderStatus.PENDING;
 		this.orderType = OrderType.ONLINE;
 	}
 
@@ -87,9 +90,10 @@ public class Order extends BaseEntity {
 		return order;
 	}
 
+	//OrderInfo는 application 단, 레이어 경계 다시 생각 필요성 있음
 	public OrderInfo toOrderInfo() {
 		return new OrderInfo(
-			this.getId(), // BaseEntity에 getId()가 있다고 가정
+			this.getId(),
 			this.storeId,
 			this.customerId,
 			this.address,
@@ -102,16 +106,38 @@ public class Order extends BaseEntity {
 		);
 	}
 
+	public void updateReason(String reason) {
+		this.reason = reason;
+	}
+
+	public void updateStatus(OrderStatus status) {
+		this.status = status;
+	}
+
+	public boolean checkCancellation() {
+		return this.status.equals(OrderStatus.CANCELLED);
+	}
+
+	public boolean checkPending() {
+		return this.status.equals(OrderStatus.PENDING);
+	}
+
+	public boolean checkCompleted() {
+		return this.status.equals(OrderStatus.COMPLETED);
+	}
+
 	@Getter // test 위해서만
 	public static class OrderView {
 		private final String address;
 		private final Integer totalPrice;
+		private final OrderStatus status;
 		private final List<OrderLine> orderLines;
 
 		public OrderView(Order order) {
 			this.address = order.address;
 			this.totalPrice = order.totalPrice;
 			this.orderLines = order.orderLines;
+			this.status = order.status;
 		}
 	}
 
