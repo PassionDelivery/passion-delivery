@@ -1,5 +1,7 @@
 package com.example.pdelivery.shared.runner;
 
+import java.util.List;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -7,6 +9,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.example.pdelivery.store.domain.CategoryEntity;
+import com.example.pdelivery.store.infrastructure.CategoryJpaRepository;
 import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.user.domain.repository.UserRepository;
@@ -22,14 +26,17 @@ public class LocalTestDataSeedRunner implements ApplicationRunner {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final CategoryJpaRepository categoryJpaRepository;
 
 	private static final String LOCAL_PASSWORD = "Local1234!";
+	private static final List<String> DEFAULT_CATEGORIES = List.of("한식", "중식", "치킨", "피자", "일식");
 
 	@Override
 	public void run(ApplicationArguments args) {
 		seedUser("local_customer", "로컬고객",   "local_customer@pdelivery.com", UserRole.CUSTOMER);
 		seedUser("local_owner",    "로컬사장",   "local_owner@pdelivery.com",    UserRole.OWNER);
 		seedUser("local_manager",  "로컬관리자", "local_manager@pdelivery.com",  UserRole.MANAGER);
+		seedCategories();
 	}
 
 	private void seedUser(String username, String nickname, String email, UserRole role) {
@@ -43,6 +50,20 @@ public class LocalTestDataSeedRunner implements ApplicationRunner {
 			log.info("Local test seed user created: {} ({})", username, role);
 		} catch (DataIntegrityViolationException ex) {
 			log.info("Local test seed user already exists: {}", username);
+		}
+	}
+
+	private void seedCategories() {
+		if (categoryJpaRepository.count() > 0) {
+			return;
+		}
+		for (String name : DEFAULT_CATEGORIES) {
+			try {
+				categoryJpaRepository.save(CategoryEntity.create(name));
+				log.info("Local test seed category created: {}", name);
+			} catch (DataIntegrityViolationException ex) {
+				log.info("Local test seed category already exists: {}", name);
+			}
 		}
 	}
 }
