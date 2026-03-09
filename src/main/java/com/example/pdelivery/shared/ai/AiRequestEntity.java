@@ -21,13 +21,13 @@ public class AiRequestEntity extends BaseEntityOnlyCreated {
 	@Column(name = "user_id", nullable = false)
 	private UUID userId;
 
-	@Column(name = "system_text", length = 500)
+	@Column(name = "system_text", columnDefinition = "TEXT")
 	private String systemText;
 
-	@Column(name = "request_text", length = 500)
+	@Column(name = "request_text", columnDefinition = "TEXT")
 	private String requestText;
 
-	@Column(name = "response_text", length = 1000)
+	@Column(name = "response_text", columnDefinition = "TEXT")
 	private String responseText;
 
 	@Builder

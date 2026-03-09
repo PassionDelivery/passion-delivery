@@ -51,6 +51,8 @@ class MenuServiceImplTest {
 
 	private final UUID storeId = UUID.randomUUID();
 
+	private final UUID userId = UUID.randomUUID();
+
 	@Nested
 	@DisplayName("메뉴 생성")
 	class CreateMenu {
@@ -64,13 +66,30 @@ class MenuServiceImplTest {
 			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.save(any(MenuEntity.class))).willReturn(menuEntity);
 
-			MenuResponse response = menuService.createMenu(storeId, request);
+			MenuResponse response = menuService.createMenu(storeId, request, userId);
 
 			assertThat(response.name()).isEqualTo("치킨");
 			assertThat(response.price()).isEqualTo(20000);
 			assertThat(response.description()).isEqualTo("바삭한 치킨");
 			assertThat(response.isHidden()).isFalse();
 			then(menuRepository).should().save(any(MenuEntity.class));
+		}
+
+		@Test
+		@DisplayName("다른 사용자의 aiRequestId를 사용하면 예외가 발생한다")
+		void failAiRequestNotOwned() {
+			UUID otherAiRequestId = UUID.randomUUID();
+			MenuCreateRequest request = new MenuCreateRequest("치킨", 20000, "바삭한 치킨", otherAiRequestId);
+
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
+			given(aiService.isOwnedByUser(otherAiRequestId, userId)).willReturn(false);
+
+			assertThatThrownBy(() -> menuService.createMenu(storeId, request, userId))
+				.isInstanceOf(MenuException.class)
+				.satisfies(e -> {
+					MenuException me = (MenuException) e;
+					assertThat(me.getErrorCode()).isEqualTo(MenuErrorCode.AI_REQUEST_NOT_OWNED);
+				});
 		}
 	}
 
@@ -264,11 +283,11 @@ class MenuServiceImplTest {
 		@DisplayName("메뉴 정보를 바탕으로 AI 설명을 생성한다")
 		void success() {
 			UUID menuId = UUID.randomUUID();
-			UUID userId = UUID.randomUUID();
 			UUID aiRequestId = UUID.randomUUID();
 			MenuEntity menuEntity = MenuEntity.create(storeId, "후라이드 치킨", 20000, "바삭한 치킨", null, null);
 			AiDescriptionRequest request = new AiDescriptionRequest("바삭한 느낌 강조해줘");
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
 			given(aiService.generate(eq(userId), anyString(), anyString()))
 				.willReturn(new AiResponse(aiRequestId, "겉은 바삭하고 속은 촉촉한 프리미엄 후라이드 치킨"));
@@ -284,11 +303,11 @@ class MenuServiceImplTest {
 		@DisplayName("요청 사항 없이도 메뉴 정보만으로 AI 설명을 생성한다")
 		void successWithoutRequestText() {
 			UUID menuId = UUID.randomUUID();
-			UUID userId = UUID.randomUUID();
 			UUID aiRequestId = UUID.randomUUID();
 			MenuEntity menuEntity = MenuEntity.create(storeId, "양념치킨", 22000, null, null, null);
 			AiDescriptionRequest request = new AiDescriptionRequest(null);
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
 			given(aiService.generate(eq(userId), anyString(), anyString()))
 				.willReturn(new AiResponse(aiRequestId, "달콤 매콤한 양념이 일품인 양념치킨"));
@@ -302,9 +321,9 @@ class MenuServiceImplTest {
 		@DisplayName("존재하지 않는 메뉴에 대해 AI 설명 생성 시 예외가 발생한다")
 		void failMenuNotFound() {
 			UUID menuId = UUID.randomUUID();
-			UUID userId = UUID.randomUUID();
 			AiDescriptionRequest request = new AiDescriptionRequest(null);
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.empty());
 
 			assertThatThrownBy(() -> menuService.generateAiDescription(storeId, menuId, userId, request))
@@ -319,10 +338,10 @@ class MenuServiceImplTest {
 		@DisplayName("AI 서비스 호출 실패 시 예외가 발생한다")
 		void failOnAiServiceError() {
 			UUID menuId = UUID.randomUUID();
-			UUID userId = UUID.randomUUID();
 			MenuEntity menuEntity = MenuEntity.create(storeId, "치킨", 20000, null, null, null);
 			AiDescriptionRequest request = new AiDescriptionRequest(null);
 
+			given(menuStoreRequirer.getStore(storeId)).willReturn(new StoreData(storeId, UUID.randomUUID()));
 			given(menuRepository.findByIdAndStoreId(menuId, storeId)).willReturn(Optional.of(menuEntity));
 			given(aiService.generate(eq(userId), anyString(), anyString()))
 				.willThrow(new RuntimeException("AI 서비스 오류"));

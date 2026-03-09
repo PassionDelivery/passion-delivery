@@ -1,6 +1,5 @@
 package com.example.pdelivery.menu.application;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
@@ -44,9 +43,13 @@ public class MenuServiceImpl implements MenuService {
 	private final AiService aiService;
 
 	@Override
-	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
+	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request, UUID userId) {
 		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);
+
+		if (request.aiRequestId() != null && !aiService.isOwnedByUser(request.aiRequestId(), userId)) {
+			throw new MenuException(MenuErrorCode.AI_REQUEST_NOT_OWNED);
+		}
 
 		MenuEntity menuEntity = MenuEntity.create(
 			storeId, request.name(), request.price(), request.description(), null, request.aiRequestId());
@@ -56,8 +59,12 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public AiDescriptionResponse generateAiDescription(UUID storeId, UUID menuId, UUID userId,
 		AiDescriptionRequest request) {
+
+		// 스토어 존재 여부 및 소유권 검증
+		menuStoreRequirer.getStore(storeId);
 
 		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
 			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
@@ -65,6 +72,7 @@ public class MenuServiceImpl implements MenuService {
 		String userPrompt = buildUserPrompt(menuEntity, request.requestText());
 
 		try {
+			// AI 호출은 AiServiceImpl의 자체 트랜잭션에서 수행
 			AiResponse aiResponse = aiService.generate(userId, MENU_DESCRIPTION_SYSTEM_PROMPT, userPrompt);
 			return new AiDescriptionResponse(aiResponse.content(), aiResponse.aiRequestId());
 		} catch (Exception e) {
@@ -92,10 +100,10 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId) {
-		return aiService.getHistory(userId).stream()
-			.map(AiDescriptionHistoryResponse::from)
-			.toList();
+	public PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId, Pageable pageable) {
+		Slice<AiDescriptionHistoryResponse> slice = aiService.getHistory(userId, pageable)
+			.map(AiDescriptionHistoryResponse::from);
+		return PageResponse.of(slice);
 	}
 
 	@Override

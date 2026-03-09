@@ -10,7 +10,11 @@ import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +35,9 @@ public class AiServiceImpl implements AiService {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public AiResponse generate(UUID userId, String systemPrompt, String userPrompt) {
-		List<AiRequestEntity> history = aiRequestJpaRepository.findRecentByUserId(userId, MAX_HISTORY_SIZE);
+		List<AiRequestEntity> history = aiRequestJpaRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, MAX_HISTORY_SIZE)).getContent();
 
 		ChatClientRequestSpec requestSpec = chatClient.prompt()
 			.system(systemPrompt);
@@ -65,7 +70,15 @@ public class AiServiceImpl implements AiService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<AiRequestEntity> getHistory(UUID userId) {
-		return aiRequestJpaRepository.findRecentByUserId(userId, MAX_HISTORY_SIZE);
+	public Slice<AiRequestEntity> getHistory(UUID userId, Pageable pageable) {
+		return aiRequestJpaRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isOwnedByUser(UUID aiRequestId, UUID userId) {
+		return aiRequestJpaRepository.findById(aiRequestId)
+			.map(entity -> entity.getUserId().equals(userId))
+			.orElse(false);
 	}
 }

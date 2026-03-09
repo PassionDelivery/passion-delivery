@@ -18,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.SliceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class AiServiceImplTest {
@@ -56,7 +58,7 @@ class AiServiceImplTest {
 			String systemPrompt = "시스템 프롬프트";
 			String userPrompt = "사용자 프롬프트";
 
-			given(aiRequestJpaRepository.findRecentByUserId(userId, 5)).willReturn(Collections.emptyList());
+			given(aiRequestJpaRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 5))).willReturn(new SliceImpl<>(Collections.emptyList()));
 			given(chatClient.prompt()).willReturn(requestSpec);
 			given(requestSpec.system(systemPrompt)).willReturn(requestSpec);
 			given(requestSpec.user(userPrompt)).willReturn(requestSpec);
@@ -81,7 +83,7 @@ class AiServiceImplTest {
 			String userPrompt = "새 요청";
 
 			AiRequestEntity historyEntity = AiRequestEntity.create(userId, "이전 시스템", "이전 요청", "이전 응답");
-			given(aiRequestJpaRepository.findRecentByUserId(userId, 5)).willReturn(List.of(historyEntity));
+			given(aiRequestJpaRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 5))).willReturn(new SliceImpl<>(List.of(historyEntity)));
 
 			given(chatClient.prompt()).willReturn(requestSpec);
 			given(requestSpec.system(systemPrompt)).willReturn(requestSpec);
@@ -114,7 +116,7 @@ class AiServiceImplTest {
 			String systemPrompt = "시스템";
 			String userPrompt = "요청";
 
-			given(aiRequestJpaRepository.findRecentByUserId(userId, 5)).willReturn(Collections.emptyList());
+			given(aiRequestJpaRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 5))).willReturn(new SliceImpl<>(Collections.emptyList()));
 			given(chatClient.prompt()).willReturn(requestSpec);
 			given(requestSpec.system(systemPrompt)).willReturn(requestSpec);
 			given(requestSpec.user(userPrompt)).willReturn(requestSpec);

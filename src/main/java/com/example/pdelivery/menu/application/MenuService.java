@@ -1,6 +1,5 @@
 package com.example.pdelivery.menu.application;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -15,11 +14,11 @@ import com.example.pdelivery.shared.PageResponse;
 
 public interface MenuService {
 
-	MenuResponse createMenu(UUID storeId, MenuCreateRequest request);
+	MenuResponse createMenu(UUID storeId, MenuCreateRequest request, UUID userId);
 
 	AiDescriptionResponse generateAiDescription(UUID storeId, UUID menuId, UUID userId, AiDescriptionRequest request);
 
-	List<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId);
+	PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID userId, Pageable pageable);
 
 	MenuResponse getMenu(UUID storeId, UUID menuId);
 

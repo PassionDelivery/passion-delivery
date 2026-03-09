@@ -20,6 +20,7 @@ public enum MenuErrorCode implements ErrorCode {
 	MENU_ALREADY_DELETED("MENU_201", HttpStatus.CONFLICT, "이미 삭제된 메뉴입니다."),
 
 	// AI
+	AI_REQUEST_NOT_OWNED("MENU_301", HttpStatus.FORBIDDEN, "본인의 AI 요청만 사용할 수 있습니다."),
 	AI_GENERATION_FAILED("MENU_401", HttpStatus.BAD_GATEWAY, "AI 설명 생성에 실패했습니다.");
 
 	private final String code;

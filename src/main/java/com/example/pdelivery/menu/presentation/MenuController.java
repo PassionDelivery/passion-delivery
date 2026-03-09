@@ -1,6 +1,5 @@
 package com.example.pdelivery.menu.presentation;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -42,10 +41,12 @@ public class MenuController {
 
 	@GetMapping("/ai/history")
 	@PreAuthorize("hasRole('OWNER')")
-	public ResponseEntity<ApiResponse<List<AiDescriptionHistoryResponse>>> getAiDescriptionHistory(
-		@AuthenticationPrincipal AuthUser authUser
+	public ResponseEntity<ApiResponse<PageResponse<AiDescriptionHistoryResponse>>> getAiDescriptionHistory(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		List<AiDescriptionHistoryResponse> response = menuService.getAiDescriptionHistory(authUser.userId());
+		PageResponse<AiDescriptionHistoryResponse> response = menuService.getAiDescriptionHistory(
+			authUser.userId(), pageable);
 		return ApiResponse.ok(response);
 	}
 
@@ -66,9 +67,10 @@ public class MenuController {
 	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<MenuResponse>> createMenu(
 		@PathVariable UUID storeId,
-		@RequestBody @Valid MenuCreateRequest request
+		@RequestBody @Valid MenuCreateRequest request,
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		MenuResponse response = menuService.createMenu(storeId, request);
+		MenuResponse response = menuService.createMenu(storeId, request, authUser.userId());
 		return ApiResponse.create(response);
 	}
 
