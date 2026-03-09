@@ -29,6 +29,7 @@ import com.example.pdelivery.shared.enums.OrderStatus;
 import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.user.domain.entity.UserRole;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class OrderController {
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByCustomer(@AuthenticationPrincipal AuthUser authUser,
-		@PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @Parameter Pageable pageable) {
 		PageResponse res = orderService.getOrderItemsByCustomer(authUser.userId(), pageable);
 
 		return ApiResponse.create(res);
@@ -58,7 +59,7 @@ public class OrderController {
 	@GetMapping("/stores/{storeId}")
 	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByStore(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable(name = "storeId") UUID storeId,
-		@PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @Parameter Pageable pageable) {
 		//store의 ownerid
 		PageResponse res = orderService.getOrderItemsByStore(storeId, pageable);
 
@@ -79,7 +80,7 @@ public class OrderController {
 			UUID storeId = order.getStoreId();
 			res.updateStoreInfo(storeId, orderStoreRequirer.getStoreName(storeId));
 		} else {
-			res.updateUsername(authUser.username());
+			res.updateUserId(order.getCustomerId());
 		}
 		return ApiResponse.create(res);
 	}

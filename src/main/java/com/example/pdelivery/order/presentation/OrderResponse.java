@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Getter;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse {
 	@Getter
 	public static class OrderCreateResponse {
@@ -22,12 +21,13 @@ public class OrderResponse {
 		}
 	}
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@Getter
 	public static class OrderDataResponse {
 		UUID orderId;
 		UUID storeId;
 		String storeName;
-		String username;
+		UUID userId;
 		String deliveryAddress;
 		String orderTitle;
 		Long totalPrice;
@@ -58,8 +58,8 @@ public class OrderResponse {
 			this.storeName = storeName;
 		}
 
-		public void updateUsername(String username) {
-			this.username = username;
+		public void updateUserId(UUID userId) {
+			this.userId = userId;
 		}
 
 	}
@@ -72,6 +72,7 @@ public class OrderResponse {
 
 	}
 
+	@Getter
 	public static class OrderStatusResponse {
 		UUID orderId;
 		OrderStatus status;

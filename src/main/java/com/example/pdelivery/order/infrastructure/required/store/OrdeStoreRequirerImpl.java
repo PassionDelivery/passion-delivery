@@ -4,21 +4,22 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.example.pdelivery.store.application.provided.StoreProvider;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
 public class OrdeStoreRequirerImpl implements OrderStoreRequirer {
-	// private final StoreProvider storeProvider;
+	private final StoreProvider storeProvider;
 
 	@Override
 	public String getStoreName(UUID storeId) {
 		/*
-		String storeName = storeProvider.getStoreName(deliveryAddressId);
-		store존재 체크 필요
+		TO DO: store존재 체크 필요
 		 */
-
-		return "storename";
+		String storeName = storeProvider.getStore(storeId).storeName();
+		return storeName;
 		/*
 			TO DO:
 			ex) http 통신 시 timeout check -> SocketTimeoutException

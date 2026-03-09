@@ -44,6 +44,7 @@ public class Order extends BaseEntity {
 	private Long totalPrice;
 
 	//MSA 확장 고려하여 논리적 연관관계 맵핑
+	@Getter
 	private UUID customerId;
 
 	@Getter

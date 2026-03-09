@@ -3,6 +3,7 @@ package com.example.pdelivery.order.application;
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.error.OrderErrorCode.*;
 import static com.example.pdelivery.order.presentation.OrderResponse.*;
+import static com.example.pdelivery.payment.domain.PaymentMethod.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -26,6 +27,8 @@ import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
+import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
+import com.example.pdelivery.payment.domain.PaymentProvider;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
@@ -69,8 +72,12 @@ public class OrderServiceImpl implements OrderService {
 		UUID storeId = cartLines.storeId();
 		Order order = Order.create(storeId, address, customerId, orderLineVOs);
 
-		if (orderPaymentRequirer.processPayment(order.getId(), order.getTotalPrice())) {
-			orderRepository.save(order);
+		orderRepository.save(order);
+
+		CreatePaymentRequest paymentRequest = new CreatePaymentRequest(order.getId(), storeId, CARD,
+			PaymentProvider.TOSS, order.getTotalPrice());
+		if (!orderPaymentRequirer.processPayment(customerId, paymentRequest)) {
+			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
 		}
 
 		return order;
