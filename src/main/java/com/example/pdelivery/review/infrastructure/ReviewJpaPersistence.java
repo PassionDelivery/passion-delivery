@@ -1,6 +1,10 @@
 package com.example.pdelivery.review.infrastructure;
 
-import org.springframework.context.annotation.Primary;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 import com.example.pdelivery.review.domain.ReviewEntity;
@@ -8,14 +12,24 @@ import com.example.pdelivery.review.domain.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Primary
 @Repository
 @RequiredArgsConstructor
 public class ReviewJpaPersistence implements ReviewRepository {
+
 	private final ReviewJpaRepository reviewJpaRepository;
 
 	@Override
 	public ReviewEntity save(ReviewEntity review) {
 		return reviewJpaRepository.save(review);
+	}
+
+	@Override
+	public Optional<ReviewEntity> findById(UUID reviewId) {
+		return reviewJpaRepository.findById(reviewId);
+	}
+
+	@Override
+	public Slice<ReviewEntity> findByStoreId(UUID storeId, Pageable pageable) {
+		return reviewJpaRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable);
 	}
 }

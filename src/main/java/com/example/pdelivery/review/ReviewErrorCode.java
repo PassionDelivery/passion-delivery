@@ -13,9 +13,13 @@ public enum ReviewErrorCode implements ErrorCode {
 		HttpStatus.BAD_REQUEST, "평점은 필수값 입니다."), REVIEW_VALIDATOR_CONTENT("REVIEW_104", HttpStatus.BAD_REQUEST,
 		"리뷰내용은 필수값 입니다."),
 
-	REVIEW_USER_NOT_FOUND("REVIEW_201", HttpStatus.BAD_REQUEST, "유저가 존재하지 않습니다."), REVIEW_STORE_NOT_FOUND("REVIEW_202",
-		HttpStatus.BAD_REQUEST, "가게가 존재하지 않습니다."), REVIEW_ORDER_NOT_FOUND("REVIEW_203", HttpStatus.BAD_REQUEST,
-		"주문이 존재하지 않습니다."), REVIEW_ORDER_INVALID_STATUS("REVIEW_204", HttpStatus.BAD_REQUEST, "리뷰를 달 수 없는 주문입니다.");
+	REVIEW_USER_NOT_FOUND("REVIEW_201", HttpStatus.BAD_REQUEST, "유저가 존재하지 않습니다."),
+	REVIEW_STORE_NOT_FOUND("REVIEW_202", HttpStatus.BAD_REQUEST, "가게가 존재하지 않습니다."),
+	REVIEW_ORDER_NOT_FOUND("REVIEW_203", HttpStatus.BAD_REQUEST, "주문이 존재하지 않습니다."),
+	REVIEW_ORDER_INVALID_STATUS("REVIEW_204", HttpStatus.BAD_REQUEST, "리뷰를 달 수 없는 주문입니다."),
+
+	REVIEW_NOT_FOUND("REVIEW_301", HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
+	REVIEW_NOT_OWNER("REVIEW_302", HttpStatus.FORBIDDEN, "본인의 리뷰만 수정/삭제할 수 있습니다.");
 	private final String code;
 	private final HttpStatus status;
 	private final String message;
