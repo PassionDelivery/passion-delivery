@@ -2,6 +2,10 @@ package com.example.pdelivery.payment.infrastructure.required.order;
 
 import java.util.UUID;
 
+import com.example.pdelivery.order.application.provider.OrderInfo;
+import com.example.pdelivery.order.application.provider.OrderProvider;
+import com.example.pdelivery.payment.error.PaymentErrorCode;
+import com.example.pdelivery.payment.error.PaymentException;
 import com.example.pdelivery.shared.Requirer;
 
 import lombok.RequiredArgsConstructor;
@@ -10,9 +14,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PaymentOrderRequirerImpl implements PaymentOrderRequirer {
 
-	// TODO
+	private final OrderProvider orderProvider;
+
 	@Override
 	public PaymentOrderSummary getOrderSummary(UUID orderId) {
-		throw new UnsupportedOperationException("구현 예정");
+		OrderInfo orderInfo = orderProvider.getOrderInfo(orderId)
+			.orElseThrow(() -> new PaymentException((PaymentErrorCode.INVALID_ORDER_ID)));
+
+		return new PaymentOrderSummary(
+			orderInfo.orderId(),
+			orderInfo.customerId(),
+			orderInfo.storeId(),
+			orderInfo.totalPrice()
+		);
 	}
 }

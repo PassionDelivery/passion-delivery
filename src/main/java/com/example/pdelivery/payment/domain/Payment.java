@@ -81,10 +81,15 @@ public class Payment extends BaseEntity {
 	}
 
 	public void markPaid(String providerPaymentKey, LocalDateTime approvedAt) {
+		if (this.paymentStatus == PaymentStatus.PAID) {
+			throw new PaymentException(PaymentErrorCode.ALREADY_PAID, "이미 결제된 건입니다.");
+		}
+		
 		if (this.paymentStatus != PaymentStatus.READY) {
 			throw new PaymentException(PaymentErrorCode.INVALID_STATUS_TRANSITION,
 				"READY 상태가 아닌 결제는 승인할 수 없습니다. (current=" + this.paymentStatus + ")");
 		}
+
 		this.providerPaymentKey = Objects.requireNonNull(providerPaymentKey, "providerPaymentKey is required");
 		this.approvedAt = Objects.requireNonNull(approvedAt, "approvedAt is required");
 		this.paymentStatus = PaymentStatus.PAID;
