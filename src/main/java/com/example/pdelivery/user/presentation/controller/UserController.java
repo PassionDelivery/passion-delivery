@@ -43,16 +43,31 @@ public class UserController {
 		return ApiResponse.ok(userService.getUsers(username, pageable));
 	}
 
+	@GetMapping("/me")
+	public ResponseEntity<ApiResponse<UserResponseDto>> getMe(
+		@AuthenticationPrincipal AuthUser authUser
+	) {
+		return ApiResponse.ok(userService.getUser(authUser.userId()));
+	}
+
 	@GetMapping("/{userId}")
-	@PreAuthorize("hasRole('MANAGER') or hasRole('MASTER') or authentication.principal.userId == #userId")
+	@PreAuthorize("hasRole('MANAGER') or hasRole('MASTER')")
 	public ResponseEntity<ApiResponse<UserResponseDto>> getUser(
 		@PathVariable UUID userId
 	) {
 		return ApiResponse.ok(userService.getUser(userId));
 	}
 
+	@PatchMapping("/me")
+	public ResponseEntity<ApiResponse<UserResponseDto>> updateMe(
+		@AuthenticationPrincipal AuthUser authUser,
+		@Valid @RequestBody UpdateUserRequestDto dto
+	) {
+		return ApiResponse.ok(userService.updateUser(authUser.userId(), dto));
+	}
+
 	@PatchMapping("/{userId}")
-	@PreAuthorize("hasRole('MANAGER') or hasRole('MASTER') or authentication.principal.userId == #userId")
+	@PreAuthorize("hasRole('MANAGER') or hasRole('MASTER')")
 	public ResponseEntity<ApiResponse<UserResponseDto>> updateUser(
 		@PathVariable UUID userId,
 		@Valid @RequestBody UpdateUserRequestDto dto
@@ -60,8 +75,16 @@ public class UserController {
 		return ApiResponse.ok(userService.updateUser(userId, dto));
 	}
 
+	@DeleteMapping("/me")
+	public ResponseEntity<Void> deleteMe(
+		@AuthenticationPrincipal AuthUser authUser
+	) {
+		userService.deleteUser(authUser.userId(), authUser.userId());
+		return ResponseEntity.noContent().build();
+	}
+
 	@DeleteMapping("/{userId}")
-	@PreAuthorize("hasRole('MANAGER') or hasRole('MASTER') or authentication.principal.userId == #userId")
+	@PreAuthorize("hasRole('MANAGER') or hasRole('MASTER')")
 	public ResponseEntity<Void> deleteUser(
 		@PathVariable UUID userId,
 		@AuthenticationPrincipal AuthUser authUser
