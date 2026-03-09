@@ -2,6 +2,7 @@ package com.example.pdelivery.cart.application;
 
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public CartResponse addItem(UUID userId, CartAddItemRequest request) {
-		cartMenuRequirer.validateMenuExists(request.menuId());
+		cartMenuRequirer.validateMenuBelongsToStore(request.menuId(), request.storeId());
 
 		CartEntity cart = cartRepository.findByUserId(userId)
 			.orElseGet(() -> CartEntity.create(userId, request.storeId()));
@@ -44,7 +45,17 @@ public class CartServiceImpl implements CartService {
 		}
 
 		cart.addOrUpdateItem(request.menuId(), request.quantity());
-		return CartResponse.from(cartRepository.save(cart));
+
+		try {
+			return CartResponse.from(cartRepository.save(cart));
+		} catch (DataIntegrityViolationException e) {
+			CartEntity existing = findCartByUserOrThrow(userId);
+			if (!existing.isSameStore(request.storeId())) {
+				existing.resetForStore(request.storeId());
+			}
+			existing.addOrUpdateItem(request.menuId(), request.quantity());
+			return CartResponse.from(cartRepository.save(existing));
+		}
 	}
 
 	@Override

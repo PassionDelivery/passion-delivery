@@ -43,6 +43,7 @@ public class CartEntity extends AbstractEntity {
 	}
 
 	public void addOrUpdateItem(UUID menuId, int quantity) {
+		validateQuantity(quantity);
 		CartLineEntity existing = cartLineEntities.stream()
 			.filter(line -> line.menuId().equals(menuId))
 			.findFirst()
@@ -50,7 +51,7 @@ public class CartEntity extends AbstractEntity {
 
 		if (existing != null) {
 			cartLineEntities.remove(existing);
-			cartLineEntities.add(new CartLineEntity(existing.no(), menuId, quantity));
+			cartLineEntities.add(new CartLineEntity(existing.no(), menuId, existing.quantity() + quantity));
 		} else {
 			int nextNo = cartLineEntities.stream()
 				.mapToInt(CartLineEntity::no)
@@ -61,12 +62,19 @@ public class CartEntity extends AbstractEntity {
 	}
 
 	public void updateItemQuantity(UUID menuId, int quantity) {
+		validateQuantity(quantity);
 		CartLineEntity existing = cartLineEntities.stream()
 			.filter(line -> line.menuId().equals(menuId))
 			.findFirst()
 			.orElseThrow(() -> new CartException(CartErrorCode.CART_ITEM_NOT_FOUND));
 		cartLineEntities.remove(existing);
 		cartLineEntities.add(new CartLineEntity(existing.no(), menuId, quantity));
+	}
+
+	private void validateQuantity(int quantity) {
+		if (quantity < 1) {
+			throw new CartException(CartErrorCode.INVALID_QUANTITY);
+		}
 	}
 
 	public void removeItem(UUID menuId) {

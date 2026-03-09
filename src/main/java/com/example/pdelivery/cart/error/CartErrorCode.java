@@ -9,7 +9,8 @@ public enum CartErrorCode implements ErrorCode {
 	MENU_NOT_FOUND("CART_001", HttpStatus.NOT_FOUND, "메뉴를 찾을 수 없습니다."),
 	CART_ITEM_NOT_FOUND("CART_002", HttpStatus.NOT_FOUND, "장바구니 항목을 찾을 수 없습니다."),
 	CART_NOT_FOUND("CART_003", HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
-	INVALID_QUANTITY("CART_004", HttpStatus.BAD_REQUEST, "수량은 1 이상이어야 합니다.");
+	INVALID_QUANTITY("CART_004", HttpStatus.BAD_REQUEST, "수량은 1 이상이어야 합니다."),
+	MENU_STORE_MISMATCH("CART_005", HttpStatus.BAD_REQUEST, "해당 매장의 메뉴가 아닙니다.");
 
 	private final String code;
 	private final HttpStatus status;

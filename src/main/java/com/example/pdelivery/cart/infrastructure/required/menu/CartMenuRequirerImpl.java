@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.example.pdelivery.cart.error.CartErrorCode;
 import com.example.pdelivery.cart.error.CartException;
+import com.example.pdelivery.menu.application.provided.MenuInfo;
 import com.example.pdelivery.menu.application.provided.MenuProvider;
 import com.example.pdelivery.shared.Requirer;
 
@@ -16,8 +17,12 @@ public class CartMenuRequirerImpl implements CartMenuRequirer {
 	private final MenuProvider menuProvider;
 
 	@Override
-	public void validateMenuExists(UUID menuId) {
-		menuProvider.getMenu(menuId)
+	public void validateMenuBelongsToStore(UUID menuId, UUID storeId) {
+		MenuInfo menuInfo = menuProvider.getMenu(menuId)
 			.orElseThrow(() -> new CartException(CartErrorCode.MENU_NOT_FOUND));
+
+		if (!menuInfo.storeId().equals(storeId)) {
+			throw new CartException(CartErrorCode.MENU_STORE_MISMATCH);
+		}
 	}
 }
