@@ -33,4 +33,7 @@ public interface MenuJpaRepository extends JpaRepository<MenuEntity, UUID> {
 
 	@Query("select m from MenuEntity m where m.storeId = :storeId and m.deletedAt is null and m.menu.name like %:keyword% order by m.createdAt desc")
 	Slice<MenuEntity> searchByStoreIdAndName(@Param("storeId") UUID storeId, @Param("keyword") String keyword, Pageable pageable);
+
+	@Query("select m from MenuEntity m where m.deletedAt is null and m.menu.isHidden = false and m.menu.name like %:keyword% order by m.createdAt desc")
+	Slice<MenuEntity> searchByName(@Param("keyword") String keyword, Pageable pageable);
 }

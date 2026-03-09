@@ -1,5 +1,6 @@
 package com.example.pdelivery.menu.application;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
@@ -14,10 +15,15 @@ import com.example.pdelivery.menu.domain.MenuRepository;
 import com.example.pdelivery.menu.error.MenuErrorCode;
 import com.example.pdelivery.menu.error.MenuException;
 import com.example.pdelivery.menu.infrastructure.required.store.MenuStoreRequirer;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionHistoryResponse;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionRequest;
+import com.example.pdelivery.menu.presentation.dto.AiDescriptionResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuCreateRequest;
 import com.example.pdelivery.menu.presentation.dto.MenuResponse;
 import com.example.pdelivery.menu.presentation.dto.MenuUpdateRequest;
 import com.example.pdelivery.shared.PageResponse;
+import com.example.pdelivery.shared.ai.AiResponse;
+import com.example.pdelivery.shared.ai.AiService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,23 +34,79 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class MenuServiceImpl implements MenuService {
 
+	private static final String MENU_DESCRIPTION_SYSTEM_PROMPT =
+		"당신은 음식 메뉴 설명을 작성하는 전문가입니다. "
+			+ "사용자가 제공하는 메뉴 정보를 바탕으로 매력적이고 간결한 메뉴 설명을 한국어로 작성하세요. "
+			+ "설명은 50자 이내로 작성하세요.";
+
 	private final MenuRepository menuRepository;
 	private final MenuStoreRequirer menuStoreRequirer;
+	private final AiService aiService;
 
 	@Override
-	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request) {
+	public MenuResponse createMenu(UUID storeId, MenuCreateRequest request, UUID userId) {
 		// TODO: StoreProvider 구현 후 스토어 존재 여부 및 소유권 검증
 		menuStoreRequirer.getStore(storeId);
 
-		if (Boolean.TRUE.equals(request.useAiDescription())) {
-			log.warn("AI 설명 생성이 요청되었지만 아직 구현되지 않았습니다. storeId={}", storeId);
+		if (request.aiRequestId() != null && !aiService.isOwnedByUser(request.aiRequestId(), userId)) {
+			throw new MenuException(MenuErrorCode.AI_REQUEST_NOT_OWNED);
 		}
 
 		MenuEntity menuEntity = MenuEntity.create(
-			storeId, request.name(), request.price(), request.description(), null);
+			storeId, request.name(), request.price(), request.description(), null, request.aiRequestId());
 		MenuEntity saved = menuRepository.save(menuEntity);
 
 		return MenuResponse.from(saved);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public AiDescriptionResponse generateAiDescription(UUID storeId, UUID menuId, UUID userId,
+		AiDescriptionRequest request) {
+
+		// 스토어 존재 여부 및 소유권 검증
+		menuStoreRequirer.getStore(storeId);
+
+		MenuEntity menuEntity = menuRepository.findByIdAndStoreId(menuId, storeId)
+			.orElseThrow(() -> new MenuException(MenuErrorCode.MENU_NOT_FOUND));
+
+		String userPrompt = buildUserPrompt(menuEntity, request.requestText());
+
+		try {
+			// AI 호출은 AiServiceImpl의 자체 트랜잭션에서 수행
+			AiResponse aiResponse = aiService.generate(userId, MENU_DESCRIPTION_SYSTEM_PROMPT, userPrompt);
+			return new AiDescriptionResponse(aiResponse.content(), aiResponse.aiRequestId());
+		} catch (Exception e) {
+			log.error("AI 설명 생성 실패: menuId={}, userId={}", menuId, userId, e);
+			throw new MenuException(MenuErrorCode.AI_GENERATION_FAILED, e);
+		}
+	}
+
+	private String buildUserPrompt(MenuEntity menuEntity, String requestText) {
+		Menu menu = menuEntity.getMenu();
+		StringBuilder sb = new StringBuilder();
+		sb.append("메뉴명: ").append(menu.getName());
+		sb.append(", 가격: ").append(menu.getPrice()).append("원");
+
+		if (menu.getDescription() != null && !menu.getDescription().isBlank()) {
+			sb.append(", 기존 설명: ").append(menu.getDescription());
+		}
+
+		if (requestText != null && !requestText.isBlank()) {
+			sb.append("\n요청 사항: ").append(requestText);
+		}
+
+		return sb.toString();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<AiDescriptionHistoryResponse> getAiDescriptionHistory(UUID storeId, UUID userId,
+		Pageable pageable) {
+		menuStoreRequirer.getStore(storeId);
+		Slice<AiDescriptionHistoryResponse> slice = aiService.getHistory(userId, pageable)
+			.map(AiDescriptionHistoryResponse::from);
+		return PageResponse.of(slice);
 	}
 
 	@Override
@@ -89,6 +151,17 @@ public class MenuServiceImpl implements MenuService {
 		menuEntity.updateMenu(updatedMenu);
 
 		return MenuResponse.from(menuEntity);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<MenuResponse> searchMenus(String keyword, Pageable pageable) {
+		if (keyword == null || keyword.isBlank()) {
+			return new PageResponse<>(List.of(), false);
+		}
+		Slice<MenuEntity> slice = menuRepository.searchByName(keyword.trim(), pageable);
+		Slice<MenuResponse> responseSlice = slice.map(MenuResponse::from);
+		return PageResponse.of(responseSlice);
 	}
 
 	@Override

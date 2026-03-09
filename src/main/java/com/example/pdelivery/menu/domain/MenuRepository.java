@@ -19,9 +19,9 @@ public interface MenuRepository {
 
 	MenuEntity save(MenuEntity menuEntity);
 
-	boolean existsById(UUID menuId);
-
 	Slice<MenuEntity> findAllByStoreId(UUID storeId, Pageable pageable);
 
 	Slice<MenuEntity> searchByStoreIdAndName(UUID storeId, String keyword, Pageable pageable);
+
+	Slice<MenuEntity> searchByName(String keyword, Pageable pageable);
 }

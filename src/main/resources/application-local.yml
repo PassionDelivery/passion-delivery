@@ -9,6 +9,13 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  ai:
+    google:
+      genai:
+        api-key: "${GENAI_API_KEY}"
+        chat:
+          options:
+            model: gemini-2.5-flash
   jpa:
     hibernate:
       ddl-auto: update

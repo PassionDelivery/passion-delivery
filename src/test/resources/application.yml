@@ -6,6 +6,11 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  ai:
+    google:
+      genai:
+        api-key: "test-placeholder"
+        enabled: false
   jpa:
     hibernate:
       ddl-auto: create-drop

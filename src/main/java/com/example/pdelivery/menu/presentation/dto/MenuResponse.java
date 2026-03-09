@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.example.pdelivery.menu.domain.MenuEntity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record MenuResponse(
 	UUID menuId,
@@ -12,6 +13,7 @@ public record MenuResponse(
 	Integer price,
 	String description,
 	Boolean isHidden,
+	@JsonProperty("ai_request_id") UUID aiRequestId,
 	LocalDateTime createdAt
 ) {
 
@@ -24,6 +26,7 @@ public record MenuResponse(
 			entity.getMenu().getPrice(),
 			entity.getMenu().getDescription(),
 			entity.getMenu().getIsHidden(),
+			entity.getAiRequestId(),
 			entity.getCreatedAt()
 		);
 	}
