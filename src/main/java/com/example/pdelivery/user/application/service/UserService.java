@@ -1,10 +1,8 @@
 package com.example.pdelivery.user.application.service;
 
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,12 +25,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	private static final Set<Integer> ALLOWED_PAGE_SIZES = Set.of(10, 30, 50);
-
 	public Page<UserResponseDto> getUsers(String username, Pageable pageable) {
-		if (!ALLOWED_PAGE_SIZES.contains(pageable.getPageSize())) {
-			pageable = PageRequest.of(pageable.getPageNumber(), 10, pageable.getSort());
-		}
 		return userRepository.findByUsernameContainingIgnoreCaseAndDeletedAtIsNull(username, pageable)
 			.map(UserResponseDto::from);
 	}
