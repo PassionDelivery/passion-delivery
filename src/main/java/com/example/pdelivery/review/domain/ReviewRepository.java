@@ -1,5 +1,6 @@
 package com.example.pdelivery.review.domain;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface ReviewRepository {
 	Slice<ReviewEntity> findByStoreId(UUID storeId, Pageable pageable);
 
 	Slice<ReviewEntity> findByCustomerId(UUID customerId, Pageable pageable);
+
+	Slice<ReviewEntity> findByStoreIdIn(List<UUID> storeIds, Pageable pageable);
 }

@@ -18,6 +18,8 @@ public interface ReviewService {
 
 	PageResponse<ReviewResponse> getMyReviews(UUID customerId, Pageable pageable);
 
+	PageResponse<ReviewResponse> getOwnerStoreReviews(UUID ownerId, Pageable pageable);
+
 	ReviewResponse updateReview(UUID customerId, UUID reviewId, UpdateReviewRequest request);
 
 	void deleteReview(UUID customerId, UUID reviewId);

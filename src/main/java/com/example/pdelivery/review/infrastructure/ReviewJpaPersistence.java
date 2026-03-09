@@ -1,5 +1,6 @@
 package com.example.pdelivery.review.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,5 +37,10 @@ public class ReviewJpaPersistence implements ReviewRepository {
 	@Override
 	public Slice<ReviewEntity> findByCustomerId(UUID customerId, Pageable pageable) {
 		return reviewJpaRepository.findByCustomerIdAndDeletedAtIsNull(customerId, pageable);
+	}
+
+	@Override
+	public Slice<ReviewEntity> findByStoreIdIn(List<UUID> storeIds, Pageable pageable) {
+		return reviewJpaRepository.findByStoreIdInAndDeletedAtIsNull(storeIds, pageable);
 	}
 }

@@ -1,5 +1,6 @@
 package com.example.pdelivery.store.application.provided;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.example.pdelivery.shared.Provider;
@@ -24,5 +25,10 @@ public class StoreProviderImpl implements StoreProvider {
 	@Override
 	public boolean existsById(UUID storeId) {
 		return storeRepository.existsById(storeId);
+	}
+
+	@Override
+	public List<UUID> findStoreIdsByOwnerId(UUID ownerId) {
+		return storeRepository.findStoreIdsByOwnerId(ownerId);
 	}
 }

@@ -1,5 +1,6 @@
 package com.example.pdelivery.store.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,4 +38,7 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
 		order by s.createdAt desc
 		""")
 	Slice<StoreEntity> findByStatus(@Param("status") StoreStatus status, Pageable pageable);
+
+	@Query("select s.id from StoreEntity s where s.ownerId = :ownerId and s.deletedAt is null")
+	List<UUID> findStoreIdsByOwnerId(@Param("ownerId") UUID ownerId);
 }

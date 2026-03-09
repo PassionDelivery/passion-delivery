@@ -15,6 +15,7 @@ import com.example.pdelivery.review.domain.RatingStatEntity;
 import com.example.pdelivery.review.domain.RatingStatRepository;
 import com.example.pdelivery.review.domain.ReviewEntity;
 import com.example.pdelivery.review.domain.ReviewRepository;
+import com.example.pdelivery.review.infrastructure.ReviewStoreRequirer;
 import com.example.pdelivery.review.presentation.dto.ReviewResponse;
 import com.example.pdelivery.review.presentation.dto.StoreReviewResponse;
 import com.example.pdelivery.review.presentation.dto.UpdateReviewRequest;
@@ -30,6 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final RatingStatRepository ratingStatRepository;
 	private final ReviewValidator reviewValidator;
+	private final ReviewStoreRequirer reviewStoreRequirer;
 
 	@Override
 	public ReviewEntity createReview(UUID customerId, CreateReviewRequest reviewRequest) {
@@ -67,6 +69,23 @@ public class ReviewServiceImpl implements ReviewService {
 	@Transactional(readOnly = true)
 	public PageResponse<ReviewResponse> getMyReviews(UUID customerId, Pageable pageable) {
 		Slice<ReviewEntity> slice = reviewRepository.findByCustomerId(customerId, pageable);
+
+		List<ReviewResponse> reviews = slice.getContent().stream()
+			.map(ReviewResponse::from)
+			.toList();
+
+		return new PageResponse<>(reviews, slice.hasNext());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<ReviewResponse> getOwnerStoreReviews(UUID ownerId, Pageable pageable) {
+		List<UUID> storeIds = reviewStoreRequirer.findStoreIdsByOwnerId(ownerId);
+		if (storeIds.isEmpty()) {
+			return new PageResponse<>(List.of(), false);
+		}
+
+		Slice<ReviewEntity> slice = reviewRepository.findByStoreIdIn(storeIds, pageable);
 
 		List<ReviewResponse> reviews = slice.getContent().stream()
 			.map(ReviewResponse::from)

@@ -67,6 +67,17 @@ public class ReviewController {
 		return ApiResponse.ok(response);
 	}
 
+	// 내 가게 리뷰 조회 (OWNER)
+	@GetMapping("/me/stores")
+	@PreAuthorize("hasRole('OWNER')")
+	public ResponseEntity<ApiResponse<PageResponse<ReviewResponse>>> getOwnerStoreReviews(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
+	) {
+		PageResponse<ReviewResponse> response = reviewService.getOwnerStoreReviews(authUser.userId(), pageable);
+		return ApiResponse.ok(response);
+	}
+
 	// 리뷰 수정
 	@PatchMapping("/{reviewId}")
 	@PreAuthorize("hasRole('CUSTOMER')")
