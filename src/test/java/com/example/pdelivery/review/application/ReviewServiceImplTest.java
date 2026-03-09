@@ -2,6 +2,7 @@ package com.example.pdelivery.review.application;
 
 import static org.mockito.BDDMockito.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.pdelivery.review.domain.RatingStatEntity;
+import com.example.pdelivery.review.domain.RatingStatRepository;
 import com.example.pdelivery.review.domain.ReviewRepository;
 
 @Transactional
@@ -23,6 +26,9 @@ class ReviewServiceImplTest {
 
 	@Mock
 	ReviewRepository reviewRepository;
+
+	@Mock
+	RatingStatRepository ratingStatRepository;
 
 	@Mock
 	ReviewValidator reviewValidator;
@@ -37,9 +43,14 @@ class ReviewServiceImplTest {
 		var content = "content";
 		var reviewRequest = new CreateReviewRequest(storeId, orderId, rating, content);
 
+		given(ratingStatRepository.findByStoreId(storeId))
+			.willReturn(Optional.of(RatingStatEntity.create(storeId)));
+		given(ratingStatRepository.save(any())).willReturn(RatingStatEntity.create(storeId));
+
 		reviewService.createReview(customerId, reviewRequest);
 
 		verify(reviewValidator, times(1)).validate(customerId, reviewRequest);
 		verify(reviewRepository, times(1)).save(any());
+		verify(ratingStatRepository, times(1)).save(any());
 	}
 }
