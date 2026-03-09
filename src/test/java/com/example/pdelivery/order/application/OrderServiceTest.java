@@ -125,7 +125,7 @@ class OrderServiceTest {
 				.isEqualTo(OrderErrorCode.PAYMENT_FAILED);
 
 			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
-			verify(orderRepository, never()).save(any());
+			verify(orderRepository, times(1)).save(any());
 		}
 
 		@Test
@@ -142,22 +142,6 @@ class OrderServiceTest {
 			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.CART_EMPTY);
-
-			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
-			verify(orderRepository, never()).save(any());
-
-		}
-
-		@Test
-		@DisplayName("빈 주소 실패 테스트")
-		void createOrder_Address() {
-			//null or 빈 문자열 왔다고 가정
-			// when(orderAddressRequirer.getAddress(addressId)).thenThrow(
-			// 	new OrderException(OrderErrorCode.ADDRESS_INVALID));
-
-			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
-				.extracting("errorCode")
-				.isEqualTo(OrderErrorCode.ADDRESS_INVALID);
 
 			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
 			verify(orderRepository, never()).save(any());

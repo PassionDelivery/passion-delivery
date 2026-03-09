@@ -3,6 +3,7 @@ package com.example.pdelivery.order.application;
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.domain.Order.*;
 import static com.example.pdelivery.order.error.OrderErrorCode.*;
+import static com.example.pdelivery.payment.domain.PaymentMethod.*;
 import static com.example.pdelivery.shared.enums.OrderStatus.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.InstanceOfAssertFactories.*;
@@ -25,6 +26,9 @@ import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
+import com.example.pdelivery.payment.domain.Payment;
+import com.example.pdelivery.payment.domain.PaymentProvider;
+import com.example.pdelivery.payment.domain.PaymentRepository;
 
 import jakarta.persistence.EntityManager;
 
@@ -32,6 +36,8 @@ import jakarta.persistence.EntityManager;
 public class OrderServiceIntegrationTest {
 	@Autowired
 	OrderService orderService;
+	@Autowired
+	PaymentRepository paymentRepository;
 	@Autowired
 	OrderRepository orderRepository;
 	@Autowired
@@ -72,6 +78,13 @@ public class OrderServiceIntegrationTest {
 		public void cancelOrder_Success() {
 			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
+			Payment payment = Payment.create(order1.getId(),
+				order1.getStoreId(),
+				PaymentProvider.TOSS,
+				CARD,
+				order1.getTotalPrice());
+			paymentRepository.save(payment);
+
 			assertThat(order1.checkCancellation()).isFalse();
 			orderService.cancelOrder(order1.getId(), req);
 
@@ -87,6 +100,13 @@ public class OrderServiceIntegrationTest {
 		public void cancelOrder_TimeoutBoundary() {
 			OrderCancelRequest req = new OrderCancelRequest("단순 변심");
 
+			Payment payment = Payment.create(order1.getId(),
+				order1.getStoreId(),
+				PaymentProvider.TOSS,
+				CARD,
+				order1.getTotalPrice());
+			paymentRepository.save(payment);
+			
 			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(4).minusSeconds(59));
 			orderRepository.save(order1);
 			em.flush();
