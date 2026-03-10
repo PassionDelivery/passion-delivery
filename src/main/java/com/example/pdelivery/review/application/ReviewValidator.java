@@ -10,7 +10,6 @@ import com.example.pdelivery.review.ReviewException;
 import com.example.pdelivery.review.infrastructure.OrderData;
 import com.example.pdelivery.review.infrastructure.ReviewOrderRequirer;
 import com.example.pdelivery.review.infrastructure.ReviewStoreRequirer;
-import com.example.pdelivery.review.infrastructure.ReviewUserRequirer;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
 import lombok.RequiredArgsConstructor;
@@ -18,14 +17,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class ReviewValidator {
-	private final ReviewUserRequirer reviewUserRequirer;
 	private final ReviewStoreRequirer reviewStoreRequirer;
 	private final ReviewOrderRequirer reviewOrderRequirer;
 
 	public void validate(UUID customerId, CreateReviewRequest reviewRequest) {
-		if (!reviewUserRequirer.existsBy(customerId)) {
-			throw new ReviewException(REVIEW_USER_NOT_FOUND);
-		}
 		if (!reviewStoreRequirer.existsBy(reviewRequest.storeId())) {
 			throw new ReviewException(REVIEW_STORE_NOT_FOUND);
 		}
