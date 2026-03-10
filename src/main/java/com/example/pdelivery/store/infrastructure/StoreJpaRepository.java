@@ -22,7 +22,7 @@ public interface StoreJpaRepository extends JpaRepository<StoreEntity, UUID> {
 		select s from StoreEntity s
 		where s.deletedAt is null
 		  and s.status = 'APPROVED'
-		  and (:keyword is null or s.store.name like concat('%', :keyword, '%'))
+		  and (:keyword is null or s.store.name like concat('%', cast(:keyword as string), '%'))
 		  and (:categoryId is null or s.categoryId = :categoryId)
 		order by s.createdAt desc
 		""")
