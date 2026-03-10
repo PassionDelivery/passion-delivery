@@ -3,5 +3,7 @@ package com.example.pdelivery.order.infrastructure.required.store;
 import java.util.UUID;
 
 public interface OrderStoreRequirer {
-	public String getStoreName(UUID storeId);
+	String getStoreName(UUID storeId);
+
+	UUID getOwnerId(UUID storeId);
 }

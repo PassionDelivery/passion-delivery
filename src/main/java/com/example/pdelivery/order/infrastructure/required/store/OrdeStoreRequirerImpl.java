@@ -26,4 +26,8 @@ public class OrdeStoreRequirerImpl implements OrderStoreRequirer {
 			//throw new OrderException(OrderErrorCode.PROVIDER_ERROR);
 		 */
 	}
+
+	public UUID getOwnerId(UUID storeId) {
+		return storeProvider.getStore(storeId).ownerId();
+	}
 }

@@ -16,6 +16,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.pdelivery.shared.PageResponse;
+import com.example.pdelivery.shared.enums.OrderStatus;
+import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
@@ -29,8 +32,6 @@ import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentR
 import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
 import com.example.pdelivery.payment.domain.PaymentProvider;
-import com.example.pdelivery.shared.PageResponse;
-import com.example.pdelivery.shared.enums.OrderStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,8 +46,6 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderStoreRequirer orderStoreRequirer;
 
 	//추후 삭제 예정
-	private UUID customerId = UUID.randomUUID();
-
 	@Transactional
 	@Override
 	public Order createOrder(UUID customerId, OrderCreateRequest req) {
@@ -113,8 +112,10 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional(readOnly = true)
 	@Override
-	public PageResponse getOrderItemsByStore(UUID storeId, Pageable pageable) {
+	public PageResponse getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable) {
 		//TO DO: store 존재 확인
+		if (orderStoreRequirer.getOwnerId(storeId) != ownerId)
+			throw new OrderException(INVALID_OWNER);
 
 		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
 
@@ -135,21 +136,30 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional(readOnly = true)
 	@Override
-	public Order getOrder(UUID orderId) {
+	public Order getOrder(AuthUser authUser, UUID orderId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new OrderException(ORDER_NOT_FOUND));
 
+		validateUser(authUser, order.getCustomerId(), INVALID_CUSTOMER);
+		validateUser(authUser, orderId, INVALID_OWNER);
 		return order;
+	}
+
+	private void validateUser(AuthUser user, UUID userId, OrderErrorCode orderErrorCode) {
+		if (!userId.equals(user.userId())) {
+			throw new OrderException(orderErrorCode);
+		}
 	}
 
 	@Transactional
 	@Override
-	public void cancelOrder(UUID orderId, OrderCancelRequest req) {
-		//TO DO: OrderId의 Order customerId랑 userId랑 같은지 확인
-
+	public void cancelOrder(UUID customerId, UUID orderId, OrderCancelRequest req) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
+		if (!customerId.equals(order.getCustomerId())) {
+			throw new OrderException(INVALID_CUSTOMER);
+		}
 		//중복 취소
 		if (order.checkCancellation()) {
 			throw new OrderException(OrderErrorCode.ALREADY_CANCELED);
@@ -211,7 +221,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional
 	@Override
-	public void deleteOrder(UUID orderId) {
+	public void deleteOrder(UUID customerId, UUID orderId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND));
 
