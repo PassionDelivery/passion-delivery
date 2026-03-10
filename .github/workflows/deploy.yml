@@ -41,8 +41,10 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com
             docker pull 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com/pdelivery:latest
             docker rm -f pdelivery || true
             docker run -d -p 8080:8080 --name pdelivery \
+            --env-file /home/ec2-user/passion-delivery/.env \
             782396859217.dkr.ecr.ap-northeast-2.amazonaws.com/pdelivery:latest
             
