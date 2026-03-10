@@ -7,7 +7,7 @@ import java.util.UUID;
 import com.example.pdelivery.order.application.provider.OrderInfo;
 import com.example.pdelivery.order.application.provider.OrderProvider;
 import com.example.pdelivery.review.ReviewException;
-import com.example.pdelivery.shared.Requirer;
+import com.example.pdelivery.shared.annotations.Requirer;
 
 import lombok.RequiredArgsConstructor;
 

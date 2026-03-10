@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.example.pdelivery.cart.error.CartErrorCode;
 import com.example.pdelivery.cart.error.CartException;
-import com.example.pdelivery.shared.AbstractEntity;
+import com.example.pdelivery.shared.jpa.AbstractEntity;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;

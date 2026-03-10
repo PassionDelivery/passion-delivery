@@ -6,7 +6,7 @@ import com.example.pdelivery.order.application.provider.OrderInfo;
 import com.example.pdelivery.order.application.provider.OrderProvider;
 import com.example.pdelivery.payment.error.PaymentErrorCode;
 import com.example.pdelivery.payment.error.PaymentException;
-import com.example.pdelivery.shared.Requirer;
+import com.example.pdelivery.shared.annotations.Requirer;
 
 import lombok.RequiredArgsConstructor;
 

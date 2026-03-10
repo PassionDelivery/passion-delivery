@@ -26,6 +26,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.pdelivery.shared.jpa.AbstractEntity;
 import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.shared.security.JwtAccessDeniedHandler;
 import com.example.pdelivery.shared.security.JwtAuthFilter;
@@ -88,7 +89,7 @@ class UserControllerTest {
 
 	private UserEntity userEntityWithId(UUID id) throws Exception {
 		UserEntity user = UserEntity.create("testuser", "hash", "nick", "a@b.com", UserRole.CUSTOMER);
-		Field idField = com.example.pdelivery.shared.AbstractEntity.class.getDeclaredField("id");
+		Field idField = AbstractEntity.class.getDeclaredField("id");
 		idField.setAccessible(true);
 		idField.set(user, id);
 		return user;

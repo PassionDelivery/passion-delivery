@@ -2,7 +2,7 @@ package com.example.pdelivery.store.domain;
 
 import java.util.UUID;
 
-import com.example.pdelivery.shared.BaseEntity;
+import com.example.pdelivery.shared.jpa.BaseEntity;
 import com.example.pdelivery.store.error.StoreErrorCode;
 import com.example.pdelivery.store.error.StoreException;
 

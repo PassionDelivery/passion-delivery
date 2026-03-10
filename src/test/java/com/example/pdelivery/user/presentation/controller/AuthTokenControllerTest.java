@@ -21,6 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.pdelivery.shared.jpa.AbstractEntity;
 import com.example.pdelivery.shared.security.JwtAccessDeniedHandler;
 import com.example.pdelivery.shared.security.JwtAuthFilter;
 import com.example.pdelivery.shared.security.JwtAuthenticationEntryPoint;
@@ -89,7 +90,7 @@ class AuthTokenControllerTest {
 		String hash = encoder.encode("Password1!");
 
 		UserEntity user = UserEntity.create("testuser", hash, "nick", "a@b.com", UserRole.CUSTOMER);
-		java.lang.reflect.Field idField = com.example.pdelivery.shared.AbstractEntity.class.getDeclaredField("id");
+		java.lang.reflect.Field idField = AbstractEntity.class.getDeclaredField("id");
 		idField.setAccessible(true);
 		idField.set(user, java.util.UUID.randomUUID());
 

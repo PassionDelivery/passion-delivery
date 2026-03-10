@@ -2,7 +2,7 @@ package com.example.pdelivery.review.infrastructure;
 
 import java.util.UUID;
 
-import com.example.pdelivery.shared.Requirer;
+import com.example.pdelivery.shared.annotations.Requirer;
 import com.example.pdelivery.user.application.provided.UserProvider;
 
 import lombok.RequiredArgsConstructor;

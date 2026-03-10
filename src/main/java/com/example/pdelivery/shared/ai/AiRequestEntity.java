@@ -2,7 +2,7 @@ package com.example.pdelivery.shared.ai;
 
 import java.util.UUID;
 
-import com.example.pdelivery.shared.BaseEntityOnlyCreated;
+import com.example.pdelivery.shared.jpa.BaseEntityOnlyCreated;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

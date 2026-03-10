@@ -2,7 +2,7 @@ package com.example.pdelivery.order.domain;
 
 import java.util.UUID;
 
-import com.example.pdelivery.shared.AbstractEntity;
+import com.example.pdelivery.shared.jpa.AbstractEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
