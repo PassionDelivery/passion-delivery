@@ -6,7 +6,7 @@ import com.example.pdelivery.cart.error.CartErrorCode;
 import com.example.pdelivery.cart.error.CartException;
 import com.example.pdelivery.menu.application.provided.MenuInfo;
 import com.example.pdelivery.menu.application.provided.MenuProvider;
-import com.example.pdelivery.shared.Requirer;
+import com.example.pdelivery.shared.annotations.Requirer;
 
 import lombok.RequiredArgsConstructor;
 

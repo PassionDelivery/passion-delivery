@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.pdelivery.order.application.OrderService;
-import com.example.pdelivery.order.domain.Order;
-import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 import com.example.pdelivery.shared.ApiResponse;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 import com.example.pdelivery.shared.security.AuthUser;
+import com.example.pdelivery.order.application.OrderService;
+import com.example.pdelivery.order.domain.Order;
+import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 import com.example.pdelivery.user.domain.entity.UserRole;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,8 +60,7 @@ public class OrderController {
 	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByStore(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable(name = "storeId") UUID storeId,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @Parameter Pageable pageable) {
-		//TODO: store의 ownerid와 auth userid 동일 확인
-		PageResponse res = orderService.getOrderItemsByStore(storeId, pageable);
+		PageResponse res = orderService.getOrderItemsByStore(authUser.userId(), storeId, pageable);
 
 		return ApiResponse.create(res);
 	}
@@ -70,8 +69,7 @@ public class OrderController {
 	public ResponseEntity<ApiResponse<OrderDataResponse>> getOrder(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId) {
-		Order order = orderService.getOrder(orderId);
-		//TODO: userId와 orderId의 customerId같은지 확인 필요
+		Order order = orderService.getOrder(authUser, orderId);
 
 		OrderDataResponse res = order.toSummaryResponse();
 
@@ -89,8 +87,7 @@ public class OrderController {
 	public ResponseEntity<ApiResponse<OrderStatusResponse>> cancelOrder(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId,
 		@RequestBody OrderCancelRequest req) {
-		//TODO: userId와 orderId의 customerId같은지 확인 필요
-		orderService.cancelOrder(orderId, req);
+		orderService.cancelOrder(authUser.userId(), orderId, req);
 
 		return ApiResponse.create(new OrderStatusResponse(orderId, OrderStatus.CANCELLED));
 	}
@@ -112,7 +109,7 @@ public class OrderController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId) {
 		//TO DO: userId와 orderId의 customerId같은지 확인 필요
-		orderService.deleteOrder(orderId);
+		orderService.deleteOrder(authUser.userId(), orderId);
 
 		return ApiResponse.ok(null);
 	}

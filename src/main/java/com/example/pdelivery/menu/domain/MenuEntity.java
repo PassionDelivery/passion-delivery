@@ -2,7 +2,7 @@ package com.example.pdelivery.menu.domain;
 
 import java.util.UUID;
 
-import com.example.pdelivery.shared.BaseEntity;
+import com.example.pdelivery.shared.jpa.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;

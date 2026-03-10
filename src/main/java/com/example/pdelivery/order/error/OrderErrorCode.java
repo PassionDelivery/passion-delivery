@@ -17,6 +17,8 @@ public enum OrderErrorCode implements ErrorCode {
 	REQUIRED_PARAMETER_MISSING("ORDER_006", HttpStatus.BAD_REQUEST, "request가 NULL입니다."),
 	INVALID_REASON("ORDER_007", HttpStatus.BAD_REQUEST, "사유를 입력해주세요."),
 	INVALID_STATUS("ORDER_008", HttpStatus.BAD_REQUEST, "status가 올바르지 않습니다."),
+	INVALID_OWNER("ORDER_009", HttpStatus.BAD_REQUEST, "가게 주인 ID가 올바르지 않습니다."),
+	INVALID_CUSTOMER("ORDER_010", HttpStatus.BAD_REQUEST, "고객ID가 올바르지 않습니다."),
 
 	// 조회
 	ORDER_NOT_FOUND("ORDER_101", HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),

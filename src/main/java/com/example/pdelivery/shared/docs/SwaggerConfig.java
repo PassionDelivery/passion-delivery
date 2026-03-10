@@ -1,4 +1,4 @@
-package com.example.pdelivery.shared;
+package com.example.pdelivery.shared.docs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

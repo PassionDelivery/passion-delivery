@@ -37,7 +37,7 @@ out/
 .vscode/
 
 ### Local docs (schema, notes — not for repo) ###
-docs/
+#docs/
 
 ### Claude Code ###
 CLAUDE.md

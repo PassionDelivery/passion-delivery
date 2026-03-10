@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.pdelivery.order.application.provider.OrderInfo;
-import com.example.pdelivery.shared.BaseEntity;
+import com.example.pdelivery.shared.jpa.BaseEntity;
 import com.example.pdelivery.shared.enums.OrderStatus;
 
 import jakarta.persistence.CascadeType;

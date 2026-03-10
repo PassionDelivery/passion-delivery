@@ -3,7 +3,7 @@ package com.example.pdelivery.review.domain;
 import java.util.UUID;
 
 import com.example.pdelivery.review.application.CreateReviewRequest;
-import com.example.pdelivery.shared.BaseEntity;
+import com.example.pdelivery.shared.jpa.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;

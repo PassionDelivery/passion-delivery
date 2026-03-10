@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.example.pdelivery.order.domain.OrderRepository;
-import com.example.pdelivery.shared.Provider;
+import com.example.pdelivery.shared.annotations.Provider;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,6 +1,6 @@
 package com.example.pdelivery.user.domain.entity;
 
-import com.example.pdelivery.shared.BaseEntity;
+import com.example.pdelivery.shared.jpa.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

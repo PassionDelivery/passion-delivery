@@ -3,7 +3,7 @@ package com.example.pdelivery.store.application.provided;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.pdelivery.shared.Provider;
+import com.example.pdelivery.shared.annotations.Provider;
 import com.example.pdelivery.store.domain.StoreRepository;
 
 import lombok.RequiredArgsConstructor;

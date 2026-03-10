@@ -1,4 +1,4 @@
-package com.example.pdelivery.shared;
+package com.example.pdelivery.shared.jpa;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

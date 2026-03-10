@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.example.pdelivery.shared.AuditorAwareImpl;
-import com.example.pdelivery.shared.JpaAuditConfig;
+import com.example.pdelivery.shared.jpa.AuditorAwareImpl;
+import com.example.pdelivery.shared.jpa.JpaAuditConfig;
 import com.example.pdelivery.user.domain.entity.UserEntity;
 import com.example.pdelivery.user.domain.entity.UserRole;
 import com.example.pdelivery.user.domain.repository.UserRepository;

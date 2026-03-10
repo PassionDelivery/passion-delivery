@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.example.pdelivery.payment.error.PaymentErrorCode;
 import com.example.pdelivery.payment.error.PaymentException;
-import com.example.pdelivery.shared.BaseEntity;
+import com.example.pdelivery.shared.jpa.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

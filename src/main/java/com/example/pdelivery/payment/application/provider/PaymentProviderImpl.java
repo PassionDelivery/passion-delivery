@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.example.pdelivery.payment.application.PaymentService;
 import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
-import com.example.pdelivery.shared.Provider;
+import com.example.pdelivery.shared.annotations.Provider;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

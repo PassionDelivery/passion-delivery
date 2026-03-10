@@ -2,7 +2,7 @@ package com.example.pdelivery.payment.infrastructure.required.order;
 
 import java.util.UUID;
 
-import com.example.pdelivery.shared.Requirer;
+import com.example.pdelivery.shared.annotations.Requirer;
 
 @Requirer
 public class PaymentStoreRequirerImpl implements PaymentStoreRequirer {
