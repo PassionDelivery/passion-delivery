@@ -26,10 +26,10 @@ jobs:
           | docker login --username AWS --password-stdin 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com
 
       - name: Build Docker Image
-        run: docker build -t passion-delivery .
+        run: docker build -t pdelivery .
 
       - name: Tag Docker Image
-        run: docker tag passion-delivery:latest 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com/passion-delivery:latest
+        run: docker tag pdelivery:latest 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com/pdelivery:latest
 
       - name: Push Docker Image
-        run: docker push 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com/passion-delivery:latest
+        run: docker push 782396859217.dkr.ecr.ap-northeast-2.amazonaws.com/pdelivery:latest
