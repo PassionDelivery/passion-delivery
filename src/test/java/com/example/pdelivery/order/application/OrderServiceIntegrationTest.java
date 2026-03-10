@@ -29,6 +29,9 @@ import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.payment.domain.Payment;
 import com.example.pdelivery.payment.domain.PaymentProvider;
 import com.example.pdelivery.payment.domain.PaymentRepository;
+import com.example.pdelivery.user.domain.entity.UserEntity;
+import com.example.pdelivery.user.domain.entity.UserRole;
+import com.example.pdelivery.user.domain.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
 
@@ -41,9 +44,12 @@ public class OrderServiceIntegrationTest {
 	@Autowired
 	OrderRepository orderRepository;
 	@Autowired
+	UserRepository userRepository;
+	@Autowired
 	EntityManager em;
 
 	private UUID storeId = UUID.randomUUID();
+	private UUID customerId;
 
 	@Nested
 	@Transactional
@@ -54,9 +60,11 @@ public class OrderServiceIntegrationTest {
 
 		@BeforeEach
 		void setUpOrderStatus() {
+			UserEntity user = UserEntity.create("abcd", "abcdQW12!@", "abcd", "abcd@gmail.com", UserRole.CUSTOMER);
+			userRepository.save(user);
+			customerId = user.getId();
 			UUID chicken = UUID.randomUUID();
 			UUID pizza = UUID.randomUUID();
-			UUID customerId = UUID.randomUUID();
 			String address = "서울시 종로구 12-54";
 			List<OrderLineVO> orderLineVOs1 = List.of(
 				new OrderLineVO(pizza, "pizza", 2, 17000),
@@ -86,7 +94,7 @@ public class OrderServiceIntegrationTest {
 			paymentRepository.save(payment);
 
 			assertThat(order1.checkCancellation()).isFalse();
-			orderService.cancelOrder(order1.getId(), req);
+			orderService.cancelOrder(customerId, order1.getId(), req);
 
 			em.flush();
 			em.clear();
@@ -106,14 +114,14 @@ public class OrderServiceIntegrationTest {
 				CARD,
 				order1.getTotalPrice());
 			paymentRepository.save(payment);
-			
+
 			ReflectionTestUtils.setField(order1, "createdAt", LocalDateTime.now().minusMinutes(4).minusSeconds(59));
 			orderRepository.save(order1);
 			em.flush();
 			em.clear();
 
 			assertThat(order1.checkCancellation()).isFalse();
-			orderService.cancelOrder(order1.getId(), req);
+			orderService.cancelOrder(customerId, order1.getId(), req);
 
 			em.flush();
 			em.clear();
@@ -133,7 +141,7 @@ public class OrderServiceIntegrationTest {
 			em.flush();
 			em.clear();
 
-			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
+			assertThatThrownBy(() -> orderService.cancelOrder(customerId, order1.getId(), req))
 				.isInstanceOf(OrderException.class)
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.CANCEL_TIMEOUT);
@@ -149,7 +157,7 @@ public class OrderServiceIntegrationTest {
 			em.flush();
 			em.clear();
 
-			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
+			assertThatThrownBy(() -> orderService.cancelOrder(customerId, order1.getId(), req))
 				.isInstanceOf(OrderException.class)
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.ALREADY_CANCELED);
@@ -165,7 +173,7 @@ public class OrderServiceIntegrationTest {
 			em.flush();
 			em.clear();
 
-			assertThatThrownBy(() -> orderService.cancelOrder(order1.getId(), req))
+			assertThatThrownBy(() -> orderService.cancelOrder(customerId, order1.getId(), req))
 				.isInstanceOf(OrderException.class)
 				.extracting("errorCode")
 				.isEqualTo(OrderErrorCode.INVALID_CANCEL_STATUS);
@@ -280,7 +288,7 @@ public class OrderServiceIntegrationTest {
 			orderRepository.save(order);
 
 			assertThat(order.getDeletedAt()).isNull();
-			orderService.deleteOrder(order.getId());
+			orderService.deleteOrder(customerId, order.getId());
 			em.flush();
 			em.clear();
 
