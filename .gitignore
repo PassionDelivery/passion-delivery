@@ -38,6 +38,7 @@ out/
 
 ### Local docs (schema, notes — not for repo) ###
 #docs/
+doc/
 
 ### Claude Code ###
 CLAUDE.md
