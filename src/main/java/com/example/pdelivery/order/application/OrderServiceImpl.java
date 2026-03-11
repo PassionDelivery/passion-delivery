@@ -106,8 +106,9 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Slice<Order> getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable) {
 		//TO DO: store 존재 확인
-		if (orderStoreRequirer.getOwnerId(storeId) != ownerId)
+		if (!ownerId.equals(orderStoreRequirer.getOwnerId(storeId))) {
 			throw new OrderException(INVALID_OWNER);
+		}
 
 		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
 
