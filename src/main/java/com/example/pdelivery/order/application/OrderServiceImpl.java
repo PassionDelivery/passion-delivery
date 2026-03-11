@@ -2,7 +2,6 @@ package com.example.pdelivery.order.application;
 
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.error.OrderErrorCode.*;
-import static com.example.pdelivery.order.presentation.OrderResponse.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
-import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 import com.example.pdelivery.shared.security.AuthUser;
 
@@ -87,54 +85,23 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional(readOnly = true)
 	@Override
-	public PageResponse getOrderItemsByCustomer(UUID customerId, Pageable pageable) {
+	public Slice<Order> getOrderItemsByCustomer(UUID customerId, Pageable pageable) {
 		//TO DO: customer 존재 확인
 
 		Slice<Order> orderItems = orderRepository.findAllByCustomerId(customerId, pageable);
-
-		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
-			.map(order -> {
-				OrderDataResponse summaryResponse = order.toSummaryResponse();
-				UUID storeId = order.getStoreId();
-				String storeName = orderStoreRequirer.getStoreName((storeId));
-
-				summaryResponse.updateStoreInfo(storeId, storeName);
-				return summaryResponse;
-			})
-			.toList();
-
-		PageResponse data = new PageResponse(
-			orderListData,
-			// orderItems.getNumber(),
-			// orderItems.getSize(),
-			orderItems.hasNext()
-		);
-
-		return data;
+		return orderItems;
 	}
 
 	@Transactional(readOnly = true)
 	@Override
-	public PageResponse getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable) {
+	public Slice<Order> getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable) {
 		//TO DO: store 존재 확인
 		if (orderStoreRequirer.getOwnerId(storeId) != ownerId)
 			throw new OrderException(INVALID_OWNER);
 
 		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
 
-		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
-			.map(order -> {
-				OrderDataResponse summaryResponse = order.toSummaryResponse();
-				return summaryResponse;
-			})
-			.toList();
-
-		PageResponse data = new PageResponse(
-			orderListData,
-			orderItems.hasNext()
-		);
-
-		return data;
+		return orderItems;
 	}
 
 	@Transactional(readOnly = true)

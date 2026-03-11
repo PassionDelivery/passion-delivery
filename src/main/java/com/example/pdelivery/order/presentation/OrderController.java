@@ -3,9 +3,11 @@ package com.example.pdelivery.order.presentation;
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.presentation.OrderResponse.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -48,26 +50,58 @@ public class OrderController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByCustomer(@AuthenticationPrincipal AuthUser authUser,
+	public ResponseEntity<ApiResponse<PageResponse<OrderDataResponse>>> getOrdersByCustomer(
+		@AuthenticationPrincipal AuthUser authUser,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @Parameter Pageable pageable) {
-		PageResponse res = orderService.getOrderItemsByCustomer(authUser.userId(), pageable);
+		Slice<Order> orders = orderService.getOrderItemsByCustomer(authUser.userId(), pageable);
 
-		return ApiResponse.create(res);
+		List<OrderDataResponse> orderListData = orders.getContent().stream()
+			.map(order -> {
+				OrderDataResponse summaryResponse = order.toSummaryResponse();
+				UUID storeId = order.getStoreId();
+				String storeName = orderStoreRequirer.getStoreName((storeId));
+
+				summaryResponse.updateStoreInfo(storeId, storeName);
+				return summaryResponse;
+			})
+			.toList();
+
+		PageResponse<OrderDataResponse> data = new PageResponse<>(
+			orderListData,
+			orders.hasNext()
+		);
+
+		return ApiResponse.create(data);
 	}
 
 	@PreAuthorize("hasRole('OWNER') or hasRole('Manager')")
 	@GetMapping("/stores/{storeId}")
-	public ResponseEntity<ApiResponse<PageResponse>> getOrdersByStore(@AuthenticationPrincipal AuthUser authUser,
+	public ResponseEntity<ApiResponse<PageResponse<OrderDataResponse>>> getOrdersByStore(
+		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable(name = "storeId") UUID storeId,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @Parameter Pageable pageable) {
-		PageResponse res = orderService.getOrderItemsByStore(authUser.userId(), storeId, pageable);
+		Slice<Order> orderItems = orderService.getOrderItemsByStore(authUser.userId(), storeId, pageable);
 
-		return ApiResponse.create(res);
+		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
+			.map(order -> {
+				OrderDataResponse summaryResponse = order.toSummaryResponse();
+				return summaryResponse;
+			})
+			.toList();
+
+		PageResponse<OrderDataResponse> data = new PageResponse<>(
+			orderListData,
+			orderItems.hasNext()
+		);
+
+		return ApiResponse.create(data);
 	}
 
 	@GetMapping("/{orderId}/payment")
-	public completeOrderPayment(AuthUser authUser, @PathVariable UUID orderId) {
+	public ResponseEntity<ApiResponse<Void>> completeOrderPayment(AuthUser authUser, @PathVariable UUID orderId) {
 		orderService.completeOrderPayment(orderId);
+
+		return ApiResponse.ok(null);
 	}
 
 	@GetMapping("/{orderId}")
