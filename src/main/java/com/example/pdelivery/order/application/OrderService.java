@@ -5,17 +5,19 @@ import static com.example.pdelivery.order.application.OrderRequest.*;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
-import com.example.pdelivery.shared.PageResponse;
-import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.order.domain.Order;
+import com.example.pdelivery.shared.security.AuthUser;
 
 public interface OrderService {
 	Order createOrder(UUID customerId, OrderCreateRequest req);
 
-	PageResponse getOrderItemsByCustomer(UUID customerId, Pageable pageable);
+	void completeOrderPayment(UUID customerId, UUID orderId);
 
-	PageResponse getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable);
+	Slice<Order> getOrderItemsByCustomer(UUID customerId, Pageable pageable);
+
+	Slice<Order> getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable);
 
 	Order getOrder(AuthUser authUser, UUID orderId);
 

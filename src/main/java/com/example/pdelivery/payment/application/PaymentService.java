@@ -18,7 +18,7 @@ public interface PaymentService {
 
 	ApprovePaymentResponse approvePayment(UUID customerId, UUID paymentId);
 
-	boolean approvePaymentByOrder(UUID customerId, CreatePaymentRequest request);
+	boolean approvePaymentByOrder(UUID orderId, Long amount);
 
 	PageResponse<PaymentResponse> search(AuthUser authUser, PaymentSearchCondition condition,
 		Pageable pageable);

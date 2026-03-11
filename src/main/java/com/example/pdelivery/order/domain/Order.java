@@ -30,6 +30,7 @@ public class Order extends BaseEntity {
 	@Column(nullable = false)
 	private String address;
 
+	@Getter
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
@@ -59,7 +60,7 @@ public class Order extends BaseEntity {
 		this.storeId = storeId;
 		this.address = address;
 		this.customerId = customerId;
-		this.status = OrderStatus.PENDING;
+		this.status = OrderStatus.UNPAID;
 		this.orderType = OrderType.ONLINE;
 	}
 

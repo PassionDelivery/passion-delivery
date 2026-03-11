@@ -2,8 +2,6 @@ package com.example.pdelivery.order.application;
 
 import static com.example.pdelivery.order.application.OrderRequest.*;
 import static com.example.pdelivery.order.error.OrderErrorCode.*;
-import static com.example.pdelivery.order.presentation.OrderResponse.*;
-import static com.example.pdelivery.payment.domain.PaymentMethod.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -16,12 +14,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.pdelivery.shared.PageResponse;
-import com.example.pdelivery.shared.enums.OrderStatus;
-import com.example.pdelivery.shared.security.AuthUser;
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.order.domain.OrderStatusHistory;
+import com.example.pdelivery.order.domain.OrderStatusHistoryRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
@@ -30,8 +27,8 @@ import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
 import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
-import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
-import com.example.pdelivery.payment.domain.PaymentProvider;
+import com.example.pdelivery.shared.enums.OrderStatus;
+import com.example.pdelivery.shared.security.AuthUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class OrderServiceImpl implements OrderService {
 	private final OrderRepository orderRepository;
+	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 	private final OrderCartRequirer orderCartRequirer;
 	// private final OrderAddressRequirer orderAddressRequirer;
 	private final OrderPaymentRequirer orderPaymentRequirer;
@@ -73,65 +71,48 @@ public class OrderServiceImpl implements OrderService {
 
 		orderRepository.save(order);
 
-		CreatePaymentRequest paymentRequest = new CreatePaymentRequest(order.getId(), storeId, CARD,
-			PaymentProvider.TOSS, order.getTotalPrice());
-		if (!orderPaymentRequirer.processPayment(customerId, paymentRequest)) {
-			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
-		}
-
 		return order;
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	@Override
-	public PageResponse getOrderItemsByCustomer(UUID customerId, Pageable pageable) {
-		//TO DO: customer 존재 확인
+	public void completeOrderPayment(UUID customerId, UUID orderId) {
+		Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderException(ORDER_NOT_FOUND));
 
-		Slice<Order> orderItems = orderRepository.findAllByCustomerId(customerId, pageable);
+		if (!order.getCustomerId().equals(customerId)) {
+			throw new OrderException(INVALID_CUSTOMER);
+		}
+		if (order.getStatus() != OrderStatus.UNPAID) {
+			throw new OrderException(INVALID_CHANGE_STATUS, "UNPAID 주문만 결제 완료할 수 있습니다.");
+		}
 
-		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
-			.map(order -> {
-				OrderDataResponse summaryResponse = order.toSummaryResponse();
-				UUID storeId = order.getStoreId();
-				String storeName = orderStoreRequirer.getStoreName((storeId));
+		if (!orderPaymentRequirer.processPayment(orderId, order.getTotalPrice())) {
+			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
+		}
 
-				summaryResponse.updateStoreInfo(storeId, storeName);
-				return summaryResponse;
-			})
-			.toList();
-
-		PageResponse data = new PageResponse(
-			orderListData,
-			// orderItems.getNumber(),
-			// orderItems.getSize(),
-			orderItems.hasNext()
-		);
-
-		return data;
+		changeStatus(order, OrderStatus.PENDING);
 	}
 
 	@Transactional(readOnly = true)
 	@Override
-	public PageResponse getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable) {
+	public Slice<Order> getOrderItemsByCustomer(UUID customerId, Pageable pageable) {
+		//TO DO: customer 존재 확인
+
+		Slice<Order> orderItems = orderRepository.findAllByCustomerId(customerId, pageable);
+		return orderItems;
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public Slice<Order> getOrderItemsByStore(UUID ownerId, UUID storeId, Pageable pageable) {
 		//TO DO: store 존재 확인
-		if (orderStoreRequirer.getOwnerId(storeId) != ownerId)
+		if (!ownerId.equals(orderStoreRequirer.getOwnerId(storeId))) {
 			throw new OrderException(INVALID_OWNER);
+		}
 
 		Slice<Order> orderItems = orderRepository.findAllByStoreId(storeId, pageable);
 
-		List<OrderDataResponse> orderListData = orderItems.getContent().stream()
-			.map(order -> {
-				OrderDataResponse summaryResponse = order.toSummaryResponse();
-				return summaryResponse;
-			})
-			.toList();
-
-		PageResponse data = new PageResponse(
-			orderListData,
-			orderItems.hasNext()
-		);
-
-		return data;
+		return orderItems;
 	}
 
 	@Transactional(readOnly = true)
@@ -143,6 +124,12 @@ public class OrderServiceImpl implements OrderService {
 		validateUser(authUser, order.getCustomerId(), INVALID_CUSTOMER);
 		validateUser(authUser, orderId, INVALID_OWNER);
 		return order;
+	}
+
+	private void changeStatus(Order order, OrderStatus newStatus) {
+		OrderStatus previous = order.getStatus();
+		order.updateStatus(newStatus);
+		orderStatusHistoryRepository.save(OrderStatusHistory.create(order.getId(), previous, newStatus));
 	}
 
 	private void validateUser(AuthUser user, UUID userId, OrderErrorCode orderErrorCode) {
@@ -175,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
 
 		orderPaymentRequirer.cancelPaymentByOrder(orderId);
 
-		order.updateStatus(OrderStatus.CANCELLED);
+		changeStatus(order, OrderStatus.CANCELLED);
 		order.updateReason(req.reason());
 	}
 
@@ -214,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
 			order.updateReason(req.reason());
 		}
 
-		order.updateStatus(req.orderStatus());
+		changeStatus(order, req.orderStatus());
 	}
 
 	//TO DO: 환불 요청 추가시 관련 로직 필요
