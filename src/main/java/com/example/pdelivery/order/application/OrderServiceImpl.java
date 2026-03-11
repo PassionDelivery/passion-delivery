@@ -76,8 +76,15 @@ public class OrderServiceImpl implements OrderService {
 
 	@Transactional
 	@Override
-	public void completeOrderPayment(UUID orderId) {
+	public void completeOrderPayment(UUID customerId, UUID orderId) {
 		Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderException(ORDER_NOT_FOUND));
+
+		if (!order.getCustomerId().equals(customerId)) {
+			throw new OrderException(INVALID_CUSTOMER);
+		}
+		if (order.getStatus() != OrderStatus.UNPAID) {
+			throw new OrderException(INVALID_CHANGE_STATUS, "UNPAID 주문만 결제 완료할 수 있습니다.");
+		}
 
 		if (!orderPaymentRequirer.processPayment(orderId, order.getTotalPrice())) {
 			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);

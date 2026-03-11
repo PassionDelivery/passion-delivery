@@ -1,7 +1,6 @@
 package com.example.pdelivery.order.infrastructure;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -19,5 +18,5 @@ public interface OrderJpaRepository extends JpaRepository<Order, UUID> {
 	@Query("SELECT o FROM Order o WHERE o.storeId = :storeId ORDER BY o.createdAt DESC")
 	Slice<Order> findAllByStoreId(UUID storeId, Pageable pageable);
 
-	List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff);
+	Slice<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff, Pageable pageable);
 }

@@ -13,7 +13,7 @@ import com.example.pdelivery.shared.security.AuthUser;
 public interface OrderService {
 	Order createOrder(UUID customerId, OrderCreateRequest req);
 
-	void completeOrderPayment(UUID orderId);
+	void completeOrderPayment(UUID customerId, UUID orderId);
 
 	Slice<Order> getOrderItemsByCustomer(UUID customerId, Pageable pageable);
 

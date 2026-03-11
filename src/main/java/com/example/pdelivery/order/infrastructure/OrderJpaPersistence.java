@@ -1,7 +1,6 @@
 package com.example.pdelivery.order.infrastructure;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +42,7 @@ public class OrderJpaPersistence implements OrderRepository {
 	}
 
 	@Override
-	public List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff) {
-		return orderJpaRepository.findAllByStatusAndCreatedAtBefore(status, cutoff);
+	public Slice<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff, Pageable pageable) {
+		return orderJpaRepository.findAllByStatusAndCreatedAtBefore(status, cutoff, pageable);
 	}
 }

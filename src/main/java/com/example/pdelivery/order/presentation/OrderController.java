@@ -100,7 +100,7 @@ public class OrderController {
 	@PostMapping("/{orderId}/payment")
 	public ResponseEntity<ApiResponse<Void>> completeOrderPayment(@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable UUID orderId) {
-		orderService.completeOrderPayment(orderId);
+		orderService.completeOrderPayment(authUser.userId(), orderId);
 
 		return ApiResponse.ok(null);
 	}

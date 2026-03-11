@@ -1,7 +1,6 @@
 package com.example.pdelivery.order.domain;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,5 +19,5 @@ public interface OrderRepository extends Repository<Order, UUID> {
 
 	Slice<Order> findAllByStoreId(UUID storeId, Pageable pageable);
 
-	List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff);
+	Slice<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff, Pageable pageable);
 }

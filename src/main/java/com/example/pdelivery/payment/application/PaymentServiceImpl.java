@@ -91,7 +91,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public boolean approvePaymentByOrder(UUID orderId, Long amount) {
 		PaymentOrderSummary summary = paymentOrderRequirer.getOrderSummary(orderId);
 
-		if (amount == null || summary.totalAmount() != amount) {
+		if (amount == null || summary.totalAmount() != amount.longValue()) {
 			throw new PaymentException(PaymentErrorCode.INVALID_AMOUNT);
 		}
 

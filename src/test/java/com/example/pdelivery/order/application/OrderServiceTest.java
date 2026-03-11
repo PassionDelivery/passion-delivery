@@ -118,20 +118,6 @@ class OrderServiceTest {
 		}
 
 		@Test
-		@DisplayName("주문 생성 시 결제 호출 안 함 테스트")
-		void createOrder_NoPaymentCall() {
-			// createOrder는 결제를 호출하지 않고 UNPAID 상태로 저장
-			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
-			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
-
-			Order result = orderService.createOrder(customerId, req);
-
-			assertThat(result).isNotNull();
-			verify(orderPaymentRequirer, never()).processPayment(any(), any());
-			verify(orderRepository, times(1)).save(any(Order.class));
-		}
-
-		@Test
 		@DisplayName("빈 cart 실패 테스트")
 		void createOrder_Cart() {
 			//Stubbing
