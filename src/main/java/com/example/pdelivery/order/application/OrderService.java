@@ -6,12 +6,14 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 
+import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.security.AuthUser;
-import com.example.pdelivery.order.domain.Order;
 
 public interface OrderService {
 	Order createOrder(UUID customerId, OrderCreateRequest req);
+
+	void completeOrderPayment(UUID orderId);
 
 	PageResponse getOrderItemsByCustomer(UUID customerId, Pageable pageable);
 

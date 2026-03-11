@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.pdelivery.order.application.OrderService;
+import com.example.pdelivery.order.domain.Order;
+import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 import com.example.pdelivery.shared.ApiResponse;
 import com.example.pdelivery.shared.PageResponse;
 import com.example.pdelivery.shared.enums.OrderStatus;
 import com.example.pdelivery.shared.security.AuthUser;
-import com.example.pdelivery.order.application.OrderService;
-import com.example.pdelivery.order.domain.Order;
-import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 import com.example.pdelivery.user.domain.entity.UserRole;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -63,6 +63,11 @@ public class OrderController {
 		PageResponse res = orderService.getOrderItemsByStore(authUser.userId(), storeId, pageable);
 
 		return ApiResponse.create(res);
+	}
+
+	@GetMapping("/{orderId}/payment")
+	public completeOrderPayment(AuthUser authUser, @PathVariable UUID orderId) {
+		orderService.completeOrderPayment(orderId);
 	}
 
 	@GetMapping("/{orderId}")

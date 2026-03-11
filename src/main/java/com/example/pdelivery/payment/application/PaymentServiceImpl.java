@@ -88,10 +88,7 @@ public class PaymentServiceImpl implements PaymentService {
 	// Order에서 사용하는 승인 로직
 	@Override
 	@Transactional
-	public boolean approvePaymentByOrder(UUID customerId, CreatePaymentRequest request) {
-		createPayment(customerId, request);
-		UUID orderId = request.orderId();
-		Long amount = request.amount();
+	public boolean approvePaymentByOrder(UUID orderId, Long amount) {
 		Payment payment = paymentRepository.findByOrderId(orderId)
 			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 		if (amount == null || payment.getAmount() != amount) {

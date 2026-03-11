@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
-import com.example.pdelivery.payment.application.dto.CreatePaymentRequest;
 import com.example.pdelivery.payment.application.provider.PaymentProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,8 @@ public class OrderPaymentRequirerImpl implements OrderPaymentRequirer {
 
 	// private boolean paymentOrderProvider = true;
 
-	public boolean processPayment(UUID customerId, CreatePaymentRequest request) {
-		if (paymentProvider.processPayment(customerId, request))
+	public boolean processPayment(UUID orderId, Long amount) {
+		if (paymentProvider.processPayment(orderId, amount))
 			return true;
 		else
 			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
