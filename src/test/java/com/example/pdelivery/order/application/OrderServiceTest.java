@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.order.domain.OrderStatusHistoryRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.order.infrastructure.required.address.OrderAddressRequirer;
@@ -27,12 +28,15 @@ import com.example.pdelivery.order.infrastructure.required.cart.OrderCartRequire
 import com.example.pdelivery.order.infrastructure.required.menu.MenuData;
 import com.example.pdelivery.order.infrastructure.required.menu.OrderMenuRequirer;
 import com.example.pdelivery.order.infrastructure.required.payment.OrderPaymentRequirer;
+import com.example.pdelivery.order.infrastructure.required.store.OrderStoreRequirer;
 
 @ExtendWith(MockitoExtension.class) // Spring을 다 띄우지 않고 Mockito만 사용해서 빠릅니다.
 class OrderServiceTest {
 
 	@Mock
 	private OrderRepository orderRepository;
+	@Mock
+	private OrderStatusHistoryRepository orderStatusHistoryRepository;
 	@Mock
 	private OrderCartRequirer orderCartRequirer;
 	@Mock
@@ -41,6 +45,8 @@ class OrderServiceTest {
 	private OrderPaymentRequirer orderPaymentRequirer;
 	@Mock
 	private OrderMenuRequirer orderMenuRequirer;
+	@Mock
+	private OrderStoreRequirer orderStoreRequirer;
 
 	@InjectMocks
 	private OrderServiceImpl orderService; // Mock들을 이 서비스에 주입
@@ -90,7 +96,6 @@ class OrderServiceTest {
 			// Stubbing
 			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
-			when(orderPaymentRequirer.processPayment(any(), any())).thenReturn(true);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
 
 			Order result = orderService.createOrder(customerId, req);
@@ -101,31 +106,29 @@ class OrderServiceTest {
 			assertThat(result).isNotNull();
 			assertThat(orderView.getAddress()).isEqualTo("서울시 중구 14-25");
 			assertThat(orderView.getTotalPrice()).isEqualTo(54000);
+			assertThat(orderView.getStatus()).isEqualTo(com.example.pdelivery.shared.enums.OrderStatus.UNPAID);
 
 			assertThat(orderView.getOrderLines()).extracting("menuId", "quantity", "price")
 				.containsExactlyInAnyOrder(tuple(chickenId, 1, 20000), tuple(pizzaId, 2, 17000));
 
 			// 호출 여부 확인 -> "실제로 리포지토리에 저장이 요청되었는가?"
 			verify(orderRepository, times(1)).save(any(Order.class));
+			// 결제는 createOrder에서 호출되지 않음 (completeOrderPayment에서 처리)
+			verify(orderPaymentRequirer, never()).processPayment(any(), any());
 		}
 
 		@Test
-		@DisplayName("결제 실패 테스트")
-		void createOrder_Payment() {
-			//Stubbing
-			// when(orderAddressRequirer.getAddress(addressId)).thenReturn("서울시 강남구");
+		@DisplayName("주문 생성 시 결제 호출 안 함 테스트")
+		void createOrder_NoPaymentCall() {
+			// createOrder는 결제를 호출하지 않고 UNPAID 상태로 저장
 			when(orderCartRequirer.getCartLines(cartId)).thenReturn(mockCartData);
 			when(orderMenuRequirer.getMenus(menuIds)).thenReturn(menuData);
-			when(orderPaymentRequirer.processPayment(any(), any())).thenThrow(
-				new OrderException(OrderErrorCode.PAYMENT_FAILED));
 
-			assertThatThrownBy(() -> orderService.createOrder(customerId, req)).isInstanceOf(OrderException.class)
-				.hasMessageContaining("결제 실패")
-				.extracting("errorCode")
-				.isEqualTo(OrderErrorCode.PAYMENT_FAILED);
+			Order result = orderService.createOrder(customerId, req);
 
-			// 예외가 터졌으므로 저장은 절대 호출되지 않아야 함
-			verify(orderRepository, times(1)).save(any());
+			assertThat(result).isNotNull();
+			verify(orderPaymentRequirer, never()).processPayment(any(), any());
+			verify(orderRepository, times(1)).save(any(Order.class));
 		}
 
 		@Test

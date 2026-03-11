@@ -77,6 +77,10 @@ public class OrderServiceIntegrationTest {
 			order1 = create(storeId, address, customerId, orderLineVOs1);
 			order2 = create(storeId, address, customerId, orderLineVOs2);
 
+			// Order.create()는 UNPAID 상태 → 테스트를 위해 PENDING으로 변경
+			ReflectionTestUtils.setField(order1, "status", PENDING);
+			ReflectionTestUtils.setField(order2, "status", PENDING);
+
 			orderRepository.save(order1);
 			orderRepository.save(order2);
 		}
