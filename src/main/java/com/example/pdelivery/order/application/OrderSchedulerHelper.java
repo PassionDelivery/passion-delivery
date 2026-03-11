@@ -1,8 +1,11 @@
 package com.example.pdelivery.order.application;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,26 +21,35 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class OrderSchedulerHelper {
 
+	private static final int BATCH_SIZE = 100;
+
 	private final OrderRepository orderRepository;
 	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 
 	@Transactional
-	public int cancelBatch(List<Order> orders) {
+	public int cancelExpiredBatch(LocalDateTime cutoff) {
+		Slice<Order> slice = orderRepository.findAllByStatusAndCreatedAtBefore(
+			OrderStatus.UNPAID, cutoff, PageRequest.of(0, BATCH_SIZE));
+
 		int count = 0;
-		for (Order detached : orders) {
-			UUID orderId = detached.getId();
-			Order order = orderRepository.findById(orderId).orElse(null);
-			if (order == null || order.getStatus() != OrderStatus.UNPAID) {
+		for (Order order : slice.getContent()) {
+			if (order.getStatus() != OrderStatus.UNPAID) {
 				continue;
 			}
 			OrderStatus previous = order.getStatus();
 			order.updateStatus(OrderStatus.CANCELLED);
 			order.updateReason("결제 미완료로 자동 취소");
 			orderStatusHistoryRepository.save(
-				OrderStatusHistory.create(orderId, previous, OrderStatus.CANCELLED)
+				OrderStatusHistory.create(order.getId(), previous, OrderStatus.CANCELLED)
 			);
 			count++;
 		}
 		return count;
+	}
+
+	public boolean hasMore(LocalDateTime cutoff) {
+		Slice<Order> slice = orderRepository.findAllByStatusAndCreatedAtBefore(
+			OrderStatus.UNPAID, cutoff, PageRequest.of(0, 1));
+		return !slice.isEmpty();
 	}
 }
