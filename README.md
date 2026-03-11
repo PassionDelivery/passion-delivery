@@ -427,7 +427,9 @@ JWT 인증(@AuthenticationPrincipal AuthUser)으로 전 모듈에서 참조
 
 ## ERD
 
-<!-- ERD 이미지 추가 예정 -->
+![ERD](assets/ERD.png)
+
+> 인터랙티브 버전: [ERDCloud](https://www.erdcloud.com/d/xevoHpovyZTMh2Lfh)
 
 ## 환경변수
 
