@@ -89,11 +89,19 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional
 	public boolean approvePaymentByOrder(UUID orderId, Long amount) {
-		Payment payment = paymentRepository.findByOrderId(orderId)
-			.orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
-		if (amount == null || payment.getAmount() != amount) {
+		PaymentOrderSummary summary = paymentOrderRequirer.getOrderSummary(orderId);
+
+		if (amount == null || summary.totalAmount() != amount) {
 			throw new PaymentException(PaymentErrorCode.INVALID_AMOUNT);
 		}
+
+		Payment payment = Payment.create(
+			orderId, summary.storeId(),
+			com.example.pdelivery.payment.domain.PaymentProvider.TOSS,
+			com.example.pdelivery.payment.domain.PaymentMethod.CARD,
+			amount
+		);
+		paymentRepository.save(payment);
 
 		String providerPaymentKey = "test_" + UUID.randomUUID().toString();
 		LocalDateTime approvedAt = LocalDateTime.now();

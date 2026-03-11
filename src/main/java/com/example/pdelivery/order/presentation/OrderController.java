@@ -97,8 +97,9 @@ public class OrderController {
 		return ApiResponse.create(data);
 	}
 
-	@GetMapping("/{orderId}/payment")
-	public ResponseEntity<ApiResponse<Void>> completeOrderPayment(AuthUser authUser, @PathVariable UUID orderId) {
+	@PostMapping("/{orderId}/payment")
+	public ResponseEntity<ApiResponse<Void>> completeOrderPayment(@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable UUID orderId) {
 		orderService.completeOrderPayment(orderId);
 
 		return ApiResponse.ok(null);

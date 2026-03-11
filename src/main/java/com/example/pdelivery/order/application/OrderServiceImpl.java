@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderLineVO;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.order.domain.OrderStatusHistory;
+import com.example.pdelivery.order.domain.OrderStatusHistoryRepository;
 import com.example.pdelivery.order.error.OrderErrorCode;
 import com.example.pdelivery.order.error.OrderException;
 import com.example.pdelivery.order.infrastructure.required.cart.CartData;
@@ -34,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class OrderServiceImpl implements OrderService {
 	private final OrderRepository orderRepository;
+	private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 	private final OrderCartRequirer orderCartRequirer;
 	// private final OrderAddressRequirer orderAddressRequirer;
 	private final OrderPaymentRequirer orderPaymentRequirer;
@@ -80,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
 			throw new OrderException(OrderErrorCode.PAYMENT_FAILED);
 		}
 
-		order.updateStatus(OrderStatus.PENDING);
+		changeStatus(order, OrderStatus.PENDING);
 	}
 
 	@Transactional(readOnly = true)
@@ -115,6 +118,12 @@ public class OrderServiceImpl implements OrderService {
 		return order;
 	}
 
+	private void changeStatus(Order order, OrderStatus newStatus) {
+		OrderStatus previous = order.getStatus();
+		order.updateStatus(newStatus);
+		orderStatusHistoryRepository.save(OrderStatusHistory.create(order.getId(), previous, newStatus));
+	}
+
 	private void validateUser(AuthUser user, UUID userId, OrderErrorCode orderErrorCode) {
 		if (!userId.equals(user.userId())) {
 			throw new OrderException(orderErrorCode);
@@ -145,7 +154,7 @@ public class OrderServiceImpl implements OrderService {
 
 		orderPaymentRequirer.cancelPaymentByOrder(orderId);
 
-		order.updateStatus(OrderStatus.CANCELLED);
+		changeStatus(order, OrderStatus.CANCELLED);
 		order.updateReason(req.reason());
 	}
 
@@ -184,7 +193,7 @@ public class OrderServiceImpl implements OrderService {
 			order.updateReason(req.reason());
 		}
 
-		order.updateStatus(req.orderStatus());
+		changeStatus(order, req.orderStatus());
 	}
 
 	//TO DO: 환불 요청 추가시 관련 로직 필요

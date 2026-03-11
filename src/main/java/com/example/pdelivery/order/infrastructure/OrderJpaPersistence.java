@@ -1,5 +1,7 @@
 package com.example.pdelivery.order.infrastructure;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.pdelivery.order.domain.Order;
 import com.example.pdelivery.order.domain.OrderRepository;
+import com.example.pdelivery.shared.enums.OrderStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,5 +40,10 @@ public class OrderJpaPersistence implements OrderRepository {
 	@Override
 	public Slice<Order> findAllByStoreId(UUID storeId, Pageable pageable) {
 		return orderJpaRepository.findAllByStoreId(storeId, pageable);
+	}
+
+	@Override
+	public List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff) {
+		return orderJpaRepository.findAllByStatusAndCreatedAtBefore(status, cutoff);
 	}
 }
